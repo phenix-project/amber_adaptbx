@@ -69,19 +69,19 @@ class manager(object):
         gradients=result.gradients,
         disable_asu_cache=disable_asu_cache,
         normalization=False)
-          
+
       #result += result.geometry #Turn this on if you don't want amber. Automate...
-        
+
       ##################################################################
       #                                                                #
       # AMBER CALL - Amber force field gradients and target            #
       #                                                                #
       ##################################################################
       if sites_cart.size() != 2387: #n_atoms. Hard coded for now...
-		result += result.geometry
+                result += result.geometry
       else:
         result.geometry = None
-        #All these set-up steps would be automated or included in Phil-parameters      
+        #All these set-up steps would be automated or included in Phil-parameters
         #import sys; sys.path.append('/net/casegroup2/u2/pjanowsk/Phenix/refine_4lzt')
         import amber
         prmtop="4lzt.prmtop"
@@ -92,7 +92,7 @@ class manager(object):
           sites_cart=sites_cart)
         result.amber_geometry=amber_geometry_manager.energies_sites()
         result +=result.amber_geometry
-      
+
     if (self.ncs_groups is None):
       result.ncs_groups = None
     else:
