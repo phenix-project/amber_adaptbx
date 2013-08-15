@@ -1,7 +1,7 @@
 
 import libtbx.load_env
 from libtbx.utils import Sorry
-import os
+import os.path
 import sys
 
 Import("env_base", "env_etc")
@@ -10,10 +10,9 @@ ext_sources = [
   "getmdgxfrc.c",
 ]
 
-# FIXME
-amber_dir = "/net/cci-filer2/raid1/home/pawelrc/amber/AmberTools/"
-assert os.path.isdir(amber_dir)
 env_etc.amber_adaptbx_dist = libtbx.env.dist_path("amber_adaptbx")
+amber_dir = os.path.join(os.path.dirname(env_etc.amber_adaptbx_dist),
+  "amber", "AmberTools")
 amber_src_dir = amber_dir + "/src"
 
 env_etc.amber_common_includes = [
