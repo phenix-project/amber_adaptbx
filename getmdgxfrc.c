@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mdgx.h"
-
+ 
 mdsys LoadCoordToGrid1(char* crdname, uform *U, trajcon *tj, const double *PhenixCoords)
 {
   mdsys thisMD;

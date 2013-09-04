@@ -92,7 +92,7 @@ class lbfgs(object):
     else:
       self.apply_shifts()
     self.compute_target(compute_gradients=True)
-        
+
     ###
     amber_geometry_manager=amber.geometry_manager(
           prmtop=self.prmtop,

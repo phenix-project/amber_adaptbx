@@ -9,7 +9,7 @@
 #include <scitbx/array_family/ref_reductions.h>
 
 
-//Function to call mdgx main routine.
+//Function to  call mdgx main routine.
 void callMdgx (std::vector<double>& sites_cart, std::vector<double>& gradients,
                std::vector<double>& target, std::string prmtop, std::string crd )
 {

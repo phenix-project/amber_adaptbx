@@ -12,7 +12,7 @@ ext_sources = [
 
 env_etc.amber_adaptbx_dist = libtbx.env.dist_path("amber_adaptbx")
 amber_dir = os.path.join(os.path.dirname(env_etc.amber_adaptbx_dist),
-  "amber", "AmberTools")
+  "amber")
 amber_src_dir = amber_dir + "/src"
 
 env_etc.amber_common_includes = [
@@ -29,7 +29,7 @@ env_amber_ext = env_scitbx_boost_python_ext.Clone()
 #env_rosetta_ext.Append(LIBPATH=["%s/lib" % rosetta_dir])
 env_amber_ext.Append(LIBPATH=env_etc.libpath_python)
 env_amber_ext.Append(CCFLAGS=["-I%s" % amber_dir])
-env_amber_ext.Append(LIBS=["fftw3", "mdgx", "netcdf",])
+env_amber_ext.Append(LIBS=["fftw3", "netcdf", "mdgx",])
 env_etc.include_registry.append(
   env=env_amber_ext,
   paths=env_etc.amber_common_includes)
