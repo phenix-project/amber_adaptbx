@@ -431,7 +431,7 @@ class run(object):
 
 ###################
     if (self.params.amber.use):
-	  run_minimization_amber(sites_cart = self.sites_cart, selection = self.selection,
+      run_minimization_amber(sites_cart = self.sites_cart, selection = self.selection,
         restraints_manager = self.grm, params = self.params.minimization,
         pdb_hierarchy = self.pdb_hierarchy,
         cdl=self.params.pdb_interpretation.cdl,

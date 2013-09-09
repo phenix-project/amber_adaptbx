@@ -82,5 +82,10 @@ int getmdgxfrc(char *tpname, char *crdname, const double *PhenixCoords,
   *(target+3)=MD.sysUV.dihe;
   *(target+4)=MD.sysUV.elec;
   *(target+5)=MD.sysUV.vdw12+MD.sysUV.vdw6;
+  
+  //~ printf("\n\n=========================\n\n");
+  //~ printf("%d\n", sizeof(U.tp.BIncH));
+  //~ printf("%d\n", sizeof(U.tp.BIncH[0]));
+  //~ printf("%d\n", sizeof(U.tp.BIncH)/sizeof(U.tp.BIncH[0]));
   return 0;
 }
