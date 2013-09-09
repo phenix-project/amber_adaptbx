@@ -16,13 +16,13 @@ class geometry_manager(object):
         prmtop=None,
         ambcrd=None,
         sites_cart=None,
-        residual_sum=flex.double([0.0]),
+        energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0]),
         gradients=None,
         number_of_restraints=100):
     self.prmtop = prmtop
     self.ambcrd = ambcrd
     self.sites_cart = sites_cart
-    self.residual_sum = residual_sum
+    self.energy_components = energy_components
     self.gradients=flex.double(len(sites_cart)*3)
     self.number_of_restraints=number_of_restraints
 
@@ -31,17 +31,25 @@ class geometry_manager(object):
     #Convert flex arrays to C arrays
     sites_cart_c=ext.ExtractVec(self.sites_cart.as_double())
     gradients_c=ext.ExtractVec(self.gradients)
-    target_c=ext.ExtractVec(self.residual_sum)
+    energy_components_c=ext.ExtractVec(self.energy_components)
 
     # Call c++ interface to call mdgx to calculate new gradients and target
-    ext.callMdgx(sites_cart_c, gradients_c, target_c, self.prmtop, self.ambcrd)
+    ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.prmtop, self.ambcrd)
     # Convert back into python types (eg. into flex arrays for phenix to use)
     self.gradients=flex.vec3_double(gradients_c)
-    self.residual_sum= float(target_c[0])
+    self.energy_components=flex.double(energy_components_c)
+    self.residual_sum= float(energy_components_c[0])
     return self
 
   def show(self):
-    print "\n\namber show\n\n"
+    print "\n\n"
+    print "Amber_total_energy: %7.6f" 		%(self.residual_sum)
+    print "  bonds (n= ): %7.6f" 			%(self.energy_components[1])
+    print "  angles (n= ): %7.6f" 			%(self.energy_components[2])
+    print "  dihedrals (n= ): %7.6f" 		%(self.energy_components[3])
+    print "  electrostatics: %7.6f" 		%(self.energy_components[4])
+    print "  vanderWaals: %7.6f" 			%(self.energy_components[5])
+    print "\n\n"
     return 0
 
 def print_sites_cart(sites_cart):

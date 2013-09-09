@@ -209,7 +209,7 @@ class run2(object):
       bond_similarity    = True,
       generic_restraints = True)
     self.update_cdl_restraints()
-    self.show()
+    self.show(prmtop, ambcrd)
     for i_macro_cycle in xrange(number_of_macro_cycles):
       print >> self.log, "  macro-cycle:", i_macro_cycle
       if(alternate_nonbonded_off_on and i_macro_cycle<=number_of_macro_cycles/2):
@@ -226,8 +226,8 @@ class run2(object):
         rmsd_angles_termination_cutoff  = rmsd_angles_termination_cutoff,
         site_labels                     = None,
         prmtop                          = prmtop,
-        ambcrd                            = ambcrd)
-      self.show()
+        ambcrd                          = ambcrd)
+      self.show(prmtop, ambcrd)
       geometry_restraints_flags.nonbonded = nonbonded
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
           max_iterations = max_number_of_iterations)
@@ -251,7 +251,11 @@ class run2(object):
           log=self.log,
           verbose=False)
 ###### change to show amber components
-  def show(self):
-    es = self.restraints_manager.geometry.energies_sites(
-      sites_cart = self.sites_cart, compute_gradients = False)
-    es.show(prefix="    ", f=self.log)
+  def show(self,prmtop, ambcrd):
+    import amber_adaptbx as amber
+    amber_geometry_manager=amber.geometry_manager(
+       prmtop=prmtop,
+       ambcrd=ambcrd,
+       sites_cart=self.sites_cart)
+    amber_geometry=amber_geometry_manager.energies_sites()	
+    amber_geometry.show()

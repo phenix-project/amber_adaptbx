@@ -75,6 +75,12 @@ int getmdgxfrc(char *tpname, char *crdname, const double *PhenixCoords,
   //~ printf("Angles    = %12.6lf    vdW   = %12.6lf\n", MD.sysUV.angl,
          //~ MD.sysUV.vdw12 + MD.sysUV.vdw6);
   //~ printf("Dihedral  = %12.6lf\n", MD.sysUV.dihe);
-  *target=MD.sysUV.eptot;
+  //~ printf("%12.6f\n", MD.sysUV.eptot);
+  *target=MD.sysUV.etot;
+  *(target+1)=MD.sysUV.bond;
+  *(target+2)=MD.sysUV.angl;
+  *(target+3)=MD.sysUV.dihe;
+  *(target+4)=MD.sysUV.elec;
+  *(target+5)=MD.sysUV.vdw12+MD.sysUV.vdw6;
   return 0;
 }
