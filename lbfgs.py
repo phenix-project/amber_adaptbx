@@ -81,6 +81,8 @@ class lbfgs(object):
         compute_gradients=compute_gradients,
         disable_asu_cache=self.tmp.disable_asu_cache,
         site_labels=self.site_labels)
+    #print self.tmp.target_result    
+    #print self.tmp.geometry_restraints_manager
     bd = self.tmp.target_result.bond_deviations()
     if(bd is not None): self.rmsd_bonds = bd[2]
     ad = self.tmp.target_result.angle_deviations()

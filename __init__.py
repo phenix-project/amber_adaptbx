@@ -16,7 +16,7 @@ class geometry_manager(object):
         prmtop=None,
         ambcrd=None,
         sites_cart=None,
-        energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0]),
+        energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]),
         gradients=None,
         number_of_restraints=100):
     self.prmtop = prmtop
@@ -44,9 +44,9 @@ class geometry_manager(object):
   def show(self):
     print "\n\n"
     print "Amber_total_energy: %7.6f" 		%(self.residual_sum)
-    print "  bonds (n= ): %7.6f" 			%(self.energy_components[1])
-    print "  angles (n= ): %7.6f" 			%(self.energy_components[2])
-    print "  dihedrals (n= ): %7.6f" 		%(self.energy_components[3])
+    print "  bonds (n=%d): %7.6f" 			%(self.energy_components[6], self.energy_components[1])
+    print "  angles (n=%d): %7.6f" 			%(self.energy_components[7], self.energy_components[2])
+    print "  dihedrals (n=%d): %7.6f" 		%(self.energy_components[8], self.energy_components[3])
     print "  electrostatics: %7.6f" 		%(self.energy_components[4])
     print "  vanderWaals: %7.6f" 			%(self.energy_components[5])
     print "\n\n"

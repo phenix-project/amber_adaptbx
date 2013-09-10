@@ -288,7 +288,7 @@ def run_minimization_amber (
     rmsd_bonds_termination_cutoff  = params.rmsd_bonds_termination_cutoff,
     rmsd_angles_termination_cutoff = params.rmsd_angles_termination_cutoff,
     alternate_nonbonded_off_on     = params.alternate_nonbonded_off_on,
-    cdl=cdl,
+    #~ cdl=cdl,
     log                            = log,
     prmtop                         = prmtop,
     ambcrd                           = ambcrd)
@@ -486,27 +486,27 @@ class run(object):
         f=f)
       f.close()
 
-class launcher (runtime_utils.target_with_save_result) :
-  def run (self) :
-    os.mkdir(self.output_dir)
-    os.chdir(self.output_dir)
-    return run(args=self.args, log=sys.stdout,
-      use_directory_prefix=False).output_file_name
-
-def validate_params (params) :
-  if (params.file_name is None) :
-    raise Sorry("Please specify a model file to minimize.")
-  if (params.restraints_directory is not None) :
-    if (not os.path.isdir(params.restraints_directory)) :
-      raise Sorry("The path '%s' does not exist or is not a directory." %
-        params.restraints_directory)
-  return True
-
-def finish_job (result) :
-  output_files = []
-  if (result is not None) :
-    output_files.append((result, "Minimized model"))
-  return output_files, []
+#~ class launcher (runtime_utils.target_with_save_result) :
+  #~ def run (self) :
+    #~ os.mkdir(self.output_dir)
+    #~ os.chdir(self.output_dir)
+    #~ return run(args=self.args, log=sys.stdout,
+      #~ use_directory_prefix=False).output_file_name
+#~ 
+#~ def validate_params (params) :
+  #~ if (params.file_name is None) :
+    #~ raise Sorry("Please specify a model file to minimize.")
+  #~ if (params.restraints_directory is not None) :
+    #~ if (not os.path.isdir(params.restraints_directory)) :
+      #~ raise Sorry("The path '%s' does not exist or is not a directory." %
+        #~ params.restraints_directory)
+  #~ return True
+#~ 
+#~ def finish_job (result) :
+  #~ output_files = []
+  #~ if (result is not None) :
+    #~ output_files.append((result, "Minimized model"))
+  #~ return output_files, []
 
 if(__name__ == "__main__"):
   timer = user_plus_sys_time()
