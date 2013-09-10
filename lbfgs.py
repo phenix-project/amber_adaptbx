@@ -75,13 +75,16 @@ class lbfgs(object):
 
   def compute_target(self, compute_gradients):
     self.tmp.target_result = \
-      self.tmp.geometry_restraints_manager.energies_sites(
+        self.tmp.geometry_restraints_manager.energies_sites(
         sites_cart=self.tmp.sites_shifted,
         flags=self.tmp.geometry_restraints_flags,
         compute_gradients=compute_gradients,
         disable_asu_cache=self.tmp.disable_asu_cache,
         site_labels=self.site_labels)
-    #print self.tmp.target_result    
+    print self.tmp.target_result    
+    #~ self.tmp.target_result.target=10
+    #from pprint import pprint
+    #pprint (vars(self.tmp.target_result))
     #print self.tmp.geometry_restraints_manager
     bd = self.tmp.target_result.bond_deviations()
     if(bd is not None): self.rmsd_bonds = bd[2]
@@ -101,6 +104,7 @@ class lbfgs(object):
           ambcrd=self.ambcrd,
           sites_cart=self.tmp.sites_shifted)
     amber_geometry=amber_geometry_manager.energies_sites()
+    print amber_geometry
     self.f =amber_geometry.residual_sum
     ###
     
