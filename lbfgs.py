@@ -56,6 +56,10 @@ class lbfgs(object):
     self.final_target_value = self.final_target_result.target
 
   def apply_shifts(self):
+    print "\n\n****************************************\nAPPLY_SHIFTS"
+    print "Previous Sites_shifted: " +str(list(self.tmp.sites_shifted[0]))
+    print "Sites_cart:             " +str(list(self.tmp.sites_cart[0]))
+    print "Shifts:                 " +str(list(self.x[0:3]))
     if self.sites_cart_selection:	
       shifted = self.tmp.reduced_sites_cart + flex.vec3_double(self.x)
       self.tmp.sites_shifted = self.tmp.sites_cart.deep_copy()
@@ -72,6 +76,8 @@ class lbfgs(object):
           crystal_symmetry=crystal_symmetry,
           special_op=site_symmetry_table.get(i_seq).special_op(),
           site_cart=self.tmp.sites_shifted[i_seq])
+    print "New Sites_shifted:      " +str(list(self.tmp.sites_shifted[0]))
+    print "END_APPLY_SHIFTS\n****************************************"
 
   def compute_target(self, compute_gradients):
     self.tmp.target_result = \
@@ -81,7 +87,6 @@ class lbfgs(object):
         compute_gradients=compute_gradients,
         disable_asu_cache=self.tmp.disable_asu_cache,
         site_labels=self.site_labels)
-    print self.tmp.target_result    
     #~ self.tmp.target_result.target=10
     #from pprint import pprint
     #pprint (vars(self.tmp.target_result))
@@ -104,7 +109,6 @@ class lbfgs(object):
           ambcrd=self.ambcrd,
           sites_cart=self.tmp.sites_shifted)
     amber_geometry=amber_geometry_manager.energies_sites()
-    print amber_geometry
     self.f =amber_geometry.residual_sum
     ###
     
@@ -122,7 +126,6 @@ class lbfgs(object):
       ###      
       self.g = amber_geometry.gradients.as_double()
       ###
-
     return self.f, self.g
 
 

@@ -37,6 +37,8 @@ class geometry_manager(object):
     ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.prmtop, self.ambcrd)
     # Convert back into python types (eg. into flex arrays for phenix to use)
     self.gradients=flex.vec3_double(gradients_c)
+    #~ print "\nGRADIENTS"  
+    #~ print list(self.gradients[0:3])
     self.energy_components=flex.double(energy_components_c)
     self.residual_sum= float(energy_components_c[0])
     return self

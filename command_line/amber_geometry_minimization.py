@@ -240,6 +240,8 @@ def run_minimization(
       params,
       cdl,
       log):
+#################################################!!!!!!!!!!!!!!!!!!!
+  selection=None		  
   o = mmtbx.refinement.geometry_minimization.run2(
     sites_cart                     = sites_cart,
     restraints_manager             = restraints_manager,
