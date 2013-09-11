@@ -36,7 +36,7 @@ class geometry_manager(object):
     # Call c++ interface to call mdgx to calculate new gradients and target
     ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.prmtop, self.ambcrd)
     # Convert back into python types (eg. into flex arrays for phenix to use)
-    self.gradients=flex.vec3_double(gradients_c)
+    self.gradients=flex.vec3_double(gradients_c)*-1
     #~ print "\nGRADIENTS"  
     #~ print list(self.gradients[0:3])
     self.energy_components=flex.double(energy_components_c)

@@ -83,7 +83,7 @@ class manager(object):
         result.geometry = None
         #All these set-up steps would be automated or included in Phil-parameters
         #import sys; sys.path.append('/net/casegroup2/u2/pjanowsk/Phenix/refine_4lzt')
-        import amber
+        import amber_adaptbx as amber
         prmtop="4lzt.prmtop"
         ambcrd="4lzt.rst7"
         amber_geometry_manager=amber.geometry_manager(
