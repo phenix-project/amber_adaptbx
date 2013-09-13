@@ -59,5 +59,77 @@ def print_sites_cart(sites_cart):
 		print("%8.3f%8.3f%8.3f"%(atom[0], atom[1], atom[2]))
 
 
+def run(pdb,prmtop, crd):
+  
+  #===================================================================#
+  #                                                                   #
+  #  BEFORE C++                                                       #
+  #                                                                   #
+  #===================================================================#
+  	
+  #file i/o	
+  pdb_file = os.path.abspath(pdb)
+  pdb_inp = iotbx.pdb.input(file_name=pdb_file)
+  pdb_atoms = pdb_inp.atoms_with_labels()
+  symm = pdb_inp.crystal_symmetry()
+  xray_structure = pdb_inp.xray_structure_simple(enable_scattering_type_unknown=True)
 
+
+  #	initiate flex arrays for coordinates, gradients, energy
+  sites_cart=xray_structure.sites_cart()
+  gradients=flex.double(len(sites_cart)*3)
+  target=flex.double([6.7,1.0,2.0,3.0,4.0,5.0,0.0,0.0,0.0])
+  print "Number of atom sites: %d " %sites_cart.size()
+  print "\nGradients and target BEFORE C call:"
+  print list(gradients[1:10])
+  print target[0]
+
+  #===================================================================#
+  #                                                                   #
+  #  CALL C++                                                         #
+  #                                                                   #
+  #===================================================================#  
+  
+  #Convert flex arrays to C arrays
+  sites_cart_c=PAI.ExtractVec(sites_cart.as_double())
+  gradients_c=PAI.ExtractVec(gradients)
+  target_c=PAI.ExtractVec(target)
+
+  # Call c++ interface to call mdgx to calculate new gradients and target	
+  PAI.callMdgx(sites_cart_c, gradients_c, target_c, prmtop, crd)
+  
+  # Convert back into python types (eg. into flex arrays for phenix to use)
+  gradients=flex.vec3_double(gradients_c)*-1
+  
+  target= flex.double(target_c)
+
+  #===================================================================#
+  #                                                                   #
+  #  AFTER C++                                                        #
+  #                                                                   #
+  #===================================================================#
+
+
+  print "\nGradients and target AFTER C call:"
+  print list(gradients[0:10])
+  print target[0]	
+ 
+  print "\n"
+  print "Amber_total_energy: %7.6f" 		%(target[0])
+  print "  bonds (n= ): %7.6f" 			%(target[1])
+  print "  angles (n= ): %7.6f" 			%(target[2])
+  print "  dihedrals (n= ): %7.6f" 		%(target[3])
+  print "  electrostatics: %7.6f" 		%(target[4])
+  print "  vanderWaals: %7.6f" 			%(target[5])
+  print "\n\n"
+
+  return 0
+
+if __name__ == "__main__" :
+	parser = argparse.ArgumentParser()	
+	parser.add_argument("pdb", help="name of pdb file")
+	parser.add_argument("prmtop", help="name of topology file")
+	parser.add_argument("crd", help="name of coordinate file")
+	args = parser.parse_args()
+	run(args.pdb,args.prmtop, args.crd)
 

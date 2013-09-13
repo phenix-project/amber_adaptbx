@@ -1,2 +1,3 @@
 
-phenix.amber_geometry_minimization vAla3.pdb vAla3.cif macro_cycles=1 max_iter=2 amber.use=True amber.topology_file_name=vAla3.prmtop amber.coordinate_file_name=vAla3.min
+phenix.amber_geometry_minimization vAla3.pdb vAla3.cif macro_cycles=1 max_iter=2 amber.use=True amber.topology_file_name=vAla3.prmtop amber.coordinate_file_name=vAla3.rst7
+
