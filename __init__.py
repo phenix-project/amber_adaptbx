@@ -25,6 +25,7 @@ class geometry_manager(object):
     self.energy_components = energy_components
     self.gradients=flex.double(len(sites_cart)*3)
     self.number_of_restraints=number_of_restraints
+    self.mdgx_structs=ext.uform(prmtop, ambcrd)
 
 
   def energies_sites(self):
@@ -34,7 +35,8 @@ class geometry_manager(object):
     energy_components_c=ext.ExtractVec(self.energy_components)
 
     # Call c++ interface to call mdgx to calculate new gradients and target
-    ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.prmtop, self.ambcrd)
+    ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, 
+                 self.prmtop, self.ambcrd, self.mdgx_structs)
     # Convert back into python types (eg. into flex arrays for phenix to use)
     self.gradients=flex.vec3_double(gradients_c)*-1
     #~ print "\nGRADIENTS"  
@@ -90,13 +92,15 @@ def run(pdb,prmtop, crd):
   #                                                                   #
   #===================================================================#  
   
+  U=ext.uform(prmtop, crd)
+  
   #Convert flex arrays to C arrays
-  sites_cart_c=PAI.ExtractVec(sites_cart.as_double())
-  gradients_c=PAI.ExtractVec(gradients)
-  target_c=PAI.ExtractVec(target)
+  sites_cart_c=ext.ExtractVec(sites_cart.as_double())
+  gradients_c=ext.ExtractVec(gradients)
+  target_c=ext.ExtractVec(target)
 
   # Call c++ interface to call mdgx to calculate new gradients and target	
-  PAI.callMdgx(sites_cart_c, gradients_c, target_c, prmtop, crd)
+  ext.callMdgx(sites_cart_c, gradients_c, target_c, prmtop, crd, U)
   
   # Convert back into python types (eg. into flex arrays for phenix to use)
   gradients=flex.vec3_double(gradients_c)*-1
