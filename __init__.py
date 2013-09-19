@@ -16,7 +16,7 @@ class geometry_manager(object):
         prmtop=None,
         ambcrd=None,
         sites_cart=None,
-        energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]),
+        energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]),
         gradients=None,
         number_of_restraints=100):
     self.prmtop = prmtop
@@ -56,6 +56,9 @@ class geometry_manager(object):
     print "\n\n"
     return 0
 
+  def get_rmsd_gradient(self):
+	  return self.energy_components[9]
+
 def print_sites_cart(sites_cart):
 	for atom in sites_cart:
 		print("%8.3f%8.3f%8.3f"%(atom[0], atom[1], atom[2]))
@@ -80,7 +83,7 @@ def run(pdb,prmtop, crd):
   #	initiate flex arrays for coordinates, gradients, energy
   sites_cart=xray_structure.sites_cart()
   gradients=flex.double(len(sites_cart)*3)
-  target=flex.double([6.7,1.0,2.0,3.0,4.0,5.0,0.0,0.0,0.0])
+  target=flex.double([6.7,1.0,2.0,3.0,4.0,5.0,0.0,0.0,0.0,0.0])
   print "Number of atom sites: %d " %sites_cart.size()
   print "\nGradients and target BEFORE C call:"
   print list(gradients[1:10])
@@ -117,6 +120,7 @@ def run(pdb,prmtop, crd):
   print "\nGradients and target AFTER C call:"
   print list(gradients[0:10])
   print target[0]	
+  print target[9]
  
   print "\n"
   print "Amber_total_energy: %7.6f" 		%(target[0])

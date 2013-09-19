@@ -46,20 +46,20 @@ class lbfgs(object):
       core_params=lbfgs_core_params,
       exception_handling_params=lbfgs_exception_handling_params)
     self.apply_shifts()
-    self.compute_target(compute_gradients=True)
-    self.final_target_result = self.tmp.target_result
+    amber_geometry_manager=amber.geometry_manager(
+          prmtop=self.prmtop,
+          ambcrd=self.ambcrd,
+          sites_cart=self.tmp.sites_shifted)	  
+    amber_geometry=amber_geometry_manager.energies_sites()
+    self.final_target_result=amber_geometry.energy_components
     sites_cart.clear()
     sites_cart.extend(self.tmp.sites_shifted)
     del self.tmp
     del self.x
-    self.first_target_value = self.first_target_result.target
-    self.final_target_value = self.final_target_result.target
+    self.first_target_value = self.first_target_result[0]
+    self.final_target_value = self.final_target_result[0]
 
   def apply_shifts(self):
-    #~ print "\n\n****************************************\nAPPLY_SHIFTS"
-    #~ print "Previous Sites_shifted: " +str(list(self.tmp.sites_shifted[0]))
-    #~ print "Sites_cart:             " +str(list(self.tmp.sites_cart[0]))
-    #~ print "Shifts:                 " +str(list(self.x[0:3]))
     if self.sites_cart_selection:	
       shifted = self.tmp.reduced_sites_cart + flex.vec3_double(self.x)
       self.tmp.sites_shifted = self.tmp.sites_cart.deep_copy()
@@ -76,56 +76,27 @@ class lbfgs(object):
           crystal_symmetry=crystal_symmetry,
           special_op=site_symmetry_table.get(i_seq).special_op(),
           site_cart=self.tmp.sites_shifted[i_seq])
-    #~ print "New Sites_shifted:      " +str(list(self.tmp.sites_shifted[0]))
-    #~ print "END_APPLY_SHIFTS\n****************************************"
-
-  def compute_target(self, compute_gradients):
-    self.tmp.target_result = \
-        self.tmp.geometry_restraints_manager.energies_sites(
-        sites_cart=self.tmp.sites_shifted,
-        flags=self.tmp.geometry_restraints_flags,
-        compute_gradients=compute_gradients,
-        disable_asu_cache=self.tmp.disable_asu_cache,
-        site_labels=self.site_labels)
-    #~ self.tmp.target_result.target=10
-    #from pprint import pprint
-    #pprint (vars(self.tmp.target_result))
-    #print self.tmp.geometry_restraints_manager
-    bd = self.tmp.target_result.bond_deviations()
-    if(bd is not None): self.rmsd_bonds = bd[2]
-    ad = self.tmp.target_result.angle_deviations()
-    if(ad is not None): self.rmsd_angles = ad[2]
 
   def compute_functional_and_gradients(self):
     if (self.first_target_result is None):
       assert self.x.all_eq(0)
     else:
       self.apply_shifts()
-    self.compute_target(compute_gradients=True)
-
-    ###
     amber_geometry_manager=amber.geometry_manager(
           prmtop=self.prmtop,
           ambcrd=self.ambcrd,
-          sites_cart=self.tmp.sites_shifted)
+          sites_cart=self.tmp.sites_shifted)	  
     amber_geometry=amber_geometry_manager.energies_sites()
+    self.tmp.target_result=amber_geometry.energy_components  
+    self.rmsd_gradient=amber_geometry.get_rmsd_gradient()
     self.f =amber_geometry.residual_sum
-    ###
-    
     if (self.first_target_result is None):
       self.first_target_result = self.tmp.target_result
     if self.sites_cart_selection:
-
-      ###
       ptr = amber_geometry.gradients
-      ###
-
       self.g = ptr.select(self.sites_cart_selection).as_double()
     else:
-
-      ###      
       self.g = amber_geometry.gradients.as_double()
-      ###
     return self.f, self.g
 
 

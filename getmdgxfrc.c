@@ -3,7 +3,7 @@
 #include <string.h>
 #include "mdgx.h"
 #include "time.h"
-
+#include "math.h"
 
 trajcon CreateTrajCon(){
 	trajcon tj; //trajectory control data (input file params)
@@ -52,6 +52,17 @@ void LoadPhenixCoordToGrid(char* crdname, uform *U, trajcon *tj,
   AtomsToCells(&(*thisMDptr).crd, &(*thisMDptr).CG, &U->tp);
 }
 
+double grms(int* n, double* gradients){
+  double s; int j;
+  s=0.0;
+  for (j=0; j< *n; j++) {
+    s+=pow(gradients[j*3],2);
+    s+=pow(gradients[j*3+1],2);
+    s+=pow(gradients[j*3+2],2);
+  }
+  s=sqrt(s/ ( (*n)*3.0) ) ;
+  return s;
+}
 
 int getmdgxfrc(char *tpname, char *crdname, const double *PhenixCoords,
                double* target, double * gradients, uform* Uptr, 
@@ -69,16 +80,12 @@ int getmdgxfrc(char *tpname, char *crdname, const double *PhenixCoords,
   for (i = 0; i < (*MDptr).CG.ncell; i++) {
     C = &(*MDptr).CG.data[i];
     for (j = 0; j < C->nr[0]; j++) {
-      //~ printf("Atom %4d at [ %9.4lf %9.4lf %9.4lf ] with force "
-             //~ "[ %9.4lf %9.4lf %9.4lf ]\n", C->data[j].id, C->data[j].loc[0],
-             //~ C->data[j].loc[1], C->data[j].loc[2], C->data[j].frc[0],
-             //~ C->data[j].frc[1], C->data[j].frc[2]);
           gradients[C->data[j].id*3]=C->data[j].frc[0];
           gradients[C->data[j].id*3+1]=C->data[j].frc[1];
           gradients[C->data[j].id*3+2]=C->data[j].frc[2];
     }
   }
-  
+
   //Populate energy components vector
   *target=(*MDptr).sysUV.etot;
   *(target+1)=(*MDptr).sysUV.bond;
@@ -89,6 +96,6 @@ int getmdgxfrc(char *tpname, char *crdname, const double *PhenixCoords,
   *(target+6)=(*Uptr).tp.withH.nbond;
   *(target+7)=(*Uptr).tp.withH.nangl;
   *(target+8)=(*Uptr).tp.withH.ndihe;
-  
+  *(target+9)=grms( &MDptr->crd.natom, gradients);
   return 0;
 }
