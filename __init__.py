@@ -18,14 +18,15 @@ class geometry_manager(object):
         sites_cart=None,
         energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]),
         gradients=None,
-        number_of_restraints=100):
+        number_of_restraints=100,
+        mdgx_structs=None):
     self.prmtop = prmtop
     self.ambcrd = ambcrd
     self.sites_cart = sites_cart
     self.energy_components = energy_components
     self.gradients=flex.double(len(sites_cart)*3)
     self.number_of_restraints=number_of_restraints
-    self.mdgx_structs=ext.uform(prmtop, ambcrd)
+    self.mdgx_structs=mdgx_structs
 
 
   def energies_sites(self):
@@ -38,9 +39,7 @@ class geometry_manager(object):
     ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, 
                  self.prmtop, self.ambcrd, self.mdgx_structs)
     # Convert back into python types (eg. into flex arrays for phenix to use)
-    self.gradients=flex.vec3_double(gradients_c)*-1
-    #~ print "\nGRADIENTS"  
-    #~ print list(self.gradients[0:3])
+    self.gradients=flex.double(gradients_c)*-1
     self.energy_components=flex.double(energy_components_c)
     self.residual_sum= float(energy_components_c[0])
     return self
@@ -63,7 +62,9 @@ def print_sites_cart(sites_cart):
 	for atom in sites_cart:
 		print("%8.3f%8.3f%8.3f"%(atom[0], atom[1], atom[2]))
 
-
+def get_amber_structs (prmtop, ambcrd):
+	return ext.uform(prmtop, ambcrd)
+	
 def run(pdb,prmtop, crd):
   
   #===================================================================#

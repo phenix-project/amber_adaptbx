@@ -11,7 +11,7 @@ class lbfgs(object):
   def __init__(self,
       sites_cart,
       geometry_restraints_manager,
-      prmtop, ambcrd,
+      prmtop, ambcrd, mdgx_structs,
       geometry_restraints_flags=None,
       lbfgs_termination_params=None,
       lbfgs_core_params=None,
@@ -27,6 +27,7 @@ class lbfgs(object):
     self.rmsd_bonds, self.rmsd_angles = None, None
     self.prmtop = prmtop
     self.ambcrd = ambcrd
+    self.mdgx_structs = mdgx_structs
     if sites_cart_selection:
       self.sites_cart_selection = flex.bool(sites_cart_selection)
       self.tmp.reduced_sites_cart=sites_cart.select(self.sites_cart_selection)
@@ -49,7 +50,8 @@ class lbfgs(object):
     amber_geometry_manager=amber.geometry_manager(
           prmtop=self.prmtop,
           ambcrd=self.ambcrd,
-          sites_cart=self.tmp.sites_shifted)	  
+          sites_cart=self.tmp.sites_shifted,
+          mdgx_structs=self.mdgx_structs)	  
     amber_geometry=amber_geometry_manager.energies_sites()
     self.final_target_result=amber_geometry.energy_components
     sites_cart.clear()
@@ -85,7 +87,8 @@ class lbfgs(object):
     amber_geometry_manager=amber.geometry_manager(
           prmtop=self.prmtop,
           ambcrd=self.ambcrd,
-          sites_cart=self.tmp.sites_shifted)	  
+          sites_cart=self.tmp.sites_shifted,
+          mdgx_structs=self.mdgx_structs)	  
     amber_geometry=amber_geometry_manager.energies_sites()
     self.tmp.target_result=amber_geometry.energy_components  
     self.rmsd_gradient=amber_geometry.get_rmsd_gradient()
@@ -93,10 +96,10 @@ class lbfgs(object):
     if (self.first_target_result is None):
       self.first_target_result = self.tmp.target_result
     if self.sites_cart_selection:
-      ptr = amber_geometry.gradients
+      ptr = flex.vec3_double(amber_geometry.gradients)
       self.g = ptr.select(self.sites_cart_selection).as_double()
     else:
-      self.g = amber_geometry.gradients.as_double()
+      self.g = amber_geometry.gradients
     return self.f, self.g
 
 
