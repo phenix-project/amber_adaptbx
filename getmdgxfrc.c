@@ -14,7 +14,7 @@ trajcon CreateTrajCon(){
 uform LoadTopology(char *tpname, trajcon* tj){
     uform U;     /*topology, direct and recip space controls and lookup tables
                    convolution support */
-	U = InitPotential(tpname, 8.0, tj);
+    U = InitPotential(tpname, 8.0, tj);
 	return U;
 } 
 
@@ -26,7 +26,7 @@ mdsys CreateMDSys(char *crdname, uform* U){
 }
 
  
-void LoadPhenixCoordToGrid(char* crdname, uform *U, trajcon *tj, 
+void LoadPhenixCoordToGrid(uform *U, trajcon *tj, 
                        const double *PhenixCoords, mdsys* thisMDptr )
 {
   /*** Replace old coords with new Phenix coords ***/
@@ -62,14 +62,14 @@ double grms(int* n, double* gradients){
   }
   s=sqrt(s/ ( (*n)*3.0) ) ;
   return s;
-}
+} 
 
-int getmdgxfrc(char *tpname, char *crdname, const double *PhenixCoords,
+int getmdgxfrc(const double *PhenixCoords,
                double* target, double * gradients, uform* Uptr, 
                trajcon* tjptr, mdsys* MDptr)
 {
 
-  LoadPhenixCoordToGrid(crdname, Uptr, tjptr, PhenixCoords, MDptr);
+  LoadPhenixCoordToGrid(Uptr, tjptr, PhenixCoords, MDptr);
   //Compute forces
   InitExecon( &(*MDptr).etimers );
   MMForceEnergy(Uptr, MDptr, tjptr);

@@ -37,7 +37,7 @@ class lbfgs(amber_adaptbx.lbfgs.lbfgs):
     if self.rmsd_gradient <self.grmsd_termination_cutoff:		 
       return True      
 
-class run2(object):
+class run(object):
   def __init__(self,
                sites_cart,
                restraints_manager,
@@ -56,7 +56,6 @@ class run2(object):
                rmsd_angles_termination_cutoff = 0,
                grmsd_termination_cutoff       = 0,
                alternate_nonbonded_off_on     = False,
-               cdl                            = False,
                log                            = None,
                prmtop                         = None,
                ambcrd                           = None):
@@ -69,10 +68,6 @@ class run2(object):
     self.restraints_manager = restraints_manager
     assert max_number_of_iterations+number_of_macro_cycles > 0
     assert [bond,nonbonded,angle,dihedral,chirality,planarity].count(False) < 6
-    self.cdl_proxies = None
-    if(cdl):
-      from mmtbx.conformation_dependent_library import setup_restraints
-      self.cdl_proxies = setup_restraints(restraints_manager)
     if(alternate_nonbonded_off_on and number_of_macro_cycles % 2 != 0):
       number_of_macro_cycles += 1
     import scitbx.lbfgs

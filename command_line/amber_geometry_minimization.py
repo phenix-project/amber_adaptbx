@@ -243,7 +243,6 @@ def run_minimization(
       params,
       cdl,
       log):
-#################################################!!!!!!!!!!!!!!!!!!!
   selection=None		  
   o = mmtbx.refinement.geometry_minimization.run2(
     sites_cart                     = sites_cart,
@@ -265,18 +264,16 @@ def run_minimization(
     cdl=cdl,
     log                            = log)
 
-###############
 def run_minimization_amber (
       sites_cart,
       selection,
       restraints_manager,
       pdb_hierarchy,
       params,
-      cdl,
       log,
       prmtop,
       ambcrd):
-  o = amber_adaptbx.amber_geometry_minimization.run2(
+  o = amber_adaptbx.amber_geometry_minimization.run(
     sites_cart                     = sites_cart,
     restraints_manager             = restraints_manager,
     pdb_hierarchy = pdb_hierarchy,
@@ -297,7 +294,7 @@ def run_minimization_amber (
     log                            = log,
     prmtop                         = prmtop,
     ambcrd                         = ambcrd)
-################
+
 
 class run(object):
   _pdb_suffix = "minimized"
@@ -433,24 +430,22 @@ class run(object):
   def minimization(self, prefix): # XXX USE alternate_nonbonded_off_on etc
     broadcast(m=prefix, log = self.log)
     self.sites_cart = self.xray_structure.sites_cart()
-
-###################
     if (self.params.amber.use):
-      run_minimization_amber(sites_cart = self.sites_cart, selection = self.selection,
-        restraints_manager = self.grm, params = self.params.minimization,
-        pdb_hierarchy = self.pdb_hierarchy,
-        cdl=self.params.pdb_interpretation.cdl,
-        log = self.log,
-        prmtop = self.params.amber.topology_file_name,
-        ambcrd = self.params.amber.coordinate_file_name)    
+      run_minimization_amber(
+          sites_cart = self.sites_cart,
+          selection = self.selection,
+          restraints_manager = self.grm,
+          params = self.params.minimization,
+          pdb_hierarchy = self.pdb_hierarchy,
+          log = self.log,
+          prmtop = self.params.amber.topology_file_name,
+          ambcrd = self.params.amber.coordinate_file_name)    
     else:
 	  run_minimization(sites_cart = self.sites_cart, selection = self.selection,
         restraints_manager = self.grm, params = self.params.minimization,
         pdb_hierarchy = self.pdb_hierarchy,
         cdl=self.params.pdb_interpretation.cdl,
         log = self.log)
-#####################
-
 
   def write_pdb_file(self, prefix):
     broadcast(m=prefix, log = self.log)

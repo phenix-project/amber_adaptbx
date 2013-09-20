@@ -38,13 +38,10 @@ uform_wrapper::uform_wrapper(std::string prmtop, std::string crdname)
 
 //Function to call mdgx main routine. 
 void callMdgx (std::vector<double>& sites_cart, std::vector<double>& gradients, 
-               std::vector<double>& target, std::string prmtop, std::string crd,
-               boost::python::object someuform )
+               std::vector<double>& target, boost::python::object someuform )
 {
 	uform_wrapper U = boost::python::extract<uform_wrapper & > (someuform);
-	const char * p = prmtop.c_str();
-	const char * c = crd.c_str();
-	getmdgxfrc(p,c, sites_cart.data(), target.data(), gradients.data(), U, U.trajcon_ptr.get(), U.mdsys_ptr.get() );
+	getmdgxfrc(sites_cart.data(), target.data(), gradients.data(), U, U.trajcon_ptr.get(), U.mdsys_ptr.get() );
 }
 
 //Function to convert double flex array to vector of doubles

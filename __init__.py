@@ -36,8 +36,8 @@ class geometry_manager(object):
     energy_components_c=ext.ExtractVec(self.energy_components)
 
     # Call c++ interface to call mdgx to calculate new gradients and target
-    ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, 
-                 self.prmtop, self.ambcrd, self.mdgx_structs)
+    ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.mdgx_structs)
+    
     # Convert back into python types (eg. into flex arrays for phenix to use)
     self.gradients=flex.double(gradients_c)*-1
     self.energy_components=flex.double(energy_components_c)
@@ -104,7 +104,7 @@ def run(pdb,prmtop, crd):
   target_c=ext.ExtractVec(target)
 
   # Call c++ interface to call mdgx to calculate new gradients and target	
-  ext.callMdgx(sites_cart_c, gradients_c, target_c, prmtop, crd, U)
+  ext.callMdgx(sites_cart_c, gradients_c, target_c, U)
   
   # Convert back into python types (eg. into flex arrays for phenix to use)
   gradients=flex.vec3_double(gradients_c)*-1

@@ -4,9 +4,9 @@
 
 extern "C"
 {
-    #include "mdgx.h"
+    #include "mdgx_pawel.h"
     
-	int getmdgxfrc(const char *tpname, const char *crdname, const double *PhenixCoords, \
+	int getmdgxfrc(const double *PhenixCoords, \
 			   double* target, double * gradients, uform* U, trajcon* tjptr, mdsys* MDptr);
     
     trajcon CreateTrajCon();
