@@ -11,7 +11,7 @@ class lbfgs(object):
   def __init__(self,
       sites_cart,
       geometry_restraints_manager,
-      prmtop, ambcrd, mdgx_structs,
+      mdgx_structs,
       geometry_restraints_flags=None,
       lbfgs_termination_params=None,
       lbfgs_core_params=None,
@@ -25,8 +25,6 @@ class lbfgs(object):
     self.site_labels = site_labels
     self.tmp = empty()
     self.rmsd_bonds, self.rmsd_angles = None, None
-    self.prmtop = prmtop
-    self.ambcrd = ambcrd
     self.mdgx_structs = mdgx_structs
     if sites_cart_selection:
       self.sites_cart_selection = flex.bool(sites_cart_selection)
@@ -48,8 +46,6 @@ class lbfgs(object):
       exception_handling_params=lbfgs_exception_handling_params)
     self.apply_shifts()
     amber_geometry_manager=amber.geometry_manager(
-          prmtop=self.prmtop,
-          ambcrd=self.ambcrd,
           sites_cart=self.tmp.sites_shifted,
           mdgx_structs=self.mdgx_structs)	  
     amber_geometry=amber_geometry_manager.energies_sites()
@@ -85,8 +81,6 @@ class lbfgs(object):
     else:
       self.apply_shifts()
     amber_geometry_manager=amber.geometry_manager(
-          prmtop=self.prmtop,
-          ambcrd=self.ambcrd,
           sites_cart=self.tmp.sites_shifted,
           mdgx_structs=self.mdgx_structs)	  
     amber_geometry=amber_geometry_manager.energies_sites()

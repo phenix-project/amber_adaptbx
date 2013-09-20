@@ -287,8 +287,6 @@ def run_minimization_amber (
     chirality                      = params.move.chirality,
     planarity                      = params.move.planarity,
     generic_restraints             = False,
-    rmsd_bonds_termination_cutoff  = params.rmsd_bonds_termination_cutoff,
-    rmsd_angles_termination_cutoff = params.rmsd_angles_termination_cutoff,
     grmsd_termination_cutoff       = params.grmsd_termination_cutoff, 
     alternate_nonbonded_off_on     = params.alternate_nonbonded_off_on,
     log                            = log,

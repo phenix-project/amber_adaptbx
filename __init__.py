@@ -13,15 +13,11 @@ ext = boost.python.import_ext("amber_adaptbx_ext")
 class geometry_manager(object):
 
   def __init__(self,
-        prmtop=None,
-        ambcrd=None,
         sites_cart=None,
         energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]),
         gradients=None,
         number_of_restraints=100,
         mdgx_structs=None):
-    self.prmtop = prmtop
-    self.ambcrd = ambcrd
     self.sites_cart = sites_cart
     self.energy_components = energy_components
     self.gradients=flex.double(len(sites_cart)*3)
