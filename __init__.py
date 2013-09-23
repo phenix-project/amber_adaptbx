@@ -9,6 +9,14 @@ from scitbx.array_family import flex
 import boost.python
 ext = boost.python.import_ext("amber_adaptbx_ext")
 
+master_phil_str = """
+  use_amber = False
+    .type = bool
+  topology_file_name = None
+    .type = path
+  coordinate_file_name = None
+    .type = path
+"""
 
 class geometry_manager(object):
 

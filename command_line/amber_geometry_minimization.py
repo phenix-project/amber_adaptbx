@@ -83,12 +83,7 @@ selection = all
   .short_caption = Atom selection
   .input_size = 400
 amber {
-  use = False
-    .type = bool
-  topology_file_name = None
-    .type = path
-  coordinate_file_name = None
-    .type = path
+  include scope amber_adaptbx.master_phil_str
 }  
 minimization
   .help = Geometry minimization parameters
@@ -428,7 +423,7 @@ class run(object):
   def minimization(self, prefix): # XXX USE alternate_nonbonded_off_on etc
     broadcast(m=prefix, log = self.log)
     self.sites_cart = self.xray_structure.sites_cart()
-    if (self.params.amber.use):
+    if (self.params.amber.use_amber):
       run_minimization_amber(
           sites_cart = self.sites_cart,
           selection = self.selection,
