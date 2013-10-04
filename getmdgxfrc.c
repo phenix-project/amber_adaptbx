@@ -26,21 +26,16 @@ mdsys CreateMDSys(char *crdname, uform* U){
 }
 
 void DestroyMDSys(mdsys* mdsysptr){
-  printf("Destroying MDSys\n");	
-  //~ DestroyEnergyTracker(&mdsysptr->sysUV);
+  //printf("Destroying MDSys\n");	
   DestroyCoord(&mdsysptr->crd);
-  //~ DestroyCellGrid(&mdsysptr->CG);  
-  //free(&mdsys_ptr.get()->etimers);    TimingsDS.h
 }
 
 void DestroyUform(uform* uptr, mdsys* mdsysptr){
-  printf("Destroying Uform\n");	
+  //printf("Destroying Uform\n");	
   FreeTopology(&uptr->tp);
   FreeFrcTab(&uptr->Etab);
   FreeFrcTab(&uptr->EHtab);
   free(uptr->rcinp.ng);
-  //~ DestroyRecCon(&uptr->rcinp, &mdsysptr->CG);
-  //~ DestroyBCKit(&uptr->PPk);
 }
 
  

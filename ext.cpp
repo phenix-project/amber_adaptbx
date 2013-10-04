@@ -40,17 +40,8 @@ uform_wrapper::uform_wrapper(std::string prmtop, std::string crdname)
 
 uform_wrapper::~uform_wrapper()
 {
-  printf("Destroying Trajcon\n");	
-  DestroyTrajCon(trajcon_ptr.get());             //TrajectoryDS.h
-  //~ FreeTopology(trajcon_ptr.get()->prc.tpA); //TopologyDS.h prmcorr
-  //~ FreeTopology(trajcon_ptr.get()->prc.tpB); //TopologyDS.h prmcorr 
-  //~ free(trajcon_ptr.get()->prc.SubBondA->items); //TopologyDS.h prmcorr ublist
-  //~ free(trajcon_ptr.get()->prc.AddBondB.items);
-  //~ free(trajcon_ptr.get()->prc.SubAnglA.items);
-  //~ free(trajcon_ptr.get()->prc.AddAnglB.items);
-  //~ free(trajcon_ptr.get()->prc.SubDiheA.items);
-  //~ free(trajcon_ptr.get()->prc.AddDiheB.items);
-
+  //printf("Destroying Trajcon\n");	
+  DestroyTrajCon(trajcon_ptr.get());            
   DestroyUform(uform_ptr.get(), mdsys_ptr.get());
   DestroyMDSys(mdsys_ptr.get());
 }
