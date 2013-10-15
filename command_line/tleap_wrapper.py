@@ -18,27 +18,29 @@ source leaprc.ff12SB
 loadamberparams frcmod.ionsjc_tip3p
 loadAmberParams frcmod.tip3pf
 
-loadAmberPrep nitrate.prepin
-loadAmberParams nitrate.frcmod
-
-loadAmberPrep acetate.prepin
 
 x = loadPdb "%s"
-
-bond x.6.SG x.127.SG
-bond x.30.SG x.115.SG
-bond x.64.SG x.80.SG
-bond x.76.SG x.94.SG
-
-set x box {27.240   31.870   34.230}
+"""
+  loads = """
+loadAmberPrep nitrate.prepin
+loadAmberParams nitrate.frcmod
+loadAmberPrep acetate.prepin
+"""
+  bond_line_template = "bond x.%s.%s x.%s.%s"
+  set_box_template = "set x box {%0.3f %0.3f %0.3f}"
+  save_and_quit = """
 set default nocenter on
 saveAmberParm x %s.prmtop %s.rst7
 quit
 """
-  cmd = cmd_template % (
-    pdb_filename,
-    pdb_filename,
-    pdb_filename,
+  cmd = cmd_template % (pdb_filename)
+  sulfur_bonds = []
+  for sb in sulfur_bonds:
+    print sb
+    cmd += bond_line_template(1,"SG", 2, "FE")
+  cmd += set_box_template % (99, 100, 101)
+  cmd += save_and_quit % (pdb_filename,
+                          pdb_filename,
     )
   f=file(tleap_input, "wb")
   f.write(cmd)
