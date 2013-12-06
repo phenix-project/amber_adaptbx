@@ -434,11 +434,13 @@ class run(object):
           prmtop = self.params.amber.topology_file_name,
           ambcrd = self.params.amber.coordinate_file_name)    
     else:
-	  run_minimization(sites_cart = self.sites_cart, selection = self.selection,
-        restraints_manager = self.grm, params = self.params.minimization,
-        pdb_hierarchy = self.pdb_hierarchy,
-        cdl=self.params.pdb_interpretation.cdl,
-        log = self.log)
+      run_minimization(sites_cart = self.sites_cart,
+                       selection = self.selection,
+                       restraints_manager = self.grm,
+                       params = self.params.minimization,
+                       pdb_hierarchy = self.pdb_hierarchy,
+                       cdl=self.params.pdb_interpretation.cdl,
+                       log = self.log)
 
   def write_pdb_file(self, prefix):
     broadcast(m=prefix, log = self.log)
