@@ -11,12 +11,19 @@ from libtbx.utils import Sorry
 from libtbx import phil
 import libtbx.phil.command_line
 from libtbx.option_parser import OptionParser
+import libtbx.load_env
 #from libtbx import runtime_utils
 
 his_names = ["HIS", "HID", "HIE", "HIP"]
 
+loading = {"NO3" : ["nitrate.prepin", "nitrate.frcmod"],
+           #"ACE" : ["acetate.prepin"],
+           }
+
 changing_residues = []
 changing_residues += his_names
+
+amber_adaptbx_dir = os.path.dirname(libtbx.env.dist_path("amber_adaptbx"))
 
 master_phil_string = """
 
@@ -30,6 +37,11 @@ amber_tleap
       .short_caption = model
       .help = PDB filename
       .style = bold file_type:pdb
+  }
+  actions
+  {
+    remediate_only = False
+      .type = bool
   }
   output
   {
@@ -91,19 +103,38 @@ def setup_parser():
   return parser
 
 def write_tleap_cmd_file(pdb_filename, tleap_input="tleap.in"):
+  def get_loads(filename):
+    loads = ""
+    loaded = []
+    pdb_inp = pdb.input(filename)
+    hierarchy = pdb_inp.construct_hierarchy()
+    for atom_group in hierarchy.atom_groups():
+      if atom_group.resname in loaded: continue
+      for load in loading.get(atom_group.resname, []):
+        loader = None
+        if load.find("prepin")>-1: loader = "loadAmberPrep"
+        elif load.find("frcmod")>-1: loader = "loadAmberParams"
+        assert loader
+        loads += "%s %s\n" % (loader,
+                              os.path.join(amber_adaptbx_dir,
+                                           "amber_adaptbx",
+                                           "force_field_library",
+                                           load,
+                                           )
+                                )
+        loaded.append(atom_group.resname)
+    return loads
+  #
   cmd_template = """
 source leaprc.ff12SB
 loadamberparams frcmod.ionsjc_tip3p
 loadAmberParams frcmod.tip3pf
 
+%s
 
 x = loadPdb "%s"
 """
-  loads = """
-loadAmberPrep nitrate.prepin
-loadAmberParams nitrate.frcmod
-loadAmberPrep acetate.prepin
-"""
+  loads = get_loads(pdb_filename)
   bond_line_template = "bond x.%s.%s x.%s.%s"
   set_box_template = "set x box {%0.3f %0.3f %0.3f}"
   save_and_quit = """
@@ -111,7 +142,8 @@ set default nocenter on
 saveAmberParm x %s.prmtop %s.rst7
 quit
 """
-  cmd = cmd_template % (pdb_filename)
+  cmd = cmd_template % (loads,
+                        pdb_filename)
   sulfur_bonds = []
   for sb in sulfur_bonds:
     print sb
@@ -146,8 +178,8 @@ def run_tleap_cmd_file(tleap_input):
       if line.find(fe)>-1:
         raise Sorry(line)
 
-def run_tleap(pdb_filename):
-  tleap_input = "%s.in" % pdb_filename
+def run_tleap(pdb_filename, output_filename):
+  tleap_input = "%s.in" % pdb_filename.split(".")[0]
   write_tleap_cmd_file(pdb_filename, tleap_input)
   run_tleap_cmd_file(tleap_input)
 
@@ -204,7 +236,7 @@ def generate_altloc_filenames(hierarchy):
     f.close()
     yield output_filename
 
-def convert_tleap_to_phenix(filename):
+def convert_tleap_residues_to_phenix_residues(filename):
   pdb_inp = pdb.input(filename)
   hierarchy = pdb_inp.construct_hierarchy()
   for atom_group in hierarchy.atom_groups():
@@ -216,17 +248,35 @@ def convert_tleap_to_phenix(filename):
       atom_group.resname = "HOH"
   return hierarchy
 
-def adjust_occupany(hierarchy):
+def adjust_occupancy(hierarchy):
   for atom in hierarchy.atoms():
     atom.occ = 1
   return hierarchy
 
+def adjust_chain(hierarchy):
+  for chain in hierarchy.chains():
+    if chain.id.strip()=="":
+      chain.id="A"
+  return hierarchy
+
 def adjust_b_factors(hierarchy, tleap_hierarchy):
+  # need to add code !!!
+  for atom1 in hierarchy.atoms():
+    print dir(atom1)
+    print atom1.id_str()
+    print atom1.quote()
+    for atom2 in tleap_hierarchy.atoms():
+      print atom2.id_str()
+      assert 0
   return tleap_hierarchy
+
+def tidy_directory(*args):
+  for filename in args:
+    print filename
 
 def run(rargs):
   print """
-  Convert a standard model to AMBER input using "tleap"
+  Convert a standard model to AMBER input using "tleap'
   """
   rargs = list(rargs)
   parser = setup_parser()
@@ -281,18 +331,23 @@ def run(rargs):
   for i, tleap_input_filename in enumerate(generate_altloc_filenames(hierarchy)):
     print tleap_input_filename
     # run tleap
-    tleap_output_filename = "%s_tleap_output.pdb" % preamble
-    if 1:
-      pass #os.system("cp 1exr_tleap_output.pdb %s" % tleap_output_filename)
-    else:
+    if not params.actions.remediate_only:
+      tleap_output_filename = "%s_tleap_output.pdb" % preamble
       run_tleap(tleap_input_filename,
                 tleap_output_filename,
         )
+    else:
+      tleap_output_filename = tleap_input_filename
     # convert tleap output model to phenix model
-    tleap_hierarchy = convert_tleap_to_phenix(tleap_output_filename)
-    # adjust b-factors from input
-    tleap_hierarchy = adjust_occupany(tleap_hierarchy)
+    tleap_hierarchy = convert_tleap_residues_to_phenix_residues(tleap_output_filename)
+    # adjust stuff from input
+    tleap_hierarchy = adjust_chain(tleap_hierarchy)
+    tleap_hierarchy = adjust_occupancy(tleap_hierarchy)
     tleap_hierarchy = adjust_b_factors(hierarchy, tleap_hierarchy)
+
+    tidy_directory(tleap_input_filename,
+                   tleap_output_filename,
+                   )
 
     break
 
