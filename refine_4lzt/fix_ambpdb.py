@@ -31,22 +31,26 @@ for chain_post in pdb_h_post.chains():
       #if resi_post.resname=='WAT': print chain_post.id, resi_post.resseq, resi_post.resname
       for chain_pre in pdb_h_pre.chains():
         for resi_pre in chain_pre.conformers()[0].residues():
-          if resi_post.resname=='NO3' and resi_pre.resname=='NO3':
-            print resi_pre.resseq, resi_post.resseq
+          #~ import code; code.interact(local=locals()); assert 0  
+          #~ sys.exit()
+          #~ if resi_post.resname.strip() =='DC' and resi_pre.resname.strip()=='DC':
+            #~ print resi_pre.resseq, resi_post.resseq
       
-            if resi_pre.resseq==resi_post.resseq and resi_pre.resname==resi_post.resname:
+            if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
               for atom_pre in resi_pre.atoms():
                 if atom_pre.name == atom_post.name and atom_pre.i_seq==atom_post.i_seq:
                   atom_post.b=atom_pre.b
                   atom_post.occ=atom_pre.occ
                   chain_post.id=chain_pre.id
+                  
 for atom_group in pdb_h_post.atom_groups():
   if atom_group.resname in ['HID','HIP','HIE']:
     atom_group.resname = "HIS"
   elif atom_group.resname == "CYX":
     atom_group.resname = "CYS"
   elif atom_group.resname in ["WAT"]:
-    atom_group.resname = "HOH"                  
+    atom_group.resname = "HOH"
+                      
             
 pdb_h_post.write_pdb_file(file_name=output_pdb_file, append_end=True,crystal_symmetry=pdb_pre.crystal_symmetry())
     
