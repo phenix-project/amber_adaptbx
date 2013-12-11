@@ -1,4 +1,7 @@
+#! /net/casegroup2/u2/pjanowsk/bin/phenix_svn/build/bin/phenix.python
+
 import iotbx.pdb
+import sys
 
 #======================================================================#
 # When tleap creates an Amber topology and ambpdb recreates a pdb with #
@@ -9,9 +12,10 @@ import iotbx.pdb
 # file.                                   #
 ########################################################################
 
-pre_amber_pdb_file="4lzti.pdb"
-post_amber_pdb_file="4lzt.pdb"
+pre_amber_pdb_file=sys.argv[1]
+post_amber_pdb_file=sys.argv[2]
 output_pdb_file="out.pdb"
+if sys.argv[3]: output_pdb_file=sys.argv[3]
 
 
 pdb_pre=iotbx.pdb.input(file_name=pre_amber_pdb_file)
@@ -36,10 +40,13 @@ for chain_post in pdb_h_post.chains():
                   atom_post.b=atom_pre.b
                   atom_post.occ=atom_pre.occ
                   chain_post.id=chain_pre.id
-    if resi_post.resname='CYX':
-      resi_post.resname='CYS'
-    if resi_post.resname in ['HIP','HIE','HID']:
-      resi_post.resname='HIS'
+for atom_group in pdb_h_post.atom_groups():
+  if atom_group.resname in ['HID','HIP','HIE']:
+    atom_group.resname = "HIS"
+  elif atom_group.resname == "CYX":
+    atom_group.resname = "CYS"
+  elif atom_group.resname in ["WAT"]:
+    atom_group.resname = "HOH"                  
             
 pdb_h_post.write_pdb_file(file_name=output_pdb_file, append_end=True,crystal_symmetry=pdb_pre.crystal_symmetry())
     
