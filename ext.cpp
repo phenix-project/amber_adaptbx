@@ -91,8 +91,8 @@ BOOST_PYTHON_MODULE(amber_adaptbx_ext)
     def("callMdgx", &callMdgx);
     def("ExtractVec", &ExtractVec);
     def("printVec", &printVec);
-    class_<std::vector<double> >("VectorOfDouble")
-        .def(vector_indexing_suite<std::vector<double> >() );
+    //~ class_<std::vector<double> >("VectorOfDouble")
+        //~ .def(vector_indexing_suite<std::vector<double> >() );
     boost::python::class_< uform_wrapper >
      ( "uform",
        "c++ class with ptr to topo",
