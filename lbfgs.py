@@ -47,7 +47,7 @@ class lbfgs(object):
     self.apply_shifts()
     amber_geometry_manager=amber.geometry_manager(
           sites_cart=self.tmp.sites_shifted,
-          mdgx_structs=self.mdgx_structs)	  
+          mdgx_structs=self.mdgx_structs)
     amber_geometry=amber_geometry_manager.energies_sites()
     self.final_target_result=amber_geometry.energy_components
     sites_cart.clear()
@@ -58,7 +58,7 @@ class lbfgs(object):
     self.final_target_value = self.final_target_result[0]
 
   def apply_shifts(self):
-    if self.sites_cart_selection:	
+    if self.sites_cart_selection:
       shifted = self.tmp.reduced_sites_cart + flex.vec3_double(self.x)
       self.tmp.sites_shifted = self.tmp.sites_cart.deep_copy()
       self.tmp.sites_shifted.set_selected(self.sites_cart_selection, shifted)
@@ -82,10 +82,10 @@ class lbfgs(object):
       self.apply_shifts()
     amber_geometry_manager=amber.geometry_manager(
           sites_cart=self.tmp.sites_shifted,
-          mdgx_structs=self.mdgx_structs)	  
+          mdgx_structs=self.mdgx_structs)
     amber_geometry=amber_geometry_manager.energies_sites(
       compute_gradients=True)
-    self.tmp.target_result=amber_geometry.energy_components  
+    self.tmp.target_result=amber_geometry.energy_components
     self.rmsd_gradient=amber_geometry.get_rmsd_gradient()
     self.f =amber_geometry.residual_sum
     if (self.first_target_result is None):
@@ -96,5 +96,3 @@ class lbfgs(object):
     else:
       self.g = amber_geometry.gradients
     return self.f, self.g
-
-

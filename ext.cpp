@@ -8,8 +8,8 @@
 #include <iostream>
 #include <scitbx/array_family/ref_reductions.h>
 #include <boost/shared_ptr.hpp>
- 
- 
+
+
 //Class to maintain uform (topology), trajcon (trajectory control settings),
 // and mdsys (coordinates, grid, forces) in memory between mdgx calls.
 class uform_wrapper
@@ -21,10 +21,10 @@ public:
   boost::shared_ptr<trajcon> trajcon_ptr;
   boost::shared_ptr<mdsys> mdsys_ptr;
   operator uform*(){
-	  return uform_ptr.get();
-  }	  
-}; 
- 
+          return uform_ptr.get();
+  }
+};
+
 uform_wrapper::uform_wrapper(std::string prmtop, std::string crdname)
 {
   const char * p = prmtop.c_str();
@@ -34,46 +34,46 @@ uform_wrapper::uform_wrapper(std::string prmtop, std::string crdname)
   uform_ptr.reset( (uform*)malloc(sizeof(uform)) );
   *uform_ptr = LoadTopology(p,trajcon_ptr.get());
   mdsys_ptr.reset( (mdsys*)malloc(sizeof(mdsys)) );
-  *mdsys_ptr = CreateMDSys(c, uform_ptr.get() ); 
-} 
+  *mdsys_ptr = CreateMDSys(c, uform_ptr.get() );
+}
 
 
 uform_wrapper::~uform_wrapper()
 {
-  //printf("Destroying Trajcon\n");	
-  DestroyTrajCon(trajcon_ptr.get());            
+  //printf("Destroying Trajcon\n");
+  DestroyTrajCon(trajcon_ptr.get());
   DestroyUform(uform_ptr.get(), mdsys_ptr.get());
   DestroyMDSys(mdsys_ptr.get());
 }
 
 
-  
-//Function to call mdgx main routine. 
-void callMdgx (std::vector<double>& sites_cart, std::vector<double>& gradients, 
+
+//Function to call mdgx main routine.
+void callMdgx (std::vector<double>& sites_cart, std::vector<double>& gradients,
                std::vector<double>& target, boost::python::object someuform )
 {
 
-	uform_wrapper & U = boost::python::extract<uform_wrapper & > (someuform);
-	getmdgxfrc(sites_cart.data(), target.data(), gradients.data(), U, U.trajcon_ptr.get(), U.mdsys_ptr.get() );
+        uform_wrapper & U = boost::python::extract<uform_wrapper & > (someuform);
+        getmdgxfrc(sites_cart.data(), target.data(), gradients.data(), U, U.trajcon_ptr.get(), U.mdsys_ptr.get() );
 }
 
 //Function to convert double flex array to vector of doubles
 std::vector<double> ExtractVec (scitbx::af::const_ref<double> const& sites_cart){
-	std::vector<double> xyz_flat;
-	for (size_t i_seq = 0; i_seq < sites_cart.size(); i_seq++) {
-		xyz_flat.push_back(sites_cart[i_seq]);
-	}
-	return xyz_flat;
+        std::vector<double> xyz_flat;
+        for (size_t i_seq = 0; i_seq < sites_cart.size(); i_seq++) {
+                xyz_flat.push_back(sites_cart[i_seq]);
+        }
+        return xyz_flat;
 }
 
 
 //Function to print out entire vector of doubles
 void printVec (std::vector<double> Vec) {
-	std::cout << "[ ";
-	for (unsigned int i=0; i < Vec.size(); ++i) {
-		std::cout << Vec[i] << ", ";
-	}
-	std::cout << "]\n";
+        std::cout << "[ ";
+        for (unsigned int i=0; i < Vec.size(); ++i) {
+                std::cout << Vec[i] << ", ";
+        }
+        std::cout << "]\n";
 }
 
 
@@ -83,11 +83,11 @@ void printVec (std::vector<double> Vec) {
 
 
 
-//boost::python registration 
+//boost::python registration
 #include <boost/python.hpp>
 BOOST_PYTHON_MODULE(amber_adaptbx_ext)
 {
-	using namespace boost::python;
+        using namespace boost::python;
     def("callMdgx", &callMdgx);
     def("ExtractVec", &ExtractVec);
     def("printVec", &printVec);
@@ -97,9 +97,7 @@ BOOST_PYTHON_MODULE(amber_adaptbx_ext)
      ( "uform",
        "c++ class with ptr to topo",
        boost::python::init< std::string, std::string >
-       ( boost::python::args("self","prmtop", "crdname"), 
+       ( boost::python::args("self","prmtop", "crdname"),
          "topo file name; amber coord file name")
-     ); 
+     );
 }
-
- 

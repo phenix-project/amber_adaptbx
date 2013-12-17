@@ -28,11 +28,11 @@ class lbfgs(amber_adaptbx.lbfgs.lbfgs):
       lbfgs_exception_handling_params=lbfgs_exception_handling_params,
       site_labels=site_labels,
       mdgx_structs=mdgx_structs)
-      
-  def callback_after_step(self, minimizer):  
+
+  def callback_after_step(self, minimizer):
     self.apply_shifts()
-    if self.rmsd_gradient <self.grmsd_termination_cutoff:		 
-      return True      
+    if self.rmsd_gradient <self.grmsd_termination_cutoff:
+      return True
 
 class run(object):
   def __init__(self,
@@ -80,12 +80,12 @@ class run(object):
       reference_dihedral = True,
       bond_similarity    = True,
       generic_restraints = True)
-  
+
     mdgx_structs=get_amber_structs (prmtop, ambcrd)
-      
+
     self.show(mdgx_structs)
     for i_macro_cycle in xrange(number_of_macro_cycles):
-      print >> self.log, "  macro-cycle:", i_macro_cycle
+      print >> self.log, "\n  macro-cycle:", i_macro_cycle
       if(alternate_nonbonded_off_on and i_macro_cycle<=number_of_macro_cycles/2):
         geometry_restraints_flags.nonbonded = bool(i_macro_cycle % 2)
       self.minimized = lbfgs(
@@ -108,5 +108,5 @@ class run(object):
     amber_geometry_manager=amber.geometry_manager(
        sites_cart=self.sites_cart,
        mdgx_structs=mdgx_structs)
-    amber_geometry=amber_geometry_manager.energies_sites()	
+    amber_geometry=amber_geometry_manager.energies_sites()
     amber_geometry.show()

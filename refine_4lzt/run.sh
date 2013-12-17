@@ -11,7 +11,7 @@ refinement {
     adp {
       individual {
         anisotropic = "not (element H)"
-	isotropic = "element H"
+        isotropic = "element H"
       }
     }
   }

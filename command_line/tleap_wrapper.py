@@ -42,6 +42,10 @@ amber_tleap
   {
     remediate_only = False
       .type = bool
+      .short_caption = Just remediate the PDB file (not running tleap).
+    use_altloc = None
+      .type = str
+      .short_caption = Use this altloc. Default is the first altloc.
   }
   output
   {
@@ -50,6 +54,7 @@ amber_tleap
   }
 }
 """
+
 master_params = master_phil_string # need for auto documentation
 if False:
   print '-'*80
@@ -64,7 +69,7 @@ def setup_parser():
   up-to-date version
 """,
     usage="""
-  phenix.carbo_load protein_pdb_file_name=pdb3a37.ent \\ 
+  phenix.carbo_load protein_pdb_file_name=pdb3a37.ent \\
                     carbohydrate_file_name=man.txt \\
                     map_coeffs_file_name=pdb3a36_refine_001_map_coeffs.mtz \\
                     residue_selection="resname LG1"
@@ -178,10 +183,22 @@ def run_tleap_cmd_file(tleap_input):
       if line.find(fe)>-1:
         raise Sorry(line)
 
+def get_matching_pdb_file(preamable, tleap_output):
+  print tleap_output
+  cmd = "ambpdb -p %s.pdb.prmtop < %s.pdb.rst7 > %s" % (preamable,
+                                                        preamable,
+                                                        tleap_output,
+    )
+  print cmd
+  easy_run.call(cmd)
+
 def run_tleap(pdb_filename, output_filename):
   tleap_input = "%s.in" % pdb_filename.split(".")[0]
   write_tleap_cmd_file(pdb_filename, tleap_input)
   run_tleap_cmd_file(tleap_input)
+  get_matching_pdb_file(tleap_input.split(".")[0],
+                        output_filename
+    )
 
 def adjust_his(atom_group):
   hydrogens = ["ND1", "NE2"]
@@ -260,11 +277,23 @@ def adjust_chain(hierarchy):
   return hierarchy
 
 def adjust_b_factors(hierarchy, tleap_hierarchy):
-  # need to add code !!!
+  for ag in tleap_hierarchy.atom_groups():
+    print ag.resname,
+  for atom_group1, atom_group2 in zip(hierarchy.atom_groups(),
+                                      tleap_hierarchy.atom_groups(),
+                                      ):
+    print atom_group1.resname,
+    print atom_group2.resname
+    for atom1 in atom_group1.atoms():
+      for atom2 in atom_group2.atoms():
+        print atom1.id_str(), atom2.id_str()
+    assert atom_group1.resname==atom_group2.resname
+  assert 0
   for atom1 in hierarchy.atoms():
     print dir(atom1)
     print atom1.id_str()
     print atom1.quote()
+    print atom1.format_atom_record_group()
     for atom2 in tleap_hierarchy.atoms():
       print atom2.id_str()
       assert 0
@@ -288,7 +317,7 @@ def run(rargs):
     sys.exit()
   if len(args)==0:
     parser.print_help()
-    sys.exit()  
+    sys.exit()
   #
   argument_interpreter = libtbx.phil.command_line.argument_interpreter(
     master_phil=master_phil,
@@ -340,11 +369,21 @@ def run(rargs):
       tleap_output_filename = tleap_input_filename
     # convert tleap output model to phenix model
     tleap_hierarchy = convert_tleap_residues_to_phenix_residues(tleap_output_filename)
+    for ag in tleap_hierarchy.atom_groups():
+      print ag.resname,
     # adjust stuff from input
     tleap_hierarchy = adjust_chain(tleap_hierarchy)
+    for ag in tleap_hierarchy.atom_groups():
+      print ag.resname,
     tleap_hierarchy = adjust_occupancy(tleap_hierarchy)
+    for ag in tleap_hierarchy.atom_groups():
+      print ag.resname,
+    pdb_inp = pdb.input(params.input.pdb_file_name)
+    hierarchy = pdb_inp.construct_hierarchy()
     tleap_hierarchy = adjust_b_factors(hierarchy, tleap_hierarchy)
-
+    for ag in tleap_hierarchy.atom_groups():
+      print ag.resname,
+    #
     tidy_directory(tleap_input_filename,
                    tleap_output_filename,
                    )
@@ -361,4 +400,3 @@ def run(rargs):
 
 if __name__=="__main__":
   run(sys.argv[1:])
-  

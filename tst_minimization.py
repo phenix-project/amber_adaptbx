@@ -14,7 +14,7 @@ def exercise_vAla3 () :
     test=os.path.isfile)
   crd_file = os.path.splitext(top_file)[0] + ".rst7"
   cif_file = os.path.splitext(top_file)[0] + ".cif"
-  
+
   args = [
     "phenix.pdbtools",
     pdb_file,
@@ -35,28 +35,28 @@ def exercise_vAla3 () :
   ]
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
   assert (rc == 0)
-  
-  pdb_inp = iotbx.pdb.input(file_name=pdb_file)  
+
+  pdb_inp = iotbx.pdb.input(file_name=pdb_file)
   symm = pdb_inp.crystal_symmetry()
   xray_structure = pdb_inp.xray_structure_simple(enable_scattering_type_unknown=True)
   sites_cart_inp=xray_structure.sites_cart()
-  
-  pdb_inp = iotbx.pdb.input(file_name='vAla3_shaken.pdb')  
+
+  pdb_inp = iotbx.pdb.input(file_name='vAla3_shaken.pdb')
   symm = pdb_inp.crystal_symmetry()
   xray_structure = pdb_inp.xray_structure_simple(enable_scattering_type_unknown=True)
   sites_cart_shaken=xray_structure.sites_cart()
-  
-  pdb_inp = iotbx.pdb.input(file_name='vAla3_shaken_minimized.pdb')  
+
+  pdb_inp = iotbx.pdb.input(file_name='vAla3_shaken_minimized.pdb')
   symm = pdb_inp.crystal_symmetry()
   xray_structure = pdb_inp.xray_structure_simple(enable_scattering_type_unknown=True)
   sites_cart_min=xray_structure.sites_cart()
-  
+
   assert sites_cart_inp.rms_difference(sites_cart_shaken) >0.09
   assert sites_cart_inp.rms_difference(sites_cart_min) <0.06, \
     "RMSD of amber-minimized structure is %5.4f (<0.06 required to pass)." \
     % sites_cart_inp.rms_difference(sites_cart_min)
-  
+
 
 if (__name__ == "__main__") :
-  exercise_vAla3()  
+  exercise_vAla3()
   print "OK"

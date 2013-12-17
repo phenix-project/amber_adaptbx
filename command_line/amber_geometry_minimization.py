@@ -84,7 +84,7 @@ selection = all
   .input_size = 400
 amber {
   include scope amber_adaptbx.master_phil_str
-}  
+}
 minimization
   .help = Geometry minimization parameters
   .short_caption = Minimization parameters
@@ -110,7 +110,7 @@ minimization
     .help = stop after reaching specified cutoff value
   grmsd_termination_cutoff = 0
     .type = float
-    .help = stop after reaching specified cutoff value  
+    .help = stop after reaching specified cutoff value
   move
     .help = Define what to include into refinement target
     .short_caption = Geometry terms
@@ -238,7 +238,7 @@ def run_minimization(
       params,
       cdl,
       log):
-  selection=None		  
+  selection=None
   o = mmtbx.refinement.geometry_minimization.run2(
     sites_cart                     = sites_cart,
     restraints_manager             = restraints_manager,
@@ -282,7 +282,7 @@ def run_minimization_amber (
     chirality                      = params.move.chirality,
     planarity                      = params.move.planarity,
     generic_restraints             = False,
-    grmsd_termination_cutoff       = params.grmsd_termination_cutoff, 
+    grmsd_termination_cutoff       = params.grmsd_termination_cutoff,
     alternate_nonbonded_off_on     = params.alternate_nonbonded_off_on,
     log                            = log,
     prmtop                         = prmtop,
@@ -432,7 +432,7 @@ class run(object):
           pdb_hierarchy = self.pdb_hierarchy,
           log = self.log,
           prmtop = self.params.amber.topology_file_name,
-          ambcrd = self.params.amber.coordinate_file_name)    
+          ambcrd = self.params.amber.coordinate_file_name)
     else:
       run_minimization(sites_cart = self.sites_cart,
                        selection = self.selection,
