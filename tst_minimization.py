@@ -26,7 +26,7 @@ def exercise_vAla3 () :
   assert (rc == 0)
 
   args = [
-    "phenix.amber_geometry_minimization",
+    "phenix.geometry_minimization",
     "vAla3_shaken.pdb",
     cif_file,
     "topology_file_name=\"%s\"" % top_file,
