@@ -5,10 +5,9 @@ import iotbx.pdb
 import argparse
 from scitbx.array_family import flex
 import scitbx.restraints
-#~ sys.path.append('/home/pjanowsk/amberSD/AmberTools/src/xtalutil/Phenix')
-#~ import amber_adaptbx_ext as PAI
 import boost.python
 ext = boost.python.import_ext("amber_adaptbx_ext")
+
 
 master_phil_str = """
   use_amber = False
