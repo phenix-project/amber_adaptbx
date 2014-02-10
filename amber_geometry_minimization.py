@@ -36,7 +36,6 @@ class lbfgs(amber_adaptbx.lbfgs.lbfgs):
 
 class run(object):
   def __init__(self,
-               sites_cart,
                restraints_manager,
                pdb_hierarchy,
                max_number_of_iterations       = 500,
@@ -59,7 +58,6 @@ class run(object):
       self.log = sys.stdout
     self.pdb_hierarchy = pdb_hierarchy
     self.minimized = None
-    self.sites_cart = sites_cart
     self.restraints_manager = restraints_manager
     assert max_number_of_iterations+number_of_macro_cycles > 0
     assert [bond,nonbonded,angle,dihedral,chirality,planarity].count(False) < 6
@@ -88,8 +86,9 @@ class run(object):
       print >> self.log, "  macro-cycle:", i_macro_cycle
       if(alternate_nonbonded_off_on and i_macro_cycle<=number_of_macro_cycles/2):
         geometry_restraints_flags.nonbonded = bool(i_macro_cycle % 2)
+      sites_cart = self.pdb_hierarchy.atoms().extract_xyz()
       self.minimized = lbfgs(
-        sites_cart                      = self.sites_cart,
+        sites_cart                      = sites_cart,
         geometry_restraints_manager     = restraints_manager.geometry,
         geometry_restraints_flags       = geometry_restraints_flags,
         lbfgs_termination_params        = lbfgs_termination_params,
@@ -98,6 +97,7 @@ class run(object):
         grmsd_termination_cutoff        = grmsd_termination_cutoff,
         site_labels                     = None,
         mdgx_structs                    = mdgx_structs)
+      self.pdb_hierarchy.atoms().set_xyz(sites_cart)
       self.show(mdgx_structs)
       geometry_restraints_flags.nonbonded = nonbonded
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
@@ -106,7 +106,7 @@ class run(object):
   def show(self, mdgx_structs):
     import amber_adaptbx as amber
     amber_geometry_manager=amber.geometry_manager(
-       sites_cart=self.sites_cart,
+       sites_cart=self.pdb_hierarchy.atoms().extract_xyz(),
        mdgx_structs=mdgx_structs)
     amber_geometry=amber_geometry_manager.energies_sites()
     amber_geometry.show()
