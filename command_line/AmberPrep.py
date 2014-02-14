@@ -7,13 +7,7 @@ from elbow.command_line import builder
 from libtbx import easy_run
 import StringIO
 from amber_adaptbx import fix_ambpdb
-
-#paj write these two functions
-def is_in_components_lib(residue_name):
-  return False
-
-def path_in_components_lib(residue_name):
-  return False
+from amber_adaptbx import amber_library_server
 
 # get box info & space group info
 def initializePdb(pdb_filename):
@@ -35,7 +29,7 @@ def run_pdb4amber(pdb_filename):
 def run_elbow_antechamber(ns_names):
   #paj pretty this up (run charge on one)
   for residue_name in ns_names:
-    if is_in_components_lib(residue_name):
+    if amber_library_server.is_in_components_lib(residue_name):
       continue
     else:
       mol = builder.run(chemical_component=residue_name,
@@ -69,8 +63,8 @@ def run_tleap(pdb_filename,ns_names):
   f.write('HOH = SPC\n')
   f.write('loadAmberParams frcmod.spce\n')
   for res in ns_names:
-    if is_in_components_lib(res):
-        res_path=path_in_components_lib(res)
+    if amber_library_server.is_in_components_lib(res):
+        res_path=amber_library_server.path_in_components_lib(res)
         f.write('%s = loadmol2 %s%s.mol2\n' %(res,res_path,res))
         f.write('loadAmberParams %s.frcmod\n' %(res_path, res))
     else:
