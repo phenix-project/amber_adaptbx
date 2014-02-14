@@ -10,14 +10,15 @@ def generate_unknown_residue_names(pdb_filename):
   for atom_group in hierarchy.atom_groups():
     yield atom_group.resname
 
-def get_charge_and_multiplicity(pdb_filename):
+def get_charge_and_multiplicity(unknw_res_names, verbose=False):
   results = {}
-  for residue_name in generate_unknown_residue_names(pdb_filename):
+  for residue_name in unknw_res_names:
     print residue_name
     if residue_name in results: continue
     mol = builder.run(chemical_component=residue_name,
-                      no_output=True,
+                      no_output=True, silent=True
                       )
+    mol.WritePDB('4antechamber_%s.pdb' %residue_name)                  
     mol.Multiplicitise()
     print mol.DisplayBrief()
     results[residue_name] = [mol.charge, mol.multiplicity]
@@ -25,7 +26,8 @@ def get_charge_and_multiplicity(pdb_filename):
 
 def run(pdb_filename):
   print pdb_filename
-  print get_charge_and_multiplicity(pdb_filename)
+  unknw_res_names=generate_unknown_residue_names(pdb_filename)
+  print get_charge_and_multiplicity(unknw_res_names, verbose=True)
 
 if __name__=="__main__":
   run(sys.argv[1])

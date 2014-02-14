@@ -4,7 +4,7 @@
 #include "mdgx.h"
 #include "time.h"
 #include "math.h"
-
+  
 trajcon CreateTrajCon(){
         trajcon tj={}; //trajectory control data (input file params)
         InitBasicTrajcon(&tj);
