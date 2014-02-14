@@ -19,7 +19,7 @@ def is_in_components_lib(residue_name):
 
 def path_in_components_lib(residue_name):
   rd = repo_dir()
-  preamble = residue_name = os.path.join(rd,
+  preamble = os.path.join(rd,
                                          residue_name[0].lower(),
                                          residue_name.upper(),
                                          )

@@ -65,8 +65,8 @@ def run_tleap(pdb_filename,ns_names):
   for res in ns_names:
     if amber_library_server.is_in_components_lib(res):
         res_path=amber_library_server.path_in_components_lib(res)
-        f.write('%s = loadmol2 %s%s.mol2\n' %(res,res_path,res))
-        f.write('loadAmberParams %s.frcmod\n' %(res_path, res))
+        f.write('%s = loadmol2 %s\n' %(res,res_path[1]))
+        f.write('loadAmberParams %s\n' %(res_path[0]))
     else:
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
