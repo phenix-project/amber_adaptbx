@@ -1,4 +1,4 @@
-# LIBTBX_SET_DISPATCHER_NAME phenix.geometry_minimization
+# LIBTBX_SET_DISPATCHER_NAME phenix.amber_geometry_minimization
 
 from __future__ import division
 import mmtbx.refinement.geometry_minimization
