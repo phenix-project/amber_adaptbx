@@ -1,3 +1,5 @@
+# LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep
+
 import os, sys
 from iotbx import pdb
 from amber_adaptbx import pdb4amber
