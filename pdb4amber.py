@@ -419,7 +419,7 @@ def non_standard_elbow(recordlist):
   ns_resname = []
 
   for record in recordlist:
-    if record[5].strip() not in RES:
+    if record[5].strip() not in RES and record[5] != '   ':
       if record[5].strip() not in ns_resname:
         ns_resname.append(record[5].strip())
         try: f.close()
