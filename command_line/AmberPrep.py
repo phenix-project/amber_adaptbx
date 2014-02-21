@@ -22,12 +22,13 @@ def initializePdb(pdb_filename):
   
 # run pdb4amber
 def run_pdb4amber(pdb_filename):
+  #paj modify output for phenix user
   ns_names=pdb4amber.run('4tleap.pdb', pdb_filename, True, False, False, True)
   return ns_names
   
 # run elbow and antechamber
 def run_elbow_antechamber(ns_names):
-  #paj pretty this up (run charge on one)
+  #paj need output if elbow or antechamber don't work
   for residue_name in ns_names:
     if amber_library_server.is_in_components_lib(residue_name):
       continue
@@ -58,6 +59,8 @@ def run_tleap(pdb_filename,ns_names):
   f=open('tleap.in','w')
   f.write('source leaprc.ff12SB\n')
   f.write('source leaprc.gaff\n')
+  f.write('loadoff ions13.lib\n')
+  f.write('loadamberparams frcmod.ionslrcm_iod\n')
   f.write('loadamberparams frcmod.ionsjc_spce\n')
   f.write('WAT = SPC\n')
   f.write('HOH = SPC\n')
