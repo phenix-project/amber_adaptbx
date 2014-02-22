@@ -22,13 +22,11 @@ def initializePdb(pdb_filename):
   
 # run pdb4amber
 def run_pdb4amber(pdb_filename):
-  #paj modify output for phenix user
   ns_names=pdb4amber.run('4tleap.pdb', pdb_filename, True, False, False, True)
   return ns_names
   
 # run elbow and antechamber
 def run_elbow_antechamber(ns_names):
-  #paj need output if elbow or antechamber don't work
   for residue_name in ns_names:
     #~ if amber_library_server.is_in_components_lib(residue_name):
     if False:
@@ -50,6 +48,8 @@ def run_elbow_antechamber(ns_names):
       for line in stdo.getvalue().splitlines():
         if line.find('APS')>-1:
           print line
+        if line.find('Error')>-1:
+          print line  
       cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
       print cmd
       easy_run.fully_buffered(cmd)
@@ -57,7 +57,6 @@ def run_elbow_antechamber(ns_names):
 
 # prepare tleap input (set box) or run pytleap?
 def run_tleap(pdb_filename,ns_names):
-  #paj change rst7 box
   f=open('tleap.in','w')
   f.write('source leaprc.ff12SB\n')
   f.write('source leaprc.gaff\n')
@@ -92,6 +91,30 @@ def run_tleap(pdb_filename,ns_names):
   ero.show_stderr()
   return 0
 
+#change box size in rst7 file
+def run_ChBox(base,cryst1):
+  from cStringIO import StringIO as StringIOc
+  old_stdout = sys.stdout
+  sys.stdout = uc = StringIOc()
+  cryst1.unit_cell().show_parameters()
+  sys.stdout = old_stdout
+  uc=uc.getvalue().translate(None,',)(').split()
+  cmd='ChBox -c %s.rst7 -o chbox.rst7 \
+             -X %s \
+             -Y %s \
+             -Z %s \
+             -al %s \
+             -bt %s \
+             -gm %s ' \
+             %(base,uc[2], uc[3], uc[4], uc[5], uc[6], uc[7])
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  ero.show_stdout()
+  ero.show_stderr()
+  cmd='mv chbox.rst7 %s.rst7' %base
+  ero=easy_run.fully_buffered(cmd)
+  return 0
+
 # make pdb 
 def run_ambpdb(base):
   cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base)
@@ -119,6 +142,7 @@ def run(pdb_filename):
   ns_names=run_pdb4amber('init.pdb')
   run_elbow_antechamber(ns_names)
   run_tleap(base,ns_names)
+  run_ChBox(base,cryst1)
   run_ambpdb(base)
   finalizePdb('new.pdb',cryst1)
   fix_ambpdb.run(pdb_filename, 'new.pdb', '4phenix_'+base+'.pdb')
