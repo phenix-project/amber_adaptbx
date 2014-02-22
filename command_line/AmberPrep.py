@@ -30,7 +30,9 @@ def run_pdb4amber(pdb_filename):
 def run_elbow_antechamber(ns_names):
   #paj need output if elbow or antechamber don't work
   for residue_name in ns_names:
-    if amber_library_server.is_in_components_lib(residue_name):
+    #~ if amber_library_server.is_in_components_lib(residue_name):
+    if False:
+      print "%s already in amber monomer library. Skipping elbow/antechamber run for this residue.\n" %residue_name
       continue
     else:
       mol = builder.run(chemical_component=residue_name,
@@ -59,7 +61,7 @@ def run_tleap(pdb_filename,ns_names):
   f=open('tleap.in','w')
   f.write('source leaprc.ff12SB\n')
   f.write('source leaprc.gaff\n')
-  f.write('loadoff ions13.lib\n')
+  #f.write('loadoff atomic_ions.lib\n')
   f.write('loadamberparams frcmod.ionslrcm_iod\n')
   f.write('loadamberparams frcmod.ionsjc_spce\n')
   f.write('WAT = SPC\n')
@@ -74,12 +76,12 @@ def run_tleap(pdb_filename,ns_names):
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
   f.write('x = loadpdb 4tleap.pdb\n')
-  if os.path.isfile('4tleap_sslink'):
-    input = open('4tleap_sslink', 'r')
-    for line in input.readlines():
-      cys1 = line.split()[0]
-      cys2 = line.split()[1]
-      f.write("bond x.%s.SG x.%s.SG\n" %(cys1, cys2))
+  #~ if os.path.isfile('4tleap_sslink'):
+    #~ input = open('4tleap_sslink', 'r')
+    #~ for line in input.readlines():
+      #~ cys1 = line.split()[0]
+      #~ cys2 = line.split()[1]
+      #~ f.write("bond x.%s.SG x.%s.SG\n" %(cys1, cys2))
   f.write('set x box {20.000   20.000   20.000}\n')
   f.write('set default nocenter on\n')
   f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(pdb_filename, pdb_filename))

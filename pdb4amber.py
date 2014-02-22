@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Romain M. Wolf, NIBR Basel, December 2013
+# with revisions by Pawel Janowski, Rutgers U. NJ, February 2014
 
 #  Copyright (c) 2013, Novartis Institutes for BioMedical Research Inc.
 #  All rights reserved.
@@ -52,10 +53,10 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
 def pdb_read(pdbin):
 #=============================================
 # only records starting with the following strings are kept...
-  ACCEPTED =  ('ATOM  ','HETATM', 'TER   ', 'END   ', 'MODEL ', 'ENDMDL')
+  ACCEPTED =  ('ATOM','HETATM', 'TER', 'MODEL', 'ENDMDL')
 # records starting with the following strings are considered 'dividers'
 # and they are cleaned for the rest of the line...
-  DIVIDERS =  ('TER   ', 'END   ', 'MODEL ', 'ENDMDL')
+  DIVIDERS =  ('TER', 'MODEL', 'ENDMDL')
   records = open(pdbin, 'r')
   print "\n=================================================="
   print "Summary of pdb4amber for file %s"%pdbin
@@ -85,13 +86,13 @@ def pdb_read(pdbin):
     # make all lines 80 characters long (fill up with blanks if necessary)
     # so that the line parser will not fail on shorter lines...
     line = (line.rstrip() + (80-len(line)) * ' ')
-    if '%-6s' % line[0:6] not in ACCEPTED:
+    if line[0:6].rstrip() not in ACCEPTED:
+      #~ print '%-6sk' %line[0:6].rstrip()
       continue
 # make clean divider lines without additional stuff that might hurt later
-    elif line[0:6] in DIVIDERS:
-      line = line[0:6]
-      line = (line.rstrip() + (80-len(line)) * ' ')
-      print line
+    elif line[0:6].rstrip() in DIVIDERS:
+      line = line[0:6].rstrip()
+      line = (line + (80-len(line)) * ' ')
     else:
       pass
 # split the line into records
@@ -143,7 +144,7 @@ def pdb_read(pdbin):
   return(recordlist)
 
 #==================================================
-def pdb_write(recordlist, filename):
+def pdb_write(recordlist, filename,cnct):
 #==================================================
 # uses a record list as created in pdb_read and writes it out to the filename
 # using the format below
@@ -151,6 +152,8 @@ def pdb_write(recordlist, filename):
   format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   for i, record in enumerate(recordlist):
     pdbout.write(format % tuple(record))
+  pdbout.write(cnct)
+  pdbout.write('END'+(77 * ' ')+'\n')  
   pdbout.close()
 
 #==================================================
@@ -227,7 +230,6 @@ def remove_altloc(recordlist):
     else:
       record[4] = ' '
       noaltlist.append(record)
-
   if altloc_resnum:
     print "\n---------- Alternate Locations (Original Residues!)"
     print "The following residues had alternate locations:"
@@ -392,27 +394,30 @@ def non_standard_elbow(recordlist):
 # and that are recognized by Amber routines in ATOM (or HETATM) records
   RES = ('A', 'A3', 'A5', 'ACE', \
          'ALA', 'AN', 'ARG', 'ASH', \
-         'ASN', 'ASP', 'Br-', 'C', \
-         'C3', 'C5', 'CN', 'CYM', \
-         'CYS', 'CYX', 'Cl-', 'Cs+', \
-         'DA', 'DA3', 'DA5', 'DAN', \
-         'DC', 'DC3', 'DC4', 'DC5', \
-         'DCN', 'DG', 'DG3', 'DG5', \
-         'DGN', 'DT', 'DT3', 'DT5', \
-         'DTN', 'F-', 'G', 'G3', \
-         'G5', 'GLH', 'GLN', 'GLU', \
-         'GLY', 'GN', 'HID', 'HIE', \
-         'HIP', 'HIS', 'HOH', 'HYP', \
-         'I-', 'ILE', 'K+', 'LEU', \
-         'LYN', 'LYS', 'Li+', 'MET', \
-         'Mg+', 'NHE', 'NME', 'Na+', \
-         'OHE', 'PHE', 'PL3', 'PRO', \
-         'Rb+', 'SER', 'SPC', 'SPF', \
-         'SPG', 'T4E', 'THR', 'TP3', \
-         'TP4', 'TP5', 'TPF', 'TRP', \
-         'TYR', 'U', 'U3', 'U5', \
-         'UN', 'VAL', 'WAT', 'U5', \
-         'UN', 'VAL', 'WAT')
+        'ASN', 'ASP', 'BA', 'BR', \
+        'C', 'C3', 'C5', 'CA', \
+        'CD', 'CL', 'CN', 'CO', \
+        'CS', 'CU', 'CYM', 'CYS', \
+        'CYX', 'DA', 'DA3', 'DA5', \
+        'DAN', 'DC', 'DC3', 'DC4', \
+        'DC5', 'DCN', 'DG', 'DG3', \
+        'DG5', 'DGN', 'DT', 'DT3', \
+        'DT5', 'DTN', 'EU', 'F', \
+        'FE2', 'G', 'G3', 'G5', \
+        'GLH', 'GLN', 'GLU', 'GLY', \
+        'GN', 'HG', 'HID', 'HIE', \
+        'HIP', 'HIS', 'HOH', 'HYP', \
+        'ILE', 'IOD', 'K', 'LEU', \
+        'LI', 'LYN', 'LYS', 'MET', \
+        'MG', 'MN', 'NA', 'NHE', \
+        'NI', 'NME', 'OHE', 'PB', \
+        'PD', 'PHE', 'PL3', 'PRO', \
+        'PT', 'RB', 'SER', 'SPC', \
+        'SPF', 'SPG', 'SR', 'T4E', \
+        'THR', 'TP3', 'TP4', 'TP5', \
+        'TPF', 'TRP', 'TYR', 'U', \
+        'U3', 'U5', 'UN', 'V2+', \
+        'VAL', 'WAT', 'YB2', 'ZN')
 
   
   format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
@@ -464,7 +469,7 @@ def find_his(recordlist):
 def find_disulfide(recordlist, filename):
 #========================================
   cys_residues = [];  cys_sgx = []; cys_sgy = []; cys_sgz = []
-  cyx_residues = []; ncys = 0; ncyx = 0
+  cyx_residues = [];  cys_sqn = []; ncys = 0; ncyx = 0
 
   print "\n---------- Cysteines in Disulfide Bonds (Renumbered Residues!)"
   for record in recordlist:
@@ -474,13 +479,16 @@ def find_disulfide(recordlist, filename):
       cys_sgx.append(record[11])
       cys_sgy.append(record[12])
       cys_sgz.append(record[13])
+      cys_sqn.append(record[1])
       ncys += 1
-
+  
+  cnct=''
   if ncys > 0:
-    
+      
     sslink = open('%s_sslink'%filename, 'w')
     dist = [[0 for i in range(ncys)] for j in range(ncys)]
-
+#PAJ TODO: once verify that CONECT records are correctly being printed,
+# remove sslink file and modify pytleap accordingly.
     for i in range(0, ncys-1):
       for j in range(i+1, ncys):
         dx = float(cys_sgx[i]) - float(cys_sgx[j])
@@ -493,9 +501,11 @@ def find_disulfide(recordlist, filename):
         if dist[i][j] < 2.5 and dist[i][j] > 0.1:
           cyx_residues.append(cys_residues[i])
           cyx_residues.append(cys_residues[j])
-          print("CYS_%s - CYS_%s: S-S distance = %f Ang."%(cys_residues[i], cys_residues[j], dist[i][j]))
+          print("CYS_%s - CYS_%s: S-S distance = %f Ang."%(cys_residues[i],\
+                 cys_residues[j], dist[i][j]))
           sslink.write('%s %s\n'%(cys_residues[i], cys_residues[j]))
           ncyx += 1
+          cnct += 'CONECT%5d%5d\n' %(cys_sqn[i],cys_sqn[j])
 
 # rename the CYS to CYX for disulfide-involved cysteines
     for record in recordlist:
@@ -505,12 +515,11 @@ def find_disulfide(recordlist, filename):
         continue
   if ncyx:
     print "The above CYS have been renamed to CYX in the new PDB file."
-    print "The created file '%s_sslink' can be used with --disul in 'pytleap'"%filename
-    print "to generate the correct parameter-topology file."
+    print "Disulfide bond CONECT cards have been added to the new PDB file."
 
   else:
     print "No disulfide bonds have been detected."
-  return(recordlist)
+  return(recordlist,cnct)
 
 #========================================
 def find_gaps(recordlist):
@@ -542,7 +551,8 @@ def find_gaps(recordlist):
     gap = sqrt(dx2 +dy2 +dz2)
 
     if gap > 5.0:
-      gaprecord = (gap, ca_resname[i], int(ca_resnum[i]), ca_resname[i+1], int(ca_resnum[i+1]))
+      gaprecord = (gap, ca_resname[i], int(ca_resnum[i]), ca_resname[i+1],\
+                   int(ca_resnum[i+1]))
       gaplist.append(gaprecord)
       ngaps += 1
 
@@ -563,7 +573,7 @@ def find_incomplete(recordlist):
 #========================================
 # finds residues with missing heavy atoms in the following list of residues;
 # dictionary with number of heavy atoms:
-  #paj complete this list
+  #PAJ TODO:complete this list with nucleic acids
   HEAVY = {'ALA':5,  'ARG':11, 'ASN':8,  'ASP':8, \
            'CYS':6,  'GLN':9,  'GLU':9,  'GLY':4, \
            'HIS':10, 'ILE':8,  'LEU':8,  'LYS':9, \
@@ -629,14 +639,14 @@ def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_elbow=False):
   # find histidines that might have to be changed
   recordlist = find_his(recordlist)
   # find possible S-S in the final protein:=============================
-  recordlist = find_disulfide(recordlist, filename)
+  recordlist,cnct = find_disulfide(recordlist, filename)
   # find possible gaps:==================================================
   find_gaps(recordlist)
   # count heavy atoms
   find_incomplete(recordlist)
   # =====================================================================
   # make final output to new PDB file
-  pdb_write(recordlist, arg_pdbout)
+  pdb_write(recordlist, arg_pdbout,cnct)
   print ""
   try: ns_names
   except: return
