@@ -93,20 +93,9 @@ def run_tleap(pdb_filename,ns_names):
 
 #change box size in rst7 file
 def run_ChBox(base,cryst1):
-  from cStringIO import StringIO as StringIOc
-  old_stdout = sys.stdout
-  sys.stdout = uc = StringIOc()
-  cryst1.unit_cell().show_parameters()
-  sys.stdout = old_stdout
-  uc=uc.getvalue().translate(None,',)(').split()
-  cmd='ChBox -c %s.rst7 -o chbox.rst7 \
-             -X %s \
-             -Y %s \
-             -Z %s \
-             -al %s \
-             -bt %s \
-             -gm %s ' \
-             %(base,uc[2], uc[3], uc[4], uc[5], uc[6], uc[7])
+  uc = cryst1.unit_cell().parameters()
+  cmd="ChBox -c %s.rst7 -o chbox.rst7" % base
+  cmd += " -X %s -Y %s -Z %s -al %s -bt %s -gm %s " % tuple(uc)
   print cmd
   ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()

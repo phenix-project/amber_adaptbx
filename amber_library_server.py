@@ -1,6 +1,7 @@
 import os, sys
 
 import libtbx.load_env
+from libtbx.utils import Sorry
 
 parent_dir = os.path.dirname(libtbx.env.dist_path("elbow"))
 
@@ -19,10 +20,16 @@ def is_in_components_lib(residue_name):
 
 def path_in_components_lib(residue_name):
   rd = repo_dir()
+  if rd is None:
+    raise Sorry( """
+    Couldn't find amberlibrary
+      1. Set AMBER_LIBRARY_DIR in environment
+      2. Add/link to $PHENIX/chem_data
+    """)
   preamble = os.path.join(rd,
-                                         residue_name[0].lower(),
-                                         residue_name.upper(),
-                                         )
+                          residue_name[0].lower(),
+                          residue_name.upper(),
+    )
   files = []
   for ext in ["frcmod", "mol2"]:
     if not os.path.exists("%s.%s" % (preamble, ext)):
