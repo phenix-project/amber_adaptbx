@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Romain M. Wolf, NIBR Basel, December 2013
-# with revisions by Pawel Janowski, Rutgers U. NJ, February 2014
+# with revisions by Jason Swails & Pawel Janowski, Rutgers U., Feb. 2014
 
 #  Copyright (c) 2013, Novartis Institutes for BioMedical Research Inc.
 #  All rights reserved.
@@ -50,14 +50,21 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
            'ACE', 'NME')
 
 #=============================================
-def pdb_read(pdbin):
+def pdb_read(pdbin, noter):
 #=============================================
 # only records starting with the following strings are kept...
-  ACCEPTED =  ('ATOM','HETATM', 'TER', 'MODEL', 'ENDMDL')
+  if noter:
+    ACCEPTED =  ('ATOM','HETATM')
+  else:
+    ACCEPTED =  ('ATOM','HETATM', 'TER', 'MODEL', 'ENDMDL')
 # records starting with the following strings are considered 'dividers'
 # and they are cleaned for the rest of the line...
   DIVIDERS =  ('TER', 'MODEL', 'ENDMDL')
-  records = open(pdbin, 'r')
+
+  if pdbin is None:
+    records = sys.stdin
+  else:
+    records = open(pdbin, 'r')
   print "\n=================================================="
   print "Summary of pdb4amber for file %s"%pdbin
   print "=================================================="
@@ -148,13 +155,17 @@ def pdb_write(recordlist, filename,cnct):
 #==================================================
 # uses a record list as created in pdb_read and writes it out to the filename
 # using the format below
-  pdbout = open(filename, 'w')
+  if filename is None:
+    pdbout = sys.stdout
+  else:  
+    pdbout  = open(filename, 'w')
   format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   for i, record in enumerate(recordlist):
     pdbout.write(format % tuple(record))
   pdbout.write(cnct)
   pdbout.write('END'+(77 * ' ')+'\n')  
-  pdbout.close()
+  if pdbout != sys.stdout:
+    pdbout.close()
 
 #==================================================
 def prot_only(recordlist, filename):
@@ -610,10 +621,11 @@ def find_incomplete(recordlist):
       continue
   return()
 
-def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_elbow=False):
+def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_noter,
+        arg_elbow=False):
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
-  recordlist = pdb_read(pdbin)
+  recordlist = pdb_read(pdbin, arg_noter)
   
   # wrap all atom names to pure standard (always):======================
   recordlist = atom_wrap(recordlist)
@@ -656,19 +668,23 @@ def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_elbow=False):
 if __name__ ==  "__main__":
   parser = OptionParser()
   parser.add_option("-i","--in", metavar = "FILE", dest = "pdbin",
-                    help = "PDB input file                      (no default)")
+                    help = "PDB input file                      (default: stdin)",
+                    default=None)
   parser.add_option("-o","--out", metavar = "FILE", dest = "pdbout",
-                    help = "PDB output file                     (no default)")
+                    help = "PDB output file                     (default: stdout)",
+                    default=None)
   parser.add_option("-y","--nohyd", action = "store_true", dest = "nohyd",
                     help = "remove all hydrogen atoms           (default: no)")
   parser.add_option("-d","--dry", action = "store_true", dest = "dry",
                     help = "remove all water molecules          (default: no)")
   parser.add_option("-p", "--prot", action = "store_true", dest = "prot",
                     help = "keep only Amber-compatible residues (default: no)")
+  parser.add_option("--noter", action =  "store_true", dest = "noter",
+                    help = "remove TER, MODEL, ENDMDL cards     (default: no)")
 
   if len(sys.argv) == 1:
     print("---------------------------------------------------------")
-    print(" pdb4amber version 0.5 (December 2013)")
+    print(" pdb4amber version 1.0 (March 2014)")
     print("---------------------------------------------------------")
     parser.print_help()
     sys.exit(-1)
@@ -676,14 +692,9 @@ if __name__ ==  "__main__":
 
   (opt, args) = parser.parse_args()
 
-  if not opt.pdbin or not opt.pdbout:
-    print "You must specify an input file and output file"
-    print "using the option -i (or --in) and -o (or --out)"
-    sys.exit(-1)
-
   if opt.pdbin == opt.pdbout:
     print "The input and outout file names cannot be the same!"
 
-  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot)
+  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter)
 
 
