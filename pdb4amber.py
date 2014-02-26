@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Romain M. Wolf, NIBR Basel, December 2013
-# with revisions by Jason Swails & Pawel Janowski, Rutgers U., Feb. 2014
+# with revisions by Pawel Janowski & Jason Swails, Rutgers U., Feb. 2014
 
 #  Copyright (c) 2013, Novartis Institutes for BioMedical Research Inc.
 #  All rights reserved.
@@ -32,12 +32,23 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+__version__ = "1.0"
+__date__ = "March 2014"
 
 # PDB analyzer to prepare protein(-ligand) PDB files for Amber simulations.
 
 import os, sys
 from optparse import OptionParser
 from math import sqrt
+
+import signal
+def sigint_handler(*args, **kwargs):
+  global parser
+  print >> sys.stderr, "Interrupt signal caught. Exiting"
+  parser.print_help()
+  sys.exit(1)
+
+signal.signal(signal.SIGINT, sigint_handler)
 
 # Global constants
 RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
@@ -61,13 +72,13 @@ def pdb_read(pdbin, noter):
 # and they are cleaned for the rest of the line...
   DIVIDERS =  ('TER', 'MODEL', 'ENDMDL')
 
-  if pdbin is None:
+  if pdbin == 'stdin':
     records = sys.stdin
   else:
     records = open(pdbin, 'r')
-  print "\n=================================================="
-  print "Summary of pdb4amber for file %s"%pdbin
-  print "=================================================="
+  print >> sys.stderr, "\n=================================================="
+  print >> sys.stderr, "Summary of pdb4amber for file %s"%pdbin
+  print >> sys.stderr, "=================================================="
   '''
   This PDB reader first splits PDB lines (records) into individual (named) fields,
   then later re-assembles the fields in records. This might be done more elegantly,
@@ -94,7 +105,7 @@ def pdb_read(pdbin, noter):
     # so that the line parser will not fail on shorter lines...
     line = (line.rstrip() + (80-len(line)) * ' ')
     if line[0:6].rstrip() not in ACCEPTED:
-      #~ print '%-6sk' %line[0:6].rstrip()
+      #~ print >> sys.stderr, '%-6sk' %line[0:6].rstrip()
       continue
 # make clean divider lines without additional stuff that might hurt later
     elif line[0:6].rstrip() in DIVIDERS:
@@ -137,16 +148,16 @@ def pdb_read(pdbin, noter):
     recordlist.append(record)
 # report findings so far to the screen
   if chains:
-    print "\n----------Chains"
-    print "The following (original) chains have been found:"
+    print >> sys.stderr, "\n----------Chains"
+    print >> sys.stderr, "The following (original) chains have been found:"
     for chain in chains:
-      print chain
+      print >> sys.stderr, chain
   if insert_resnums:
-    print "\n----------Insertions"
-    print "The following (original-number) residues were considered as insertions:"
-    print "They will be renumbered 'normally' in the final 1-N sequence." 
+    print >> sys.stderr, "\n----------Insertions"
+    print >> sys.stderr, "The following (original-number) residues were considered as insertions:"
+    print >> sys.stderr, "They will be renumbered 'normally' in the final 1-N sequence." 
     for i in range(0,len(insert_resnums)):
-      print "%s%s"%(insert_resnames[i],(insert_resnums[i]))
+      print >> sys.stderr, "%s%s"%(insert_resnames[i],(insert_resnums[i]))
 
   return(recordlist)
 
@@ -155,7 +166,7 @@ def pdb_write(recordlist, filename,cnct):
 #==================================================
 # uses a record list as created in pdb_read and writes it out to the filename
 # using the format below
-  if filename is None:
+  if filename == 'stdout':
     pdbout = sys.stdout
   else:  
     pdbout  = open(filename, 'w')
@@ -217,9 +228,9 @@ def remove_water(recordlist, filename):
       drylist.append(record)
 
 # report the water removal to the screen
-  print "\n---------- Water"
-  print "%d water molecules have been removed"%nwaters
-  print "and stored in the file %s_water.pdb"%filename
+  print >> sys.stderr, "\n---------- Water"
+  print >> sys.stderr, "%d water molecules have been removed"%nwaters
+  print >> sys.stderr, "and stored in the file %s_water.pdb"%filename
 # return the dry record list with all water removed
   pdb_write(waterlist, filename+'_water.pdb')
   return(drylist)
@@ -242,14 +253,14 @@ def remove_altloc(recordlist):
       record[4] = ' '
       noaltlist.append(record)
   if altloc_resnum:
-    print "\n---------- Alternate Locations (Original Residues!)"
-    print "The following residues had alternate locations:"
+    print >> sys.stderr, "\n---------- Alternate Locations (Original Residues!)"
+    print >> sys.stderr, "The following residues had alternate locations:"
 
     for i, rname in enumerate(altloc_resname):
-      print "%s_%d"%(rname, int(altloc_resnum[i]))
+      print >> sys.stderr, "%s_%d"%(rname, int(altloc_resnum[i]))
 
-    print "The alternate coordinates have been discarded."
-    print "Only the first occurrence for each atom was kept."
+    print >> sys.stderr, "The alternate coordinates have been discarded."
+    print >> sys.stderr, "Only the first occurrence for each atom was kept."
 
   return(noaltlist)
 
@@ -390,11 +401,11 @@ def non_standard(recordlist, filename):
           ns_resname.append(record[5])
 
   if ns_resname:
-    print "\n---------- Non-Standard Residues"
-    print "The following non-standard residue names in the original PDB file"
-    print "are not recognized by Amber and have been written to the separate"
-    print "file %s_nonprot.pdb"%filename
-    print "\n".join(ns_resname)
+    print >> sys.stderr, "\n---------- Non-Standard Residues"
+    print >> sys.stderr, "The following non-standard residue names in the original PDB file"
+    print >> sys.stderr, "are not recognized by Amber and have been written to the separate"
+    print >> sys.stderr, "file %s_nonprot.pdb"%filename
+    print >> sys.stderr, "\n".join(ns_resname)
 
   return(ns_resname)
 
@@ -464,15 +475,15 @@ def find_his(recordlist):
       nhis += 1
 
   if nhis > 0:
-    print "\n---------- Histidines (Renumbered Residues!)"
-    print "The following %d histidines are found in the PDB file: "%nhis
+    print >> sys.stderr, "\n---------- Histidines (Renumbered Residues!)"
+    print >> sys.stderr, "The following %d histidines are found in the PDB file: "%nhis
 
     for i, rname in enumerate(hisresname):
-      print '%s_%d' % (rname, int(hisresnum[i]))
+      print >> sys.stderr, '%s_%d' % (rname, int(hisresnum[i]))
 
-    print "If HIS, Amber will consider them as HIE (epsilon-HIS) by default."
-    print "You might need to check their tautomerism or protonation state"
-    print "and change them to HID (delta-HIS) or HIP (protonated HIS)"
+    print >> sys.stderr, "If HIS, Amber will consider them as HIE (epsilon-HIS) by default."
+    print >> sys.stderr, "You might need to check their tautomerism or protonation state"
+    print >> sys.stderr, "and change them to HID (delta-HIS) or HIP (protonated HIS)"
 
   return(recordlist)
 
@@ -482,7 +493,7 @@ def find_disulfide(recordlist, filename):
   cys_residues = [];  cys_sgx = []; cys_sgy = []; cys_sgz = []
   cyx_residues = [];  cys_sqn = []; ncys = 0; ncyx = 0
 
-  print "\n---------- Cysteines in Disulfide Bonds (Renumbered Residues!)"
+  print >> sys.stderr, "\n---------- Cysteines in Disulfide Bonds (Renumbered Residues!)"
   for record in recordlist:
 
     if 'SG' in record[3] and ('CYS' in record[5] or 'CYX' in record[5]):
@@ -498,7 +509,7 @@ def find_disulfide(recordlist, filename):
       
     sslink = open('%s_sslink'%filename, 'w')
     dist = [[0 for i in range(ncys)] for j in range(ncys)]
-#PAJ TODO: once verify that CONECT records are correctly being printed,
+#PAJ TODO: once verify that CONECT records are correctly being print >> sys.stderr,ed,
 # remove sslink file and modify pytleap accordingly.
     for i in range(0, ncys-1):
       for j in range(i+1, ncys):
@@ -512,7 +523,7 @@ def find_disulfide(recordlist, filename):
         if dist[i][j] < 2.5 and dist[i][j] > 0.1:
           cyx_residues.append(cys_residues[i])
           cyx_residues.append(cys_residues[j])
-          print("CYS_%s - CYS_%s: S-S distance = %f Ang."%(cys_residues[i],\
+          print >> sys.stderr,("CYS_%s - CYS_%s: S-S distance = %f Ang."%(cys_residues[i],
                  cys_residues[j], dist[i][j]))
           sslink.write('%s %s\n'%(cys_residues[i], cys_residues[j]))
           ncyx += 1
@@ -525,11 +536,11 @@ def find_disulfide(recordlist, filename):
       else:
         continue
   if ncyx:
-    print "The above CYS have been renamed to CYX in the new PDB file."
-    print "Disulfide bond CONECT cards have been added to the new PDB file."
+    print >> sys.stderr, "The above CYS have been renamed to CYX in the new PDB file."
+    print >> sys.stderr, "Disulfide bond CONECT cards have been added to the new PDB file."
 
   else:
-    print "No disulfide bonds have been detected."
+    print >> sys.stderr, "No disulfide bonds have been detected."
   return(recordlist,cnct)
 
 #========================================
@@ -568,14 +579,14 @@ def find_gaps(recordlist):
       ngaps += 1
 
   if ngaps > 0:
-    print "\n---------- Gaps (Renumbered Residues!)"
+    print >> sys.stderr, "\n---------- Gaps (Renumbered Residues!)"
     format = "gap of %lf A between %s_%d and %s_%d"
 
     for i, gaprecord in enumerate(gaplist):
-      print (format % tuple(gaprecord))
+      print >> sys.stderr, (format % tuple(gaprecord))
 
-    print "You MUST (!!!) insert a TER record between the residues listed above and"
-    print "consider to introduce caps (ACE and NME) at the dangling N- and C-terminals."
+    print >> sys.stderr, "You MUST (!!!) insert a TER record between the residues listed above and"
+    print >> sys.stderr, "consider to introduce caps (ACE and NME) at the dangling N- and C-terminals."
 
   return()
 
@@ -592,7 +603,7 @@ def find_incomplete(recordlist):
            'THR':7,  'TRP':14, 'TYR':12, 'VAL':7, \
            'HID':10, 'HIE':10, 'HIN':10, 'HIP':10, \
            'CYX':6,  'ASH':8,  'GLH':9,  'LYH':9}
-  print '\n---------- Missing Heavy Atoms (Renumbered Residues!)' 
+  print >> sys.stderr, '\n---------- Missing Heavy Atoms (Renumbered Residues!)' 
   resnum = []
   resname = []
   resheavy = []
@@ -605,9 +616,9 @@ def find_incomplete(recordlist):
         missing = HEAVY[resname[j]] - resheavy[j]
         if missing > 0:
           flag = 1
-          print "%s_%s misses %d heavy atom(s)"%(resname[j], res, missing) 
+          print >> sys.stderr, "%s_%s misses %d heavy atom(s)"%(resname[j], res, missing) 
       if flag == 0:
-        print "None"
+        print >> sys.stderr, "None"
       return()
     if not HEAVY.has_key(record[5]):
       continue
@@ -621,8 +632,12 @@ def find_incomplete(recordlist):
       continue
   return()
 
-def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_noter,
-        arg_elbow=False):
+def run(arg_pdbout, arg_pdbin, 
+        arg_nohyd = True, 
+        arg_dry   = False, 
+        arg_prot  = False, 
+        arg_noter = False,
+        arg_elbow = False):
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
   recordlist = pdb_read(pdbin, arg_noter)
@@ -636,6 +651,7 @@ def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_noter,
     recordlist = remove_hydrogens(recordlist)
   # find non-standard Amber residues:===================================
   non_standard(recordlist, filename)
+  ns_names = None
   if arg_elbow:
     ns_names=non_standard_elbow(recordlist)
   # keep only protein:==================================================
@@ -659,20 +675,18 @@ def run(arg_pdbout, arg_pdbin, arg_nohyd, arg_dry, arg_prot, arg_noter,
   # =====================================================================
   # make final output to new PDB file
   pdb_write(recordlist, arg_pdbout,cnct)
-  print ""
-  try: ns_names
-  except: return
-  else: return ns_names
+  print >> sys.stderr, ""
+  return ns_names
     
 #========================================main===========================
 if __name__ ==  "__main__":
-  parser = OptionParser()
+  parser = OptionParser(version=__version__)
   parser.add_option("-i","--in", metavar = "FILE", dest = "pdbin",
                     help = "PDB input file                      (default: stdin)",
-                    default=None)
+                    default='stdin')
   parser.add_option("-o","--out", metavar = "FILE", dest = "pdbout",
                     help = "PDB output file                     (default: stdout)",
-                    default=None)
+                    default='stdout')
   parser.add_option("-y","--nohyd", action = "store_true", dest = "nohyd",
                     help = "remove all hydrogen atoms           (default: no)")
   parser.add_option("-d","--dry", action = "store_true", dest = "dry",
@@ -682,18 +696,10 @@ if __name__ ==  "__main__":
   parser.add_option("--noter", action =  "store_true", dest = "noter",
                     help = "remove TER, MODEL, ENDMDL cards     (default: no)")
 
-  if len(sys.argv) == 1:
-    print("---------------------------------------------------------")
-    print(" pdb4amber version 1.0 (March 2014)")
-    print("---------------------------------------------------------")
-    parser.print_help()
-    sys.exit(-1)
-  else:pass
-
   (opt, args) = parser.parse_args()
 
   if opt.pdbin == opt.pdbout:
-    print "The input and outout file names cannot be the same!"
+    print >> sys.stderr, "The input and outout file names cannot be the same!"
 
   run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter)
 

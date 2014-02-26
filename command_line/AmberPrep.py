@@ -22,7 +22,7 @@ def initializePdb(pdb_filename):
   
 # run pdb4amber
 def run_pdb4amber(pdb_filename):
-  ns_names=pdb4amber.run('4tleap.pdb', pdb_filename, True, False, False, True)
+  ns_names=pdb4amber.run('4tleap.pdb', pdb_filename, arg_elbow=True)
   return ns_names
   
 # run elbow and antechamber
