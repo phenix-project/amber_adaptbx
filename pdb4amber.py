@@ -58,7 +58,7 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
            'THR', 'TRP', 'TYR', 'VAL',
            'HID', 'HIE', 'HIN', 'HIP',
            'CYX', 'ASH', 'GLH', 'LYH',
-           'ACE', 'NME')
+           'ACE', 'NME', 'GL4', 'AS4')
 
 #=============================================
 def pdb_read(pdbin, noter):
@@ -240,7 +240,7 @@ def remove_altloc(recordlist):
 #========================================
   noaltlist = []
   altloc_resnum = []; altloc_resname = []
-
+#PAJ TODO: keep most populous conformation
   for record in recordlist:
 # we accept only altlocs 'A' and '1'
     if record[4] != ' ' and record[4] != 'A' and record[4] != '1':
@@ -488,6 +488,30 @@ def find_his(recordlist):
   return(recordlist)
 
 #========================================
+def constph(recordlist):
+#========================================
+  print >> sys.stderr, "\n---------- Constant pH Simulation"
+  as4, gl4, hip = [],[],[]
+  for record in recordlist:
+    if record[5] == 'ASP':
+      record[5] = 'AS4'
+      as4.append(record[8])
+    elif record[5] == 'GLU':
+      record[5] = 'GL4'
+      gl4.append(record[8])
+    elif record[5] == 'HIS':
+      record[5] = 'HIP'
+      hip.append(record[8])
+    else:
+      continue
+
+  print >> sys.stderr, "ASP --> AS4: %d" %len(set(as4))
+  print >> sys.stderr, "GLU --> GL4: %d" %len(set(gl4))
+  print >> sys.stderr, "HIS --> HIP: %d" %len(set(hip))
+
+  return recordlist
+
+#========================================
 def find_disulfide(recordlist, filename):
 #========================================
   cys_residues = [];  cys_sgx = []; cys_sgy = []; cys_sgz = []
@@ -637,6 +661,7 @@ def run(arg_pdbout, arg_pdbin,
         arg_dry   = False, 
         arg_prot  = False, 
         arg_noter = False,
+        arg_constph = False,
         arg_elbow = False):
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
@@ -665,7 +690,10 @@ def run(arg_pdbout, arg_pdbin,
   # after this call, residue numbers refer to the ***new*** PDB file
   #=====================================================================
   # find histidines that might have to be changed
-  recordlist = find_his(recordlist)
+  if arg_constph:
+    recordlist = constph(recordlist)
+  else:
+    recordlist = find_his(recordlist)
   # find possible S-S in the final protein:=============================
   recordlist,cnct = find_disulfide(recordlist, filename)
   # find possible gaps:==================================================
@@ -695,12 +723,14 @@ if __name__ ==  "__main__":
                     help = "keep only Amber-compatible residues (default: no)")
   parser.add_option("--noter", action =  "store_true", dest = "noter",
                     help = "remove TER, MODEL, ENDMDL cards     (default: no)")
+  parser.add_option("--constantph", action = "store_true", dest = "constantph",
+                    help = "rename GLU,ASP,HIS for constant pH simulation")
 
   (opt, args) = parser.parse_args()
 
   if opt.pdbin == opt.pdbout:
     print >> sys.stderr, "The input and outout file names cannot be the same!"
 
-  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter)
+  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter, opt.constantph)
 
 

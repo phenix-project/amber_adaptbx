@@ -114,11 +114,11 @@ def run_ambpdb(base):
   return 0
 
 #add cryst1 and smtry
-def finalizePdb(pdb_filename,cryst):
+def finalizePdb(pdb_filename,cryst,base):
   pdb_inp = pdb.input(pdb_filename)
   pdb_hierarchy=pdb_inp.construct_hierarchy()
   pdbstring=pdb_hierarchy.as_pdb_string(crystal_symmetry=cryst)
-  f=open('new2.pdb','w')
+  f=open('4phenix_'+base+'.pdb','w')
   f.write(pdbstring)
   f.close()
   #~ import code; code.interact(local=locals())
@@ -133,8 +133,9 @@ def run(pdb_filename):
   run_tleap(base,ns_names)
   run_ChBox(base,cryst1)
   run_ambpdb(base)
-  finalizePdb('new.pdb',cryst1)
-  fix_ambpdb.run(pdb_filename, 'new.pdb', '4phenix_'+base+'.pdb')
+  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  finalizePdb('new2.pdb',cryst1, base)
+  
   
 if __name__=="__main__":
   run(sys.argv[1])
