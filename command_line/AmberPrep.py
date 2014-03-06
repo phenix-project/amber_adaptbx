@@ -211,7 +211,9 @@ def run(pdb_filename, minimize=0):
   
   
 if __name__=="__main__":
-  if sys.argv[2]=='-min':
-    run(sys.argv[1],minimize=1)
-  else:
-    run(sys.argv[1])
+  import argparse
+  parser = argparse.ArgumentParser()
+  parser.add_argument("pdb_file_name", help="name of pdb file")
+  parser.add_argument("min", help="option to minimize", default=0)
+  args = parser.parse_args()
+  run(args.pdb_file_name, minimize=args.min)
