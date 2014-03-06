@@ -199,13 +199,13 @@ def run_minimize(base,cryst1):
 def run(pdb_filename, minimize=0):
   base = os.path.basename(pdb_filename).split('.')[0]
   cryst1=initializePdb(pdb_filename)
-  #~ ns_names=run_pdb4amber('init.pdb')
-  #~ run_elbow_antechamber(ns_names)
-  #~ run_tleap(base,ns_names)
-  #~ run_ChBox(base,cryst1)
-  #~ run_ambpdb(base)
-  #~ fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-  #~ finalizePdb('new2.pdb',cryst1, base)
+  ns_names=run_pdb4amber('init.pdb')
+  run_elbow_antechamber(ns_names)
+  run_tleap(base,ns_names)
+  run_ChBox(base,cryst1)
+  run_ambpdb(base)
+  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  finalizePdb('new2.pdb',cryst1, base)
   if minimize:
     run_minimize(base,cryst1)
   
