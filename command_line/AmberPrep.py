@@ -49,7 +49,19 @@ def run_elbow_antechamber(ns_names):
         if line.find('APS')>-1:
           print line
         if line.find('Error')>-1:
-          print line  
+          print line
+      cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
+          -nc %s -m %d -s 2 -pf y -c bcc -at gaff' \
+          %(residue_name, mol.charge, mol.multiplicity)    
+      print cmd
+      ero=easy_run.fully_buffered(cmd)
+      stdo = StringIO.StringIO()
+      ero.show_stdout(out=stdo)
+      for line in stdo.getvalue().splitlines():
+        if line.find('APS')>-1:
+          print line
+        if line.find('Error')>-1:
+          print line          
       cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
       print cmd
       easy_run.fully_buffered(cmd)

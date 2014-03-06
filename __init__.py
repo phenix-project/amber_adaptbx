@@ -75,7 +75,7 @@ class energies (scitbx.restraints.energies) :
     print "      electrostatics: %0.2f" %(self.energy_components[4])
     print "      van der Waals: %0.2f" %(self.energy_components[5])
     return 0
-
+    
   def get_rmsd_gradient(self):
     return self.energy_components[9]
 

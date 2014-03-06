@@ -15,7 +15,7 @@ uform LoadTopology(char *tpname, trajcon* tj){
     uform U;     /*topology, direct and recip space controls and lookup tables
                    convolution support */
     U = InitPotential(tpname, 8.0, tj);
-        return U;
+            return U;
 }
 
 mdsys CreateMDSys(char *crdname, uform* U){
@@ -82,7 +82,7 @@ int getmdgxfrc(const double *PhenixCoords,
                double* target, double * gradients, uform* Uptr,
                trajcon* tjptr, mdsys* MDptr)
 {
-
+  //(*Uptr).dcinp.MaxDens = 50.0;
   LoadPhenixCoordToGrid(Uptr, tjptr, PhenixCoords, MDptr);
   //Compute forces
   InitExecon( &(*MDptr).etimers );

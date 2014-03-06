@@ -24,4 +24,8 @@ refinement {
 }
 EOF
 
-phenix.refine 4lzt.pdb prefix=vs_obs_amber 4lzt-sf-truncated.mtz params.eff topology_file_name=4lzt.prmtop amber.coordinate_file_name=4lzt.rst7 use_amber=True refinement.input.xray_data.r_free_flags.file_name=md_avg_95_rfree.mtz --overwrite optimize_xyz_weight=False
+phenix.refine 4lzt.pdb prefix=vs_obs_amber 4lzt-sf-truncated.mtz params.eff \
+  topology_file_name=4lzt.prmtop amber.coordinate_file_name=4lzt.rst7 \
+  use_amber=True \
+  refinement.input.xray_data.r_free_flags.file_name=md_avg_95_rfree.mtz \
+  --overwrite optimize_xyz_weight=False
