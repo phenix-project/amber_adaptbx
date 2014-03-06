@@ -86,6 +86,7 @@ def run_tleap(pdb_filename,ns_names):
     else:
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
+  f.write('clearPdbResMap\n')    
   f.write('x = loadpdb 4tleap.pdb\n')
   #~ if os.path.isfile('4tleap_sslink'):
     #~ input = open('4tleap_sslink', 'r')
@@ -136,18 +137,81 @@ def finalizePdb(pdb_filename,cryst,base):
   #~ import code; code.interact(local=locals())
   return 0
 
+def run_minimize(base,cryst1):
+  f=open('min_H.in', 'w')
+  f.write("Initial minimization\n")
+  f.write("&cntrl\n")
+  f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
+  f.write(" ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',\n")
+  f.write(" imin   = 1, maxcyc = 10000, ncyc   = 200, ntmin  = 1, \n")
+  f.write("&end\n")
+  f.close()
+  cmd='sander -O -i min_H.in -p %s.prmtop -c %s.rst7 -o min_H.out \
+       -ref %s.rst7 -r %s_minH.rst7' %(base, base, base, base)
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  run_ChBox(base+'_minH',cryst1)
+  cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minH')
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  ero.show_stdout()
+  ero.show_stderr()
+  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  finalizePdb('new2.pdb',cryst1, base+'_minH')
+  
+  
+  f=open('min_all.in', 'w')
+  f.write("Initial minimization\n")
+  f.write("&cntrl\n")
+  f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
+  f.write(" imin   = 1, maxcyc = 10000, ncyc   = 200, ntmin  = 1, \n")
+  f.write("&end\n")
+  f.close()
+  cmd='sander -O -i min_all.in -p %s.prmtop -c %s.rst7 -o min_all.out \
+       -r %s_minall.rst7'%(base, base, base)
+  print cmd
+  ero=easy_run.fully_buffered(cmd)  
+  ero=easy_run.fully_buffered(cmd)
+  run_ChBox(base+'_minall',cryst1)
+  cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minall')
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  ero.show_stdout()
+  ero.show_stderr()
+  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  finalizePdb('new2.pdb',cryst1, base+'_minall')  
+
+  
+  cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use=True \
+       amber.topology_file_name=%s.prmtop \
+       amber.coordinate_file_name=%s.rst7  \
+       output_file_name_prefix=%s_minPhenix ' %(base,base,base,base)
+  print cmd
+  ero=easy_run.fully_buffered(cmd).raise_if_errors().return_code
+  assert (ero == 0)
+  ero.show_stdout()
+  ero.show_stderr()
+  
+  return 0
+  
+
 #fix residue names for phenix, add original Bfactors
-def run(pdb_filename):
+def run(pdb_filename, minimize=0):
   base = os.path.basename(pdb_filename).split('.')[0]
   cryst1=initializePdb(pdb_filename)
-  ns_names=run_pdb4amber('init.pdb')
-  run_elbow_antechamber(ns_names)
-  run_tleap(base,ns_names)
-  run_ChBox(base,cryst1)
-  run_ambpdb(base)
-  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-  finalizePdb('new2.pdb',cryst1, base)
+  #~ ns_names=run_pdb4amber('init.pdb')
+  #~ run_elbow_antechamber(ns_names)
+  #~ run_tleap(base,ns_names)
+  #~ run_ChBox(base,cryst1)
+  #~ run_ambpdb(base)
+  #~ fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  #~ finalizePdb('new2.pdb',cryst1, base)
+  if minimize:
+    run_minimize(base,cryst1)
   
   
 if __name__=="__main__":
-  run(sys.argv[1])
+  if sys.argv[2]=='-min':
+    run(sys.argv[1],minimize=1)
+  else:
+    run(sys.argv[1])
