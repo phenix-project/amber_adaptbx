@@ -26,7 +26,11 @@ def run (pre_amber_pdb_file, post_amber_pdb_file, output_pdb_file="out.pdb"):
       atom_group.resname = "CYS"
     elif atom_group.resname in ["WAT"]:
       atom_group.resname = "HOH"
-      
+    elif atom_group.resname.strip() in ['G5','G3','A5','A3','C5','C3','U5','U3']:
+      atom_group.resname = atom_group.resname.strip()[0]+'  '  
+    elif atom_group.resname in ['DA5','DA3','DC5','DC3','DG5','DG3','DT5','DT3']:
+      atom_group.resname = atom_group.resname[0:2]+' '
+
   # even though we're not modifying pdb_pre, we need to change residue 
   # names to ensure matching below
   for atom_group in pdb_h_pre.atom_groups():
@@ -35,7 +39,11 @@ def run (pre_amber_pdb_file, post_amber_pdb_file, output_pdb_file="out.pdb"):
     elif atom_group.resname == "CYX":
       atom_group.resname = "CYS"
     elif atom_group.resname in ["WAT"]:
-      atom_group.resname = "HOH"      
+      atom_group.resname = "HOH" 
+    elif atom_group.resname.strip() in ['G5','G3','A5','A3','C5','C3','U5','U3']:
+      atom_group.resname = atom_group.resname.strip()[0]+'  '  
+    elif atom_group.resname in ['DA5','DA3','DC5','DC3','DG5','DG3','DT5','DT3']:
+      atom_group.resname = atom_group.resname[0:2]+' '
 
   #match residues based on resseq and resname
   #match atoms based on name an i_seq

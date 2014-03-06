@@ -82,7 +82,6 @@ int getmdgxfrc(const double *PhenixCoords,
                double* target, double * gradients, uform* Uptr,
                trajcon* tjptr, mdsys* MDptr)
 {
-  //(*Uptr).dcinp.MaxDens = 50.0;
   LoadPhenixCoordToGrid(Uptr, tjptr, PhenixCoords, MDptr);
   //Compute forces
   InitExecon( &(*MDptr).etimers );
