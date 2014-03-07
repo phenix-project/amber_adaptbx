@@ -143,7 +143,7 @@ def run_minimize(base,cryst1):
   f.write("&cntrl\n")
   f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
   f.write(" ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',\n")
-  f.write(" imin   = 1, maxcyc = 10000, ncyc   = 200, ntmin  = 1, \n")
+  f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
   f.write("&end\n")
   f.close()
   cmd='sander -O -i min_H.in -p %s.prmtop -c %s.rst7 -o min_H.out \
@@ -164,7 +164,7 @@ def run_minimize(base,cryst1):
   f.write("Initial minimization\n")
   f.write("&cntrl\n")
   f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
-  f.write(" imin   = 1, maxcyc = 10000, ncyc   = 200, ntmin  = 1, \n")
+  f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
   f.write("&end\n")
   f.close()
   cmd='sander -O -i min_all.in -p %s.prmtop -c %s.rst7 -o min_all.out \
