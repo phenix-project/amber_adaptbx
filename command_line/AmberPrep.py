@@ -86,7 +86,7 @@ def run_tleap(pdb_filename,ns_names):
     else:
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
-  f.write('clearPdbResMap\n')    
+  #~ f.write('clearPdbResMap\n')    
   f.write('x = loadpdb 4tleap.pdb\n')
   #~ if os.path.isfile('4tleap_sslink'):
     #~ input = open('4tleap_sslink', 'r')
