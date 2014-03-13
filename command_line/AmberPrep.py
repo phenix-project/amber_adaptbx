@@ -196,15 +196,15 @@ def run_minimize(base,cryst1):
   
 
 #fix residue names for phenix, add original Bfactors
-def run(pdb_filename, minimize=0):
+def run(pdb_filename, minimize=False):
   base = os.path.basename(pdb_filename).split('.')[0]
   cryst1=initializePdb(pdb_filename)
-  ns_names=run_pdb4amber('init.pdb')
-  run_elbow_antechamber(ns_names)
-  run_tleap(base,ns_names)
-  run_ChBox(base,cryst1)
-  run_ambpdb(base)
-  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  #~ ns_names=run_pdb4amber('init.pdb')
+  #~ run_elbow_antechamber(ns_names)
+  #~ run_tleap(base,ns_names)
+  #~ run_ChBox(base,cryst1)
+  #~ run_ambpdb(base)
+  #~ fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
   finalizePdb('new2.pdb',cryst1, base)
   if minimize:
     run_minimize(base,cryst1)
@@ -214,6 +214,10 @@ if __name__=="__main__":
   import argparse
   parser = argparse.ArgumentParser()
   parser.add_argument("pdb_file_name", help="name of pdb file")
-  parser.add_argument("min", help="option to minimize", default=0)
+  parser.add_argument("min", help="option to minimize", default=False)
   args = parser.parse_args()
-  run(args.pdb_file_name, minimize=args.min)
+  if args.min=='False' or args.min=='0':
+    min=False
+  else:
+    min=True  
+  run(args.pdb_file_name, minimize=min)
