@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#! PYTHONEXE
+
 # Romain M. Wolf, NIBR Basel, December 2013
 # with revisions by Pawel Janowski & Jason Swails, Rutgers U., Feb. 2014
 
@@ -43,9 +44,7 @@ from math import sqrt
 
 import signal
 def sigint_handler(*args, **kwargs):
-  global parser
   print >> sys.stderr, "Interrupt signal caught. Exiting"
-  parser.print_help()
   sys.exit(1)
 
 signal.signal(signal.SIGINT, sigint_handler)
@@ -58,7 +57,8 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
            'THR', 'TRP', 'TYR', 'VAL',
            'HID', 'HIE', 'HIN', 'HIP',
            'CYX', 'ASH', 'GLH', 'LYH',
-           'ACE', 'NME', 'GL4', 'AS4')
+           'ACE', 'NME', 'GL4', 'AS4',
+           'WAT','HOH')
 
 #=============================================
 def pdb_read(pdbin, noter):
@@ -162,7 +162,7 @@ def pdb_read(pdbin, noter):
   return(recordlist)
 
 #==================================================
-def pdb_write(recordlist, filename,cnct):
+def pdb_write(recordlist, filename, cnct=''):
 #==================================================
 # uses a record list as created in pdb_read and writes it out to the filename
 # using the format below
@@ -212,21 +212,28 @@ def remove_water(recordlist, filename):
 #========================================
 # removes all water molecules of option -d was specified
   drylist = []; waterlist = []; nwaters = 0
+  is_prev_water = 0
 # format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
 # watpdb = open(filename+'_water.pdb', 'w')
   for record in recordlist:
+# if previous record was water, remove TER card
+    if is_prev_water and record[0]=='TER   ':
+      is_prev_water=0      
 # if oxygen, then count water
-    if (record[5] == 'HOH' or record[5] == 'WAT') and 'O' in record[3]:
+    elif (record[5] == 'HOH' or record[5] == 'WAT') and 'O' in record[3]:
       nwaters +=1
       waterlist.append(record)
+      is_prev_water=1
 #     watpdb.write(format % tuple(record))
       continue
 # if not oxygen, just remove, but do not count, since this is probably hydrogen
     elif  record[5] == 'HOH' or record[5] == 'WAT':
+      is_prev_water=1
       continue
     else:
       drylist.append(record)
-
+      is_prev_water=0
+ 
 # report the water removal to the screen
   print >> sys.stderr, "\n---------- Water"
   print >> sys.stderr, "%d water molecules have been removed"%nwaters
@@ -236,11 +243,53 @@ def remove_water(recordlist, filename):
   return(drylist)
 
 #========================================
+def remove_mostpop_altloc(recordlist):
+#========================================
+  noaltlist = []
+  altloc_resnum = []; altloc_resname = []
+#keep most populous conformation
+  import collections
+  n_altlocs=collections.OrderedDict()
+#first iteration to set up dict with no. altloc occurences for each atom  
+  for record in recordlist:
+    id = "%s_%s" %(record[8],record[3])
+    if record[4] != ' ':
+      if id not in n_altlocs.keys():
+        n_altlocs[id] = [1,0.0,0,[]]
+      else:
+        n_altlocs[id][0] += 1
+#now iterate again and keep only the record with the highest occupancy      
+  for record in recordlist:
+    id = "%s_%s" %(record[8],record[3])
+    if id in n_altlocs.keys():
+      if float(record[14]) > n_altlocs[id][1]:
+        n_altlocs[id][1] = float(record[14])
+        n_altlocs[id][3] = record
+      n_altlocs[id][2] += 1
+      #if all altloc occurences have been checked, add record to list 
+      if n_altlocs[id][2] == n_altlocs[id][0]:
+        noaltlist.append(n_altlocs[id][3])
+    #if no altlocs, add record directly to list    
+    else:
+      record[4] = ' '
+      noaltlist.append(record)
+      
+  if n_altlocs:
+    print >> sys.stderr, "\n---------- Alternate Locations (Original Residues!)"
+    print >> sys.stderr, "The following atoms had alternate locations:"
+    for id,value in n_altlocs.iteritems():
+      record=value[3]
+      print >> sys.stderr, "%s_%-4s %s"%(record[5], record[8].strip(), record[3])
+    print >> sys.stderr, "The alternate coordinates have been discarded."
+    print >> sys.stderr, "Only the highest occupancy of each atom was kept."         
+      
+  return(noaltlist)
+
+#========================================
 def remove_altloc(recordlist):
 #========================================
   noaltlist = []
   altloc_resnum = []; altloc_resname = []
-#PAJ TODO: keep most populous conformation
   for record in recordlist:
 # we accept only altlocs 'A' and '1'
     if record[4] != ' ' and record[4] != 'A' and record[4] != '1':
@@ -662,6 +711,7 @@ def run(arg_pdbout, arg_pdbin,
         arg_prot  = False, 
         arg_noter = False,
         arg_constph = False,
+        arg_mostpop = False,
         arg_elbow = False):
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
@@ -670,7 +720,10 @@ def run(arg_pdbout, arg_pdbin,
   # wrap all atom names to pure standard (always):======================
   recordlist = atom_wrap(recordlist)
   # remove alternate locations and keep only the first one:=============
-  recordlist = remove_altloc(recordlist)
+  if arg_mostpop:
+    recordlist = remove_mostpop_altloc(recordlist)
+  else:
+    recordlist = remove_altloc(recordlist)
   # remove hydrogens if option -y is used:==============================
   if arg_nohyd:
     recordlist = remove_hydrogens(recordlist)
@@ -695,14 +748,14 @@ def run(arg_pdbout, arg_pdbin,
   else:
     recordlist = find_his(recordlist)
   # find possible S-S in the final protein:=============================
-  recordlist,cnct = find_disulfide(recordlist, filename)
+  recordlist, cnct = find_disulfide(recordlist, filename)
   # find possible gaps:==================================================
   find_gaps(recordlist)
   # count heavy atoms
   find_incomplete(recordlist)
   # =====================================================================
   # make final output to new PDB file
-  pdb_write(recordlist, arg_pdbout,cnct)
+  pdb_write(recordlist, arg_pdbout, cnct)
   print >> sys.stderr, ""
   return ns_names
     
@@ -725,12 +778,19 @@ if __name__ ==  "__main__":
                     help = "remove TER, MODEL, ENDMDL cards     (default: no)")
   parser.add_option("--constantph", action = "store_true", dest = "constantph",
                     help = "rename GLU,ASP,HIS for constant pH simulation")
-
+  parser.add_option("--most_populous", action = "store_true", dest = "mostpop",
+                    help = "keep most populous alt. conf. (default is to keep 'A')")
   (opt, args) = parser.parse_args()
 
   if opt.pdbin == opt.pdbout:
-    print >> sys.stderr, "The input and outout file names cannot be the same!"
+    print >> sys.stderr, "The input and output file names cannot be the same!"
 
-  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter, opt.constantph)
+  # Make sure that if we are reading from stdin it's being directed from a pipe
+  # or a file. We don't want to wait for user input that will never come.
 
+  if opt.pdbin == 'stdin':
+    if os.isatty(sys.stdin.fileno()):
+      sys.exit(parser.print_help() or 1)
 
+  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter, 
+      opt.constantph, opt.mostpop)
