@@ -86,14 +86,7 @@ def run_tleap(pdb_filename,ns_names):
     else:
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
-  #~ f.write('clearPdbResMap\n')    
   f.write('x = loadpdb 4tleap.pdb\n')
-  #~ if os.path.isfile('4tleap_sslink'):
-    #~ input = open('4tleap_sslink', 'r')
-    #~ for line in input.readlines():
-      #~ cys1 = line.split()[0]
-      #~ cys2 = line.split()[1]
-      #~ f.write("bond x.%s.SG x.%s.SG\n" %(cys1, cys2))
   f.write('set x box {20.000   20.000   20.000}\n')
   f.write('set default nocenter on\n')
   f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(pdb_filename, pdb_filename))
@@ -199,12 +192,12 @@ def run_minimize(base,cryst1):
 def run(pdb_filename, minimize=False):
   base = os.path.basename(pdb_filename).split('.')[0]
   cryst1=initializePdb(pdb_filename)
-  #~ ns_names=run_pdb4amber('init.pdb')
-  #~ run_elbow_antechamber(ns_names)
-  #~ run_tleap(base,ns_names)
-  #~ run_ChBox(base,cryst1)
-  #~ run_ambpdb(base)
-  #~ fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  ns_names=run_pdb4amber('init.pdb')
+  run_elbow_antechamber(ns_names)
+  run_tleap(base,ns_names)
+  run_ChBox(base,cryst1)
+  run_ambpdb(base)
+  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
   finalizePdb('new2.pdb',cryst1, base)
   if minimize:
     run_minimize(base,cryst1)
