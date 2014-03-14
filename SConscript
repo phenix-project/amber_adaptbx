@@ -28,6 +28,7 @@ Import("env_scitbx_boost_python_ext")
 env_amber_ext = env_scitbx_boost_python_ext.Clone()
 env_amber_ext.Append(CPPDEFINES='AMBERPHENIX')
 env_amber_ext.Append(LIBS=["fftw3", "netcdf", "mdgx",])
+env_amber_ext.Append(LIBPATH=["%s/lib" % os.environ["AMBERHOME"]])
 env_etc.include_registry.append(
   env=env_amber_ext,
   paths=env_etc.amber_common_includes)
