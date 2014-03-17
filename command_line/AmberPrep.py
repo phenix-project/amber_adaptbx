@@ -1,6 +1,9 @@
 # LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep
 
 import os, sys
+import iotbx.pdb
+from libtbx import phil
+import libtbx.phil.command_line
 from iotbx import pdb
 from amber_adaptbx import pdb4amber
 from elbow.command_line import builder
@@ -8,6 +11,109 @@ from libtbx import easy_run
 import StringIO
 from amber_adaptbx import fix_ambpdb
 from amber_adaptbx import amber_library_server
+
+master_phil_string = """
+amber_prep
+  .caption = Prepare Amber files
+{
+  input
+  {
+    pdb_file_name = None
+      .type = path
+  }
+  actions
+  {
+    minimise = amber_all amber_h phenix_all *off
+      .type = choice
+  }
+  output
+  {
+    file_name = None
+      .type = path
+  }
+}
+"""
+
+master_params = master_phil_string # need for auto documentation
+master_phil = phil.parse(master_phil_string,
+                         process_includes=True,
+                         )
+def setup_parser():
+  from libtbx.option_parser import OptionParser
+  usage="""
+  phenix.amber_prep 3a37.pdb minimise=phenix_all
+"""
+  parser = OptionParser(
+    prog="phenix.amber_prep",
+    version="""
+  up-to-date version
+""",
+    usage=usage,
+    )
+  # Input options
+  parser.add_option("",
+                    "--show_defaults",
+                    dest="show_defaults",
+                    default=False,
+                    action="store_true",
+                    help="Display defaults",
+                    )
+  return parser
+
+def setup_options_args(rargs):
+  rargs = list(rargs)
+  parser = setup_parser()
+  (options, args) = parser.parse_args(args=rargs)
+  if options.show_defaults:
+    tmp = phil.parse(master_phil_string,
+                     process_includes=True,
+                     )
+    tmp.show()
+    sys.exit()
+  if len(args)==0:
+    parser.print_help()
+    sys.exit()
+
+  #
+  argument_interpreter = libtbx.phil.command_line.argument_interpreter(
+    master_phil=master_phil,
+    home_scope="amber_prep")
+  #
+  pdbs = []
+  phils = []
+  phil_args = []
+  for arg in args:
+    if os.path.isfile(arg) :
+      if iotbx.pdb.is_pdb_file(arg):
+        pdbs.append(arg)
+      else:
+        try : 
+          file_phil = phil.parse(file_name=arg)
+        except RuntimeError :
+          pass
+        else :
+          phils.append(file_phil)
+    else :
+      phil_args.append(arg)
+      phils.append(argument_interpreter.process(arg))
+  working_phil = master_phil.fetch(sources=phils)
+  assert len(pdbs)==1
+  working_phil.show()
+  working_params = working_phil.extract()
+  working_params.amber_prep.input.pdb_file_name = pdbs[0]
+  #check_working_params(working_params)
+  preamble = 'test' #get_output_preamble(working_params)
+  preamble = preamble.replace(".pdb","")
+  print "  Writing effective parameters to %s.eff\n" % preamble
+  #working_phil.format(python_object=working_params).show()
+  print "#phil __ON__"
+  master_phil.fetch_diff(source=master_phil.format(
+      python_object=working_params)).show()
+  print "#phil __OFF__\n\n"
+  f=file("%s.eff" % preamble, "wb")
+  f.write(working_phil.format(python_object=working_params).as_str())
+  f.close()
+  return working_params
 
 # get box info & space group info
 def initializePdb(pdb_filename):
@@ -130,68 +236,77 @@ def finalizePdb(pdb_filename,cryst,base):
   #~ import code; code.interact(local=locals())
   return 0
 
-def run_minimize(base,cryst1):
-  f=open('min_H.in', 'w')
-  f.write("Initial minimization\n")
-  f.write("&cntrl\n")
-  f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
-  f.write(" ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',\n")
-  f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
-  f.write("&end\n")
-  f.close()
-  cmd='sander -O -i min_H.in -p %s.prmtop -c %s.rst7 -o min_H.out \
-       -ref %s.rst7 -r %s_minH.rst7' %(base, base, base, base)
-  print cmd
-  ero=easy_run.fully_buffered(cmd)
-  run_ChBox(base+'_minH',cryst1)
-  cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minH')
-  print cmd
-  ero=easy_run.fully_buffered(cmd)
-  ero.show_stdout()
-  ero.show_stderr()
-  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-  finalizePdb('new2.pdb',cryst1, base+'_minH')
-  
-  
-  f=open('min_all.in', 'w')
-  f.write("Initial minimization\n")
-  f.write("&cntrl\n")
-  f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
-  f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
-  f.write("&end\n")
-  f.close()
-  cmd='sander -O -i min_all.in -p %s.prmtop -c %s.rst7 -o min_all.out \
-       -r %s_minall.rst7'%(base, base, base)
-  print cmd
-  ero=easy_run.fully_buffered(cmd)  
-  ero=easy_run.fully_buffered(cmd)
-  run_ChBox(base+'_minall',cryst1)
-  cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minall')
-  print cmd
-  ero=easy_run.fully_buffered(cmd)
-  ero.show_stdout()
-  ero.show_stderr()
-  fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-  finalizePdb('new2.pdb',cryst1, base+'_minall')  
+def run_minimise(base, cryst1, option=None):
+  if option is None: return
 
-  
-  cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use=True \
-       amber.topology_file_name=%s.prmtop \
-       amber.coordinate_file_name=%s.rst7  \
-       output_file_name_prefix=%s_minPhenix ' %(base,base,base,base)
-  print cmd
-  ero=easy_run.fully_buffered(cmd).raise_if_errors().return_code
-  assert (ero == 0)
-  ero.show_stdout()
-  ero.show_stderr()
-  
+  if option=="amber_h":
+    f=open('min_H.in', 'w')
+    f.write("Initial minimization\n")
+    f.write("&cntrl\n")
+    f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
+    f.write(" ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',\n")
+    f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
+    f.write("&end\n")
+    f.close()
+    cmd='sander -O -i min_H.in -p %s.prmtop -c %s.rst7 -o min_H.out \
+         -ref %s.rst7 -r %s_minH.rst7' %(base, base, base, base)
+    print cmd
+    ero=easy_run.fully_buffered(cmd)
+    run_ChBox(base+'_minH',cryst1)
+    cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minH')
+    print cmd
+    ero=easy_run.fully_buffered(cmd)
+    ero.show_stdout()
+    ero.show_stderr()
+    fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+    finalizePdb('new2.pdb',cryst1, base+'_minH')
+
+  elif option=="amber_all":  
+    f=open('min_all.in', 'w')
+    f.write("Initial minimization\n")
+    f.write("&cntrl\n")
+    f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
+    f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
+    f.write("&end\n")
+    f.close()
+    cmd='sander -O -i min_all.in -p %s.prmtop -c %s.rst7 -o min_all.out \
+         -r %s_minall.rst7'%(base, base, base)
+    print cmd
+    ero=easy_run.fully_buffered(cmd)  
+    ero=easy_run.fully_buffered(cmd)
+    run_ChBox(base+'_minall',cryst1)
+    cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minall')
+    print cmd
+    ero=easy_run.fully_buffered(cmd)
+    ero.show_stdout()
+    ero.show_stderr()
+    fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+    finalizePdb('new2.pdb',cryst1, base+'_minall')  
+
+  elif option=="phenix_all":
+    cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use=True \
+         amber.topology_file_name=%s.prmtop \
+         amber.coordinate_file_name=%s.rst7  \
+         output_file_name_prefix=%s_minPhenix ' %(base,base,base,base)
+    restraints = "%s.ligands.cif" % base
+    if os.path.exists(restraints):
+      cmd += " %s" % restraints
+    print cmd
+    ero=easy_run.fully_buffered(cmd).raise_if_errors() #.return_code
+    assert (ero.return_code == 0)
+    ero.show_stdout()
+    ero.show_stderr()
+
   return 0
   
 
 #fix residue names for phenix, add original Bfactors
-def run(pdb_filename, minimize=False):
-  base = os.path.basename(pdb_filename).split('.')[0]
-  cryst1=initializePdb(pdb_filename)
+def run(rargs):
+  working_params = setup_options_args(rargs)
+  inputs = working_params.amber_prep.input
+  actions = working_params.amber_prep.actions
+  base = os.path.basename(inputs.pdb_file_name).split('.')[0]
+  cryst1=initializePdb(inputs.pdb_file_name)
   ns_names=run_pdb4amber('init.pdb')
   run_elbow_antechamber(ns_names)
   run_tleap(base,ns_names)
@@ -199,18 +314,21 @@ def run(pdb_filename, minimize=False):
   run_ambpdb(base)
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
   finalizePdb('new2.pdb',cryst1, base)
-  if minimize:
-    run_minimize(base,cryst1)
-  
+  if actions.minimise == "off":
+    pass
+  else:
+    run_minimise(base, cryst1, actions.minimise)
+  return '4phenix_%s.pdb' % base
   
 if __name__=="__main__":
-  import argparse
-  parser = argparse.ArgumentParser()
-  parser.add_argument("pdb_file_name", help="name of pdb file")
-  parser.add_argument("min", help="option to minimize", default=False)
-  args = parser.parse_args()
-  if args.min=='False' or args.min=='0':
-    min=False
+  if 1:
+    args = sys.argv[1:]
+    del sys.argv[1:]
+    run(args)
   else:
-    min=True  
-  run(args.pdb_file_name, minimize=min)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("pdb_file_name", help="name of pdb file")
+    parser.add_argument("min", help="option to minimize", default=0)
+    args = parser.parse_args()
+    run(args.pdb_file_name, minimize=args.min)
