@@ -47,12 +47,14 @@ class run(object):
                dihedral                       = False,
                chirality                      = False,
                planarity                      = False,
+               parallelity                    = False,
                generic_restraints             = False,
                grmsd_termination_cutoff       = 0,
                alternate_nonbonded_off_on     = False,
                log                            = None,
                prmtop                         = None,
                ambcrd                           = None):
+    # parallelity needs to be propagated - NWM
     self.log = log
     if self.log is None:
       self.log = sys.stdout
