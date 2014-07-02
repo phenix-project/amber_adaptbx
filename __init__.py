@@ -34,7 +34,17 @@ class geometry_manager(object):
     self.mdgx_structs=mdgx_structs
 
   def energies_sites(self, compute_gradients=False):
+    #~ import code; code.interact(local=dict(globals(), **locals()))
+    #import inspect
+    #for i in inspect.stack():
+    #  print i[1], i[2], i[4]
+    #print "\n\n\n\n"
+    #Expand sites_cart to unit cell
+    #~ sites_cart_uc=expand_to_unit_cell(sites_cart, space_group)
+    #~ assert 0
+    
     #Convert flex arrays to C arrays
+    #~ if not...
     sites_cart_c=ext.ExtractVec(self.sites_cart.as_double())
     gradients_c=ext.ExtractVec(flex.double(self.sites_cart.size() * 3, 0))
     energy_components_c=ext.ExtractVec(self.energy_components)
@@ -85,6 +95,19 @@ def print_sites_cart(sites_cart):
 
 def get_amber_structs (prmtop, ambcrd):
         return ext.uform(prmtop, ambcrd)
+
+def expand_to_unit_cell(sites_cart, space_group):
+  #~ get no of symm ops
+  #~ set up uc_sites_cart of zeros
+  #~ convert sites cart to sites_frac
+  #~ for each symm_op
+    #~ apply symop to sites_frac
+    #~ convert sites_frac to sites_cart
+    #~ populates the corresponding part of uc_sites_cart
+  #~ return sites_cart
+  return 1
+    
+
 
 def run(pdb,prmtop, crd):
 
