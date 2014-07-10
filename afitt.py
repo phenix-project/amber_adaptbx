@@ -138,12 +138,46 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
              float(line.split()[2]), 
              float(line.split()[3]) ) ) 
   geometry.residual_sum += afitt_energy
-  if (geometry.gradients is not None):  
+  if (geometry.gradients is not None):
     assert afitt_gradients.size() == len(ptrs)
+    gr_scale = 1.0
+    print_gradients = False
+    use_gr_norm = True
+    from math import sqrt
+    phenix_norm=0
+    afitt_norm=0
     for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
-      geometry.gradients[ptr] = afitt_gradient
+      phenix_norm += sqrt(geometry.gradients[ptr][0]**2+geometry.gradients[ptr][1]**2+geometry.gradients[ptr][2]**2)
+      afitt_norm += sqrt(afitt_gradient[0]**2+afitt_gradient[1]**2+afitt_gradient[2]**2)
+    phenix_norm /= len(ptrs)
+    afitt_norm /=  len(ptrs)
+    if use_gr_norm:
+      gr_scale = phenix_norm/afitt_norm
+      
+    if print_gradients:
+      print("\n\nGRADIENTS BEFORE AFTER AFITT\n")
+      print "NORMS: %10.4f         %10.4f\n" %(phenix_norm, afitt_norm)
+      for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
+        print "(%10.4f %10.4f %10.4f) (%4.4f %4.4f %4.4f)" \
+            %(geometry.gradients[ptr][0], geometry.gradients[ptr][1], geometry.gradients[ptr][2],
+            afitt_gradient[0], afitt_gradient[1], afitt_gradient[2])
+
+    for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
+      scaled_gradient = (afitt_gradient[0]*gr_scale, 
+                         afitt_gradient[1]*gr_scale,
+                         afitt_gradient[2]*gr_scale)
+      geometry.gradients[ptr] = scaled_gradient
   return geometry
 
-
-  
+#~ import iotbx.pdb  
+#~ def run(file_name):
+  #~ pdb_inp = iotbx.pdb.input(file_name=file_name)
+  #~ h = pdb_inp.construct_hierarchy()
+  #~ xrs = h.extract_xray_structure(
+    #~ crystal_symmetry = pdb_inp.crystal_symmetry_from_cryst1())
+  #~ sc=xray_structure.sites_cart()
+  #~ import code; code.interact(local=dict(globals(), **locals()))      
+  #~ 
+#~ if (__name__ == "__main__"):
+  #~ run(sys.argv[0])
 
