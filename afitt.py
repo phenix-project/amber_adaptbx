@@ -10,32 +10,6 @@ master_phil_str = """
     .type = str  
 """
   
-#~ class afitt_object:
-    #~ def __init__(
-            #~ self,
-            #~ cif_object=None,
-            #~ header_object=None):
-      #~ self.cif_object = cif_object
-      #~ self.header_object = header_object
-  
-#~ def read_cif_afitt(ligand_name):
-  #~ from mmtbx import monomer_library
-  #~ import mmtbx.monomer_library.server
-  #~ mon_lib_srv = monomer_library.server.server()
-  #~ get_func = getattr(mon_lib_srv, "get_comp_comp_id", None)
-  #~ if (get_func is not None): 
-    #~ ml=get_func(comp_id=ligand_name)
-  #~ else:  
-    #~ ml=mon_lib_srv.get_comp_comp_id_direct(comp_id=ligand_name)
-  #~ bonds = []
-  #~ for bond in ml.bond_list:
-    #~ bonds.append([bond.atom_id_1, bond.atom_id_2])
-  #~ for atom1, atom2 in bonds:
-    #~ print atom1, atom2
-  #~ return ml  
-
-#~ [(2, 0, 'coval'), (1, 0, 'coval'), (3, 2, 'coval'), (4, 2, 'coval'), (5, 2, 'coval')]
-
 
 class afitt_object:
   def __init__(self, ligand_path, pdb_hierarchy, ff='mmff'):
@@ -169,15 +143,24 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
       geometry.gradients[ptr] = scaled_gradient
   return geometry
 
-#~ import iotbx.pdb  
-#~ def run(file_name):
-  #~ pdb_inp = iotbx.pdb.input(file_name=file_name)
-  #~ h = pdb_inp.construct_hierarchy()
-  #~ xrs = h.extract_xray_structure(
-    #~ crystal_symmetry = pdb_inp.crystal_symmetry_from_cryst1())
-  #~ sc=xray_structure.sites_cart()
+
+def run(pdb_file, cif_file, ff='mmff'):
+  import iotbx.pdb
+  pdb_inp = iotbx.pdb.input(file_name=pdb_file)
+  pdb_hierarchy = pdb_inp.construct_hierarchy()
+  xrs = pdb_hierarchy.extract_xray_structure()
+  sites_cart=xrs.sites_cart()
+  afitt_o = afitt_object(
+                cif_file,
+                pdb_hierarchy,
+                ff)
+  afitt_input='afitt_in'
+  afitt_output='afitt_out' 
   #~ import code; code.interact(local=dict(globals(), **locals()))      
-  #~ 
-#~ if (__name__ == "__main__"):
-  #~ run(sys.argv[0])
+  afitt_o.make_afitt_input(sites_cart=sites_cart, 
+        afitt_input=afitt_input)
+  call_afitt(afitt_input, afitt_output, ff)  
+ 
+if (__name__ == "__main__"):
+  run(sys.argv[1], sys.argv[2])
 
