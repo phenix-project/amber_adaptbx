@@ -150,8 +150,23 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
       #~ geometry.gradients[ptr] = scaled_gradient
   return geometry
 
+def get_afitt_energy(cif_file, pdb_hierarchy, ff, sites_cart):
+  afitt_o = afitt_object(
+                cif_file,
+                pdb_hierarchy,
+                ff)
+  afitt_input='afitt_in'
+  afitt_output='afitt_out' 
+  afitt_o.make_afitt_input(sites_cart=sites_cart, 
+        afitt_input=afitt_input)
+  call_afitt(afitt_input, afitt_output, ff)  
+  with open(afitt_output, 'r') as afitt_o:
+    for line in afitt_o:
+      if line.startswith('ENERGYTAG'):
+        energy=float(line.split()[1])                
+  return energy
 
-def run_afitt(pdb_file, cif_file, ff='mmff'):
+def run(pdb_file, cif_file, ff='mmff'):
   import iotbx.pdb
   pdb_inp = iotbx.pdb.input(file_name=pdb_file)
   pdb_hierarchy = pdb_inp.construct_hierarchy()
@@ -180,20 +195,8 @@ def run_afitt(pdb_file, cif_file, ff='mmff'):
     raw_records=raw_lines)
   pdb_hierarchy=processed_pdb.all_chain_proxies.pdb_hierarchy
   geometry_restraints_manager = processed_pdb.geometry_restraints_manager()
-  afitt_o = afitt_object(
-                cif_file,
-                pdb_hierarchy,
-                ff)
-  afitt_input='afitt_in'
-  afitt_output='afitt_out' 
-  #~ import code; code.interact(local=dict(globals(), **locals()))      
-  afitt_o.make_afitt_input(sites_cart=sites_cart, 
-        afitt_input=afitt_input)
-  call_afitt(afitt_input, afitt_output, ff)  
-  with open(afitt_output, 'r') as afitt_o:
-    for line in afitt_o:
-      if line.startswith('ENERGYTAG'):
-        print "AFITT ENERGY: %10.4f" %float(line.split()[1]) 
+  afitt_energy = get_afitt_energy(cif_file, pdb_hierarchy, ff, sites_cart)
+  print "AFITT ENERGY: %10.4f\n" %afitt_energy
  
 if (__name__ == "__main__"):
   run(sys.argv[1], sys.argv[2])
