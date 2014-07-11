@@ -18,13 +18,14 @@ class afitt_object:
     self.chain = None
     self.number = 1 
     self.charge = 0
-    self.atom_charges = None
+    self.partial_charges = None
     self.atom_elements = None
     self.bonds = None
     self.nbonds = 0
     self.sites_cart_ptrs = None
     self.total_model_atoms = 0
     self.ff = ff
+    self.formal_charges = None
     
     cif_object = self.read_cif_file(ligand_path)
     self.process_cif_object(cif_object, pdb_hierarchy)
@@ -55,8 +56,8 @@ class afitt_object:
     assert comp_rname == cif_object.keys()[1]
     self.n_atoms = \
       int(cif_object['comp_list']['_chem_comp.number_atoms_all'][0])
-    self.atom_charges =  \
-      [float(i) for i in cif_object[comp_rname]['_chem_comp_atom.partial_charge']] 
+    self.partial_charges =  \
+      [float(i) for i in cif_object[comp_rname]['_chem_comp_atom.partial_charge']]
     self.atom_elements = \
       [i for i in cif_object[comp_rname]['_chem_comp_atom.type_symbol']] 
     atom_ids = \
@@ -69,13 +70,18 @@ class afitt_object:
     bond_type = \
       [bond_dict[i] for i in cif_object[comp_rname]['_chem_comp_bond.type']] 
     self.bonds = zip(bond_atom_1, bond_atom_2, bond_type)
-    self.charge = sum( self.atom_charges )
+    self.charge = sum( self.partial_charges )
     self.nbonds = len(self.bonds)
     self.sites_cart_ptrs = self.get_sites_cart_pointers(
           atom_ids, 
           pdb_hierarchy,
           self.resname)
     self.total_model_atoms=pdb_hierarchy.atoms_size()
+    try:
+      f_charges=cif_object[comp_rname]['_chem_comp_atom.formal_charge']
+      self.formal_charges = [float(i) for i in f_charges] 
+    except KeyError:
+      pass
     #~ import code; code.interact(local=dict(globals(), **locals()))      
 
   def make_afitt_input(self, sites_cart, afitt_input):
@@ -89,7 +95,11 @@ class afitt_object:
             sites_cart[ptr][0], sites_cart[ptr][1], sites_cart[ptr][2]) )
     f.write('bond_table_nbonds %d\n' %self.nbonds)
     for bond in self.bonds:
-      f.write('%d %d %d\n' %(bond[0], bond[1], bond[2]))       
+      f.write('%d %d %d\n' %(bond[0], bond[1], bond[2]))
+    if self.formal_charges:
+      f.write("formal charges\n")
+      for fcharge in formal_charges:
+        f.write ('%d\n' %fcharge)
     f.close()
   
 def call_afitt(afitt_input, afitt_output, ff):
@@ -147,7 +157,7 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
                          afitt_gradient[1]*gr_scale,
                          afitt_gradient[2]*gr_scale)
       # comment next line to avoid using afitt gradients (but print norms, energy)
-      #~ geometry.gradients[ptr] = scaled_gradient
+      geometry.gradients[ptr] = scaled_gradient
   return geometry
 
 def get_afitt_energy(cif_file, pdb_hierarchy, ff, sites_cart):
