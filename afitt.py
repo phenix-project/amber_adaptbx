@@ -112,6 +112,12 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
              float(line.split()[2]), 
              float(line.split()[3]) ) ) 
   geometry.residual_sum += afitt_energy
+  print ("AFITT ENERGY: %10.4f\n" %afitt_energy)
+  #~ import inspect
+  #~ for i in inspect.stack():
+    #~ print i[1], i[2], i[4]
+  #~ print "\n\n\n\n"  
+  
   if (geometry.gradients is not None):
     assert afitt_gradients.size() == len(ptrs)
     gr_scale = 1.0
@@ -121,13 +127,13 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
     phenix_norm=0
     afitt_norm=0
     for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
-      phenix_norm += sqrt(geometry.gradients[ptr][0]**2+geometry.gradients[ptr][1]**2+geometry.gradients[ptr][2]**2)
-      afitt_norm += sqrt(afitt_gradient[0]**2+afitt_gradient[1]**2+afitt_gradient[2]**2)
-    phenix_norm /= len(ptrs)
-    afitt_norm /=  len(ptrs)
+      phenix_norm += geometry.gradients[ptr][0]**2+geometry.gradients[ptr][1]**2+geometry.gradients[ptr][2]**2
+      afitt_norm += afitt_gradient[0]**2+afitt_gradient[1]**2+afitt_gradient[2]**2
+    phenix_norm = sqrt(phenix_norm)
+    afitt_norm = sqrt(afitt_norm)
     if use_gr_norm:
       gr_scale = phenix_norm/afitt_norm
-      
+    #~ gr_scale = 100000  
     if print_gradients:
       print("\n\nGRADIENTS BEFORE AFTER AFITT\n")
       print "NORMS: %10.4f         %10.4f\n" %(phenix_norm, afitt_norm)
@@ -140,16 +146,40 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
       scaled_gradient = (afitt_gradient[0]*gr_scale, 
                          afitt_gradient[1]*gr_scale,
                          afitt_gradient[2]*gr_scale)
-      geometry.gradients[ptr] = scaled_gradient
+      # comment next line to avoid using afitt gradients (but print norms, energy)
+      #~ geometry.gradients[ptr] = scaled_gradient
   return geometry
 
 
-def run(pdb_file, cif_file, ff='mmff'):
+def run_afitt(pdb_file, cif_file, ff='mmff'):
   import iotbx.pdb
   pdb_inp = iotbx.pdb.input(file_name=pdb_file)
   pdb_hierarchy = pdb_inp.construct_hierarchy()
+  pdb_hierarchy.atoms().reset_serial()
   xrs = pdb_hierarchy.extract_xray_structure()
   sites_cart=xrs.sites_cart()
+  raw_lines = pdb_hierarchy.as_pdb_string(
+    crystal_symmetry=pdb_inp.crystal_symmetry())
+  f=file(cif_file, "rb")
+  ligand_cif = f.read()
+  f.close()
+  cif_object = iotbx.cif.model.cif()
+  iotbx.cif.reader(input_string=ligand_cif,
+                   cif_object=cif_object,
+                   strict=False)
+  from mmtbx.monomer_library import server
+  mon_lib_srv = server.server()
+  ener_lib = server.ener_lib()                   
+  for srv in [mon_lib_srv, ener_lib]:
+    srv.process_cif_object(cif_object=cif_object,
+                           file_name="LIGAND")
+  from mmtbx.monomer_library import pdb_interpretation
+  processed_pdb = pdb_interpretation.process(
+    mon_lib_srv,
+    ener_lib,
+    raw_records=raw_lines)
+  pdb_hierarchy=processed_pdb.all_chain_proxies.pdb_hierarchy
+  geometry_restraints_manager = processed_pdb.geometry_restraints_manager()
   afitt_o = afitt_object(
                 cif_file,
                 pdb_hierarchy,
@@ -160,6 +190,10 @@ def run(pdb_file, cif_file, ff='mmff'):
   afitt_o.make_afitt_input(sites_cart=sites_cart, 
         afitt_input=afitt_input)
   call_afitt(afitt_input, afitt_output, ff)  
+  with open(afitt_output, 'r') as afitt_o:
+    for line in afitt_o:
+      if line.startswith('ENERGYTAG'):
+        print "AFITT ENERGY: %10.4f" %float(line.split()[1]) 
  
 if (__name__ == "__main__"):
   run(sys.argv[1], sys.argv[2])
