@@ -121,8 +121,9 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
             (float(line.split()[1]), 
              float(line.split()[2]), 
              float(line.split()[3]) ) ) 
-  geometry.residual_sum += afitt_energy
   print ("AFITT ENERGY: %10.4f\n" %afitt_energy)
+  geometry.residual_sum += afitt_energy
+  
   #~ import inspect
   #~ for i in inspect.stack():
     #~ print i[1], i[2], i[4]
@@ -143,7 +144,7 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
     afitt_norm = sqrt(afitt_norm)
     if use_gr_norm:
       gr_scale = phenix_norm/afitt_norm
-    #~ gr_scale = 100000  
+    #~ gr_scale = 160.0
     if print_gradients:
       print("\n\nGRADIENTS BEFORE AFTER AFITT\n")
       print "NORMS: %10.4f         %10.4f\n" %(phenix_norm, afitt_norm)
@@ -187,6 +188,12 @@ def run(pdb_file, cif_file, ff='mmff'):
   print "AFITT ENERGY: %10.4f\n" %afitt_energy
  
 if (__name__ == "__main__"):
-  args = sys.argv[1:]
-  run(*tuple(args))
+  import argparse
+  parser = argparse.ArgumentParser()
+  parser.add_argument("pdb_file", help="pdb file")
+  parser.add_argument("cif_file", help="cif file", default=0)
+  parser.add_argument("-ff", help="afitt theory: mmff, pm3 or am1", default='mmff')
+  args = parser.parse_args()
+  print args.pdb_file, args.cif_file, args.ff
+  run(args.pdb_file, args.cif_file, args.ff)
 
