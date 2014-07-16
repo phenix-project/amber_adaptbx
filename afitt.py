@@ -8,11 +8,13 @@ master_phil_str = """
     .type = str  
   ff = 'mmff'
     .type = str  
+  scale = 'gnorm'
+    .type = str  
 """
   
 
 class afitt_object:
-  def __init__(self, ligand_path, pdb_hierarchy, ff='mmff'):
+  def __init__(self, ligand_path, pdb_hierarchy, ff='mmff', scale='gnorm'):
     self.n_atoms = 0
     self.resname = None
     self.chain = None
@@ -26,6 +28,7 @@ class afitt_object:
     self.total_model_atoms = 0
     self.ff = ff
     self.formal_charges = None
+    self.scale = scale
     
     cif_object = self.read_cif_file(ligand_path)
     self.process_cif_object(cif_object, pdb_hierarchy)
@@ -121,7 +124,9 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
             (float(line.split()[1]), 
              float(line.split()[2]), 
              float(line.split()[3]) ) ) 
+  ### debug_stuff
   print ("AFITT ENERGY: %10.4f\n" %afitt_energy)
+  ### end_debug
   geometry.residual_sum += afitt_energy
   
   #~ import inspect
@@ -131,20 +136,24 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
   
   if (geometry.gradients is not None):
     assert afitt_gradients.size() == len(ptrs)
-    gr_scale = 1.0
-    print_gradients = False
-    use_gr_norm = True
-    from math import sqrt
-    phenix_norm=0
-    afitt_norm=0
-    for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
-      phenix_norm += geometry.gradients[ptr][0]**2+geometry.gradients[ptr][1]**2+geometry.gradients[ptr][2]**2
-      afitt_norm += afitt_gradient[0]**2+afitt_gradient[1]**2+afitt_gradient[2]**2
-    phenix_norm = sqrt(phenix_norm)
-    afitt_norm = sqrt(afitt_norm)
-    if use_gr_norm:
+    if afitt_object.scale == 'gnorm':
+      from math import sqrt
+      phenix_norm=0
+      afitt_norm=0
+      for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
+        phenix_norm += geometry.gradients[ptr][0]**2+geometry.gradients[ptr][1]**2+geometry.gradients[ptr][2]**2
+        afitt_norm += afitt_gradient[0]**2+afitt_gradient[1]**2+afitt_gradient[2]**2
+      phenix_norm = sqrt(phenix_norm)
+      afitt_norm = sqrt(afitt_norm)
       gr_scale = phenix_norm/afitt_norm
-    #~ gr_scale = 160.0
+      print ("GRNORM RATIO: %10.4f\n" %gr_scale)
+    elif afitt_object.scale == 'noafitt':
+      gr_scale = None
+    else:
+      gr_scale = float(afitt_object.scale)    
+    
+    ### debug_stuff
+    print_gradients = False
     if print_gradients:
       print("\n\nGRADIENTS BEFORE AFTER AFITT\n")
       print "NORMS: %10.4f         %10.4f\n" %(phenix_norm, afitt_norm)
@@ -152,13 +161,13 @@ def process_afitt_output(afitt_output, geometry, afitt_object):
         print "(%10.4f %10.4f %10.4f) (%4.4f %4.4f %4.4f)" \
             %(geometry.gradients[ptr][0], geometry.gradients[ptr][1], geometry.gradients[ptr][2],
             afitt_gradient[0], afitt_gradient[1], afitt_gradient[2])
-
-    for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
-      scaled_gradient = (afitt_gradient[0]*gr_scale, 
+    ### end_debug
+    if gr_scale:
+      for afitt_gradient, ptr in zip(afitt_gradients, ptrs):
+        scaled_gradient = (afitt_gradient[0]*gr_scale, 
                          afitt_gradient[1]*gr_scale,
                          afitt_gradient[2]*gr_scale)
-      # comment next line to avoid using afitt gradients (but print norms, energy)
-      geometry.gradients[ptr] = scaled_gradient
+        geometry.gradients[ptr] = scaled_gradient
   return geometry
 
 def get_afitt_energy(cif_file, pdb_hierarchy, ff, sites_cart):
