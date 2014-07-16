@@ -41,7 +41,7 @@ master_phil = phil.parse(master_phil_string,
 def setup_parser():
   from libtbx.option_parser import OptionParser
   usage="""
-  phenix.amber_prep 3a37.pdb minimise=phenix_all
+  phenix.AmberPrep 3a37.pdb minimise=phenix_all
 """
   parser = OptionParser(
     prog="phenix.amber_prep",
