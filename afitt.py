@@ -162,8 +162,9 @@ def process_afitt_output(afitt_output, geometry, afitt_object,
              float(line.split()[3]) ) ) 
   ### debug_stuff
   print ("AFITT_ENERGY %s_%d: %10.4f\n" 
-                  %(afitt_energy, afitt_object.resname[r_i], 
-                    int(afitt_object.res_ids[i_i][2]) ))
+                  %(afitt_object.resname[r_i], 
+                    int(afitt_object.res_ids[r_i][i_i][2]), 
+                    afitt_energy ))
   ### end_debug
   geometry.residual_sum += afitt_energy
   
@@ -186,8 +187,9 @@ def process_afitt_output(afitt_output, geometry, afitt_object,
       gr_scale = phenix_norm/afitt_norm
       ### debug_stuff
       print ("GRNORM_RATIO %s_%d: %10.4f\n" 
-                    %(gr_scale, afitt_object.resname[r_i], 
-                      int(afitt_object.res_ids[i_i][2]) ))
+                    %(afitt_object.resname[r_i], 
+                      int(afitt_object.res_ids[r_i][i_i][2]),
+                      gr_scale ))
   
       ### end_debug
     elif afitt_object.scale == 'noafitt':
