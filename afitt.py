@@ -34,7 +34,7 @@ class afitt_object:
     
     cif_object = self.read_cif_file(ligand_path)
     self.process_cif_object(cif_object, pdb_hierarchy)
-    
+     
 
   def read_cif_file(self, ligand_path):
     from iotbx import cif
@@ -105,9 +105,9 @@ class afitt_object:
                                           resseq=residue_instance[2]) 
                                         )
       self.sites_cart_ptrs.append( this_res_sites_cart_ptrs )                           
-      if cif_object[comp_rname].has_key('_chem_comp_atom.formal_charge'):
+      if cif_object[comp_rname].has_key('_chem_comp_atom.charge'):
         self.formal_charges.append(
-          [float(i) for i in cif_object[comp_rname]['_chem_comp_atom.formal_charge']] 
+          [float(i) for i in cif_object[comp_rname]['_chem_comp_atom.charge']]
           )
       else:
         self.formal_charges.append([])
@@ -238,11 +238,14 @@ def get_afitt_energy(cif_file, ligand_names, pdb_hierarchy, ff, sites_cart):
 
 def run(pdb_file, cif_file, ligand_names, ff='mmff'):
   import iotbx.pdb
+  assert os.path.isfile(pdb_file), "File %s does not exist." %pdb_file
+  assert os.path.isfile(cif_file), "File %s does not exist." %cif_file
   pdb_inp = iotbx.pdb.input(file_name=pdb_file)
   pdb_hierarchy = pdb_inp.construct_hierarchy()
   pdb_hierarchy.atoms().reset_i_seq()
   xrs = pdb_hierarchy.extract_xray_structure()
   sites_cart=xrs.sites_cart()
+  
   energies = get_afitt_energy(cif_file, ligand_names, pdb_hierarchy, ff, sites_cart)
   for energy in energies:
     print "%s_%d AFITT_ENERGY: %10.4f" %(energy[0], energy[1], energy[2])
