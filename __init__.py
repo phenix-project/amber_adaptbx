@@ -33,26 +33,33 @@ class geometry_manager(object):
     self.number_of_restraints=number_of_restraints
     self.mdgx_structs=mdgx_structs
 
-  def energies_sites(self, compute_gradients=False):
-    #~ import code; code.interact(local=dict(globals(), **locals()))
-    #import inspect
-    #for i in inspect.stack():
-    #  print i[1], i[2], i[4]
-    #print "\n\n\n\n"
+  def energies_sites(self,
+        crystal_symmetry,
+        compute_gradients=False):
+    # import code; code.interact(local=dict(globals(), **locals()))
+    # import inspect
+    # for i in inspect.stack():
+    #     print i[1], i[2], i[4]
+    # print "\n\n\n\n"
+    # sys.exit()
     #Expand sites_cart to unit cell
-    #~ sites_cart_uc=expand_to_unit_cell(sites_cart, space_group)
+    sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
     #~ assert 0
     
     #Convert flex arrays to C arrays
     #~ if not...
-    sites_cart_c=ext.ExtractVec(self.sites_cart.as_double())
-    gradients_c=ext.ExtractVec(flex.double(self.sites_cart.size() * 3, 0))
+    sites_cart_c=ext.ExtractVec(sites_cart_uc.as_double())
+    gradients_c=ext.ExtractVec(flex.double(sites_cart_uc.size() * 3, 0))
     energy_components_c=ext.ExtractVec(self.energy_components)
 
     # Call c++ interface to call mdgx to calculate new gradients and target
     ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.mdgx_structs)
     if (compute_gradients) :
-      gradients = self.gradients_factory(gradients_c) * -1
+      gradients_uc = self.gradients_factory(gradients_c) * -1
+      gradients = gradients_uc[0:self.sites_cart.size()]
+      # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
+      # import code; code.interact(local=dict(globals(), **locals()))
+      # sys.exit()
     else :
       gradients = self.gradients_factory(
         flex.double(self.sites_cart.size() * 3,0))
@@ -96,18 +103,34 @@ def print_sites_cart(sites_cart):
 def get_amber_structs (prmtop, ambcrd):
         return ext.uform(prmtop, ambcrd)
 
-def expand_to_unit_cell(sites_cart, space_group):
-  #~ get no of symm ops
-  #~ set up uc_sites_cart of zeros
-  #~ convert sites cart to sites_frac
-  #~ for each symm_op
-    #~ apply symop to sites_frac
-    #~ convert sites_frac to sites_cart
-    #~ populates the corresponding part of uc_sites_cart
-  #~ return sites_cart
-  return 1
+def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
+  sites_cart_uc = flex.vec3_double()
+  cell = crystal_symmetry.unit_cell()
+  sg = crystal_symmetry.space_group()
+  for i, op in enumerate(sg.all_ops()):
+    rotn = op.r().as_double()
+    tln = cell.orthogonalize(op.t().as_double())
+    # import code; code.interact(local=dict(globals(), **locals()))
+    # sys.exit()
+    sites_cart_uc.extend( (rotn * sites_cart) + tln)
+  return sites_cart_uc
     
-
+def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
+  cell = crystal_symmetry.unit_cell()
+  sg = crystal_symmetry.space_group()
+  n_symop = sg.n_smx()
+  n_asu_atoms = int(gradients_uc.size() / n_symop)
+  # import code; code.interact(local=dict(globals(), **locals()))
+  # sys.exit()
+  gradients = flex.vec3_double(n_asu_atoms)
+  for i, op in enumerate(sg.all_ops()):
+    inv_rotn = op.r().inverse().as_double()
+    tln = cell.orthogonalize(op.t().as_double())
+    start = i*n_asu_atoms
+    end = (i+1)*n_asu_atoms
+    gradients += inv_rotn * (gradients_uc[start:end])
+  gradients = gradients * (1.0/n_symop)
+  return gradients
 
 def run(pdb,prmtop, crd):
 
