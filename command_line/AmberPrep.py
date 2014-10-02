@@ -25,6 +25,8 @@ amber_prep
   {
     minimise = amber_all amber_h phenix_all *off
       .type = choice
+    clean = on *off
+      .type = choice
   }
   output
   {
@@ -139,6 +141,9 @@ def run_elbow_antechamber(ns_names):
       print "%s already in amber monomer library. Skipping elbow/antechamber run for this residue.\n" %residue_name
       continue
     else:
+      print >> sys.stderr, "\n=================================================="
+      print >> sys.stderr, "Running elbow/antechamber for %s " %residue_name
+      print >> sys.stderr, "=================================================="
       mol = builder.run(chemical_component=residue_name,
                       no_output=True, silent=True)
       mol.WritePDB('4antechamber_%s.pdb' %residue_name)                  
@@ -174,7 +179,7 @@ def run_elbow_antechamber(ns_names):
   return 0
 
 # prepare tleap input (set box) or run pytleap?
-def run_tleap(pdb_filename,ns_names):
+def run_tleap(input_pdb, output_base,ns_names, reorder_residues, logfile):
   f=open('tleap.in','w')
   f.write('source leaprc.ff12SB\n')
   f.write('source leaprc.gaff\n')
@@ -192,13 +197,16 @@ def run_tleap(pdb_filename,ns_names):
     else:
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
-  f.write('x = loadpdb 4tleap.pdb\n')
+  f.write('x = loadpdb %s\n' %input_pdb)
   f.write('set x box {20.000   20.000   20.000}\n')
   f.write('set default nocenter on\n')
-  f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(pdb_filename, pdb_filename))
+  f.write('set default reorder_residues %s\n' %reorder_residues)
+  f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(output_base, output_base))
   f.write('quit\n')   
   f.close()
-  ero=easy_run.fully_buffered('tleap -f tleap.in')
+  cmd = 'tleap -f tleap.in >%s' %logfile
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()
   ero.show_stderr()
   return 0
@@ -225,7 +233,7 @@ def run_ambpdb(base):
   ero.show_stderr()
   return 0
 
-#add cryst1 and smtry
+#add cryst1 and sscale
 def finalizePdb(pdb_filename,cryst,base):
   pdb_inp = pdb.input(pdb_filename)
   pdb_hierarchy=pdb_inp.construct_hierarchy()
@@ -235,6 +243,30 @@ def finalizePdb(pdb_filename,cryst,base):
   f.close()
   #~ import code; code.interact(local=locals())
   return 0
+
+def run_UnitCell(input_file,output_file):
+  cmd='UnitCell -p %s -o %s' %(input_file, output_file)
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  ero.show_stdout()
+  ero.show_stderr()
+
+def uc(pdb_filename,ns_names,cryst1, base):
+  #add SMTRY to 4tleap.pdb -> 4UnitCell.pdb
+  with open("4UnitCell.pdb","wb") as fout:
+    with open(pdb_filename) as fin:
+      smtry = [line for line in fin if "SMTRY" in line]
+      smtry = ''.join(smtry)
+      fout.write(smtry)
+    with open("new.pdb") as fin:
+      for line in fin:
+        fout.write(line)
+
+  run_UnitCell('4UnitCell.pdb', '4tleap_uc.pdb')
+  run_tleap('4tleap_uc.pdb', 'uc', ns_names, reorder_residues='off', logfile='tleap_uc.log')
+  run_ChBox('uc', cryst1)
+  cmd='cp uc.rst7 4amber_%s.rst7; cp uc.prmtop 4amber_%s.prmtop' %(base,base)
+  ero=easy_run.fully_buffered(cmd)
 
 def run_minimise(base, cryst1, option=None):
   if option is None: return
@@ -298,7 +330,34 @@ def run_minimise(base, cryst1, option=None):
     ero.show_stderr()
 
   return 0
-  
+
+def run_clean():
+  files_to_clean = """
+    4tleap_nonprot.pdb
+    4tleap.pdb
+    4tleap_renum.txt
+    4tleap_sslink
+    4tleap_uc.pdb
+    4UnitCell.pdb
+    asu.prmtop
+    asu.rst7
+    init.pdb
+    leap.log
+    new2.pdb
+    new.pdb
+    test.eff
+    tleap_asu.log
+    tleap.in
+    tleap_uc.log
+    uc.prmtop
+    uc.rst7
+    sqm.pdb
+    sqm.out
+    sqm.in
+  """
+  for file in files_to_clean.strip().split():
+    if os.path.isfile(file):
+      os.remove(file)
 
 #fix residue names for phenix, add original Bfactors
 def run(rargs):
@@ -309,17 +368,29 @@ def run(rargs):
   cryst1=initializePdb(inputs.pdb_file_name)
   ns_names=run_pdb4amber('init.pdb')
   run_elbow_antechamber(ns_names)
-  run_tleap(base,ns_names)
+  print >> sys.stderr, "\n=================================================="
+  print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" %base
+  print >> sys.stderr, "=================================================="
+  run_tleap('4tleap.pdb','asu',ns_names,reorder_residues='on', logfile='tleap_asu.log')
   run_ChBox(base,cryst1)
-  run_ambpdb(base)
+  run_ambpdb('asu')
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-  finalizePdb('new2.pdb',cryst1, base)
+  finalizePdb('new2.pdb', cryst1, base)
+  print >> sys.stderr, "\n=================================================="
+  print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
+  print >> sys.stderr, "=================================================="
+  uc(inputs.pdb_file_name, ns_names,cryst1, base)
   if actions.minimise == "off":
     pass
   else:
+    print >> sys.stderr, "\n=================================================="
+    print >> sys.stderr, "Minimizing input coordinates."
+    print >> sys.stderr, "=================================================="
     run_minimise(base, cryst1, actions.minimise)
+  if actions.clean == "on":
+    run_clean()
   return '4phenix_%s.pdb' % base
-  
+
 if __name__=="__main__":
   if 1:
     args = sys.argv[1:]
@@ -330,5 +401,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("pdb_file_name", help="name of pdb file")
     parser.add_argument("min", help="option to minimize", default=0)
+    parser.add_argument("-c","--no_clean", help="don't remove "
+                        "intermediate files", action='True', default=False )
     args = parser.parse_args()
-    run(args.pdb_file_name, minimize=args.min)
+    run(args.pdb_file_name, minimize=args.min, clean=args.no_clean)
