@@ -221,6 +221,7 @@ def run_ChBox(base,cryst1):
   ero.show_stdout()
   ero.show_stderr()
   cmd='mv chbox.rst7 %s.rst7' %base
+  print cmd
   ero=easy_run.fully_buffered(cmd)
   return 0
 
@@ -367,7 +368,7 @@ def run(rargs):
   base = os.path.basename(inputs.pdb_file_name).split('.')[0]
   cryst1=initializePdb(inputs.pdb_file_name)
   ns_names=run_pdb4amber('init.pdb')
-  run_elbow_antechamber(ns_names)
+  # run_elbow_antechamber(ns_names)
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" %base
   print >> sys.stderr, "=================================================="
@@ -375,6 +376,8 @@ def run(rargs):
   run_ChBox(base,cryst1)
   run_ambpdb('asu')
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
+  import code; code.interact(local=dict(globals(), **locals()))
+  sys.exit()
   finalizePdb('new2.pdb', cryst1, base)
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)

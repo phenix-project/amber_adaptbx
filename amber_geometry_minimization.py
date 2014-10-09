@@ -13,12 +13,12 @@ class lbfgs(amber_adaptbx.lbfgs.lbfgs):
         geometry_restraints_manager,
         geometry_restraints_flags,
         lbfgs_termination_params,
-        mdgx_structs,
+        amber_structs,
         sites_cart_selection=None,
         lbfgs_exception_handling_params=None,
-        grmsd_termination_cutoff=0,
+        grms_termination_cutoff=0,
         site_labels=None):
-    self.grmsd_termination_cutoff = grmsd_termination_cutoff
+    self.grms_termination_cutoff = grms_termination_cutoff
     amber_adaptbx.lbfgs.lbfgs.__init__(self,
       sites_cart=sites_cart,
       geometry_restraints_manager=geometry_restraints_manager,
@@ -27,11 +27,11 @@ class lbfgs(amber_adaptbx.lbfgs.lbfgs):
       sites_cart_selection=sites_cart_selection,
       lbfgs_exception_handling_params=lbfgs_exception_handling_params,
       site_labels=site_labels,
-      mdgx_structs=mdgx_structs)
+      amber_structs=amber_structs)
 
   def callback_after_step(self, minimizer):
     self.apply_shifts()
-    if self.rmsd_gradient <self.grmsd_termination_cutoff:
+    if self.grms <self.grms_termination_cutoff:
       return True
 
 class run(object):
@@ -49,7 +49,8 @@ class run(object):
                planarity                      = False,
                parallelity                    = False,
                generic_restraints             = False,
-               grmsd_termination_cutoff       = 0,
+               grms_termination_cutoff        = 0,
+               use_sander                     = False,
                alternate_nonbonded_off_on     = False,
                log                            = None,
                prmtop                         = None,
@@ -81,9 +82,22 @@ class run(object):
       bond_similarity    = True,
       generic_restraints = True)
 
-    mdgx_structs=get_amber_structs (prmtop, ambcrd)
+    if (use_sander):
+      import sander
+      amber_structs = amber_adaptbx.sander_structs(
+        parm_file_name=prmtop,
+        rst_file_name=ambcrd)
+      sander.setup(amber_structs.parm,
+             amber_structs.rst.coords,
+             amber_structs.rst.box,
+             amber_structs.inp)
+    else:
+      amber_structs = amber_adaptbx.get_amber_structs(
+        parm_file_name=prmtop,
+        rst_file_name=ambcrd)
 
-    self.show(mdgx_structs)
+    self.show(amber_structs)
+
     for i_macro_cycle in xrange(number_of_macro_cycles):
       print >> self.log, "  macro-cycle:", i_macro_cycle
       if(alternate_nonbonded_off_on and i_macro_cycle<=number_of_macro_cycles/2):
@@ -96,19 +110,22 @@ class run(object):
         lbfgs_termination_params        = lbfgs_termination_params,
         lbfgs_exception_handling_params = exception_handling_params,
         sites_cart_selection            = selection,
-        grmsd_termination_cutoff        = grmsd_termination_cutoff,
+        grms_termination_cutoff         = grms_termination_cutoff,
         site_labels                     = None,
-        mdgx_structs                    = mdgx_structs)
+        amber_structs                   = amber_structs)
       self.pdb_hierarchy.atoms().set_xyz(sites_cart)
-      self.show(mdgx_structs)
+      self.show(amber_structs)
       geometry_restraints_flags.nonbonded = nonbonded
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
           max_iterations = max_number_of_iterations)
 
-  def show(self, mdgx_structs):
+      if hasattr(amber_structs, 'parm'):
+        sander.cleanup()
+
+  def show(self, amber_structs):
     import amber_adaptbx as amber
     amber_geometry_manager=amber.geometry_manager(
        sites_cart=self.pdb_hierarchy.atoms().extract_xyz(),
-       mdgx_structs=mdgx_structs)
-    amber_geometry=amber_geometry_manager.energies_sites()
+       amber_structs=amber_structs)
+    amber_geometry=amber_geometry_manager.energies_sites(self.restraints_manager.geometry.crystal_symmetry)
     amber_geometry.show()

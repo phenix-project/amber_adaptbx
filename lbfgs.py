@@ -11,7 +11,7 @@ class lbfgs(object):
   def __init__(self,
       sites_cart,
       geometry_restraints_manager,
-      mdgx_structs,
+      amber_structs,
       geometry_restraints_flags=None,
       lbfgs_termination_params=None,
       lbfgs_core_params=None,
@@ -25,7 +25,7 @@ class lbfgs(object):
     self.site_labels = site_labels
     self.tmp = empty()
     self.rmsd_bonds, self.rmsd_angles = None, None
-    self.mdgx_structs = mdgx_structs
+    self.amber_structs = amber_structs
     if sites_cart_selection:
       self.sites_cart_selection = flex.bool(sites_cart_selection)
       self.tmp.reduced_sites_cart=sites_cart.select(self.sites_cart_selection)
@@ -47,8 +47,9 @@ class lbfgs(object):
     self.apply_shifts()
     amber_geometry_manager=amber.geometry_manager(
           sites_cart=self.tmp.sites_shifted,
-          mdgx_structs=self.mdgx_structs)
-    amber_geometry=amber_geometry_manager.energies_sites()
+          amber_structs=self.amber_structs,)
+    amber_geometry=amber_geometry_manager.energies_sites(
+      crystal_symmetry = self.tmp.geometry_restraints_manager.crystal_symmetry)
     self.final_target_result=amber_geometry.energy_components
     sites_cart.clear()
     sites_cart.extend(self.tmp.sites_shifted)
@@ -82,11 +83,13 @@ class lbfgs(object):
       self.apply_shifts()
     amber_geometry_manager=amber.geometry_manager(
           sites_cart=self.tmp.sites_shifted,
-          mdgx_structs=self.mdgx_structs)
+          amber_structs=self.amber_structs)
     amber_geometry=amber_geometry_manager.energies_sites(
+      crystal_symmetry = self.tmp.geometry_restraints_manager.crystal_symmetry,
       compute_gradients=True)
+    # import code; code.interact(local=dict(globals(), **locals()))
     self.tmp.target_result=amber_geometry.energy_components
-    self.rmsd_gradient=amber_geometry.get_rmsd_gradient()
+    self.grms=amber_geometry.get_grms()
     self.f =amber_geometry.residual_sum
     if (self.first_target_result is None):
       self.first_target_result = self.tmp.target_result

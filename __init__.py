@@ -7,6 +7,8 @@ from scitbx.array_family import flex
 import scitbx.restraints
 import boost.python
 ext = boost.python.import_ext("amber_adaptbx_ext")
+import sander
+from chemistry.amber.readparm import AmberParm, Rst7
 
 
 master_phil_str = """
@@ -16,64 +18,93 @@ master_phil_str = """
     .type = path
   coordinate_file_name = None
     .type = path
+  use_sander = False
+    .type = bool
 """
 
 class geometry_manager(object):
 
   def __init__(self,
         sites_cart=None,
-        energy_components=flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]),
+        energy_components=None,
         gradients=None,
         number_of_restraints=0,
-        gradients_factory=flex.double,
-        mdgx_structs=None):
+        gradients_factory=flex.vec3_double,
+        amber_structs=None):
     self.sites_cart = sites_cart
     self.energy_components = energy_components
     self.gradients_factory = gradients_factory
     self.number_of_restraints=number_of_restraints
-    self.mdgx_structs=mdgx_structs
+    self.amber_structs=amber_structs
 
+    if self.energy_components is None:
+      self.energy_components = flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
   def energies_sites(self,
         crystal_symmetry,
         compute_gradients=False):
     # import code; code.interact(local=dict(globals(), **locals()))
-    # import inspect
-    # for i in inspect.stack():
-    #     print i[1], i[2], i[4]
-    # print "\n\n\n\n"
-    # sys.exit()
     #Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
-    #~ assert 0
-    
-    #Convert flex arrays to C arrays
-    #~ if not...
-    sites_cart_c=ext.ExtractVec(sites_cart_uc.as_double())
-    gradients_c=ext.ExtractVec(flex.double(sites_cart_uc.size() * 3, 0))
-    energy_components_c=ext.ExtractVec(self.energy_components)
 
-    # Call c++ interface to call mdgx to calculate new gradients and target
-    ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.mdgx_structs)
-    if (compute_gradients) :
-      gradients_uc = self.gradients_factory(gradients_c) * -1
-      gradients = gradients_uc[0:self.sites_cart.size()]
-      # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
+    if hasattr(self.amber_structs,'parm'):
+      # print "\n\nUSING SANDER\n\n"
+      sander_coords = list(sites_cart_uc.as_double())
       # import code; code.interact(local=dict(globals(), **locals()))
-      # sys.exit()
-    else :
-      gradients = self.gradients_factory(
-        flex.double(self.sites_cart.size() * 3,0))
-    result = energies(
-      compute_gradients=compute_gradients,
-      gradients=gradients,
-      gradients_size=None,
-      gradients_factory=None,
-      normalization=False)
-    result.number_of_restraints = self.number_of_restraints
-    result.residual_sum = float(energy_components_c[0])
-    result.energy_components = list(energy_components_c)
-    result.finalize_target_and_gradients()
-    #result.show()
+      sander.set_positions(sander_coords)
+      ene, frc = sander.energy_forces()
+      # sander.cleanup()
+      if (compute_gradients) :
+        gradients_uc=flex.vec3_double(flex.double(frc)) * -1
+        gradients = gradients_uc[0:self.sites_cart.size()]
+        # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
+      else :
+        gradients = self.gradients_factory(
+          flex.double(self.sites_cart.size() * 3,0))
+      result = energies(
+        compute_gradients=compute_gradients,
+        gradients=gradients,
+        gradients_size=None,
+        gradients_factory=None,
+        normalization=False)
+      result.number_of_restraints = self.number_of_restraints
+      result.residual_sum = ene.tot
+      ptrfunc = self.amber_structs.parm.ptr
+      nbond = ptrfunc('nbonh') + ptrfunc('nbona')
+      nangl = ptrfunc('ntheth') + ptrfunc('ntheta')
+      nmphi = ptrfunc('nphih') + ptrfunc('nphia')
+      result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
+                                  ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
+                                  nbond, nangl, nmphi]
+      result.finalize_target_and_gradients()
+
+    else:
+      # print "\n\nUSING MDGX\n\n"
+      #Convert flex arrays to C arrays
+      sites_cart_c=ext.ExtractVec(sites_cart_uc.as_double())
+      gradients_c=ext.ExtractVec(flex.double(sites_cart_uc.size() * 3, 0))
+      energy_components_c=ext.ExtractVec(self.energy_components)
+
+      # Call c++ interface to call mdgx to calculate new gradients and target
+      ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.amber_structs)
+      if (compute_gradients) :
+        # import code; code.interact(local=dict(globals(), **locals()))
+        # sys.exit()
+        gradients_uc = self.gradients_factory(gradients_c) * -1
+        gradients = gradients_uc[0:self.sites_cart.size()]
+        # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
+      else :
+        gradients = self.gradients_factory(
+          flex.double(self.sites_cart.size() * 3,0))
+      result = energies(
+        compute_gradients=compute_gradients,
+        gradients=gradients,
+        gradients_size=None,
+        gradients_factory=None,
+        normalization=False)
+      result.number_of_restraints = self.number_of_restraints
+      result.residual_sum = float(energy_components_c[0])
+      result.energy_components = list(energy_components_c)
+      result.finalize_target_and_gradients()
     return result
 
 class energies (scitbx.restraints.energies) :
@@ -93,15 +124,26 @@ class energies (scitbx.restraints.energies) :
     print "      van der Waals: %0.2f" %(self.energy_components[5])
     return 0
     
-  def get_rmsd_gradient(self):
-    return self.energy_components[9]
+  def get_grms(self):
+    from math import sqrt
+    gradients_1d = self.gradients.as_double()
+    grms = sum(gradients_1d**2)
+    grms /= gradients_1d.size()
+    grms = sqrt(grms)
+    return grms
 
 def print_sites_cart(sites_cart):
         for atom in sites_cart:
                 print("%8.3f%8.3f%8.3f"%(atom[0], atom[1], atom[2]))
 
-def get_amber_structs (prmtop, ambcrd):
-        return ext.uform(prmtop, ambcrd)
+def get_amber_structs (parm_file_name, rst_file_name):
+        return ext.uform(parm_file_name, rst_file_name)
+
+class sander_structs ():
+  def __init__ (self, parm_file_name, rst_file_name):
+    self.parm = AmberParm(parm_file_name)
+    self.rst = Rst7.open(rst_file_name)
+    self.inp = sander.pme_input()
 
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()
@@ -131,6 +173,45 @@ def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
     gradients += inv_rotn * (gradients_uc[start:end])
   gradients = gradients * (1.0/n_symop)
   return gradients
+
+def bond_angle_rmsd(parm, sites_cart):
+  from math import acos, pi, sqrt
+
+  #bond rmsd
+  bdev = 0
+  # import code; code.interact(local=dict(globals(), **locals()))
+  # sys.exit()
+  for i, bond in enumerate(parm.bonds_inc_h + parm.bonds_without_h):
+    atom1 = sites_cart[bond.atom1.starting_index]
+    atom2 = sites_cart[bond.atom2.starting_index]
+    dx = atom1[0] - atom2[0]
+    dy = atom1[1] - atom2[1]
+    dz = atom1[2] - atom2[2]
+    contrib = bond.bond_type.req - sqrt(dx*dx + dy*dy + dz*dz)
+    bdev += contrib * contrib
+  nbond = i + 1
+  bdev /= nbond
+  bdev = sqrt(bdev)
+
+  #angle rmsd
+  adev = 0
+  for i, angle in enumerate(parm.angles_inc_h + parm.angles_without_h):
+    atom1 = sites_cart[angle.atom1.starting_index]
+    atom2 = sites_cart[angle.atom2.starting_index]
+    atom3 = sites_cart[angle.atom3.starting_index]
+    a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
+    b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
+    a = flex.double(a)
+    b = flex.double(b)
+    contrib = angle.angle_type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))
+    contrib *= 180/pi
+    adev += contrib * contrib
+  nang = i + 1
+  adev /= nang
+  adev = sqrt(adev)
+
+  return bdev, adev
+
 
 def run(pdb,prmtop, crd):
 
