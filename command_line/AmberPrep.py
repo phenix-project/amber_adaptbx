@@ -227,7 +227,7 @@ def run_ChBox(base,cryst1):
 
 # make pdb 
 def run_ambpdb(base):
-  cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base)
+  cmd='ambpdb -p  %s.prmtop <%s.rst7 >new.pdb' %(base, base)
   print cmd
   ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()
@@ -262,7 +262,7 @@ def uc(pdb_filename,ns_names,cryst1, base):
     with open("new.pdb") as fin:
       for line in fin:
         fout.write(line)
-
+  # sys.exit()
   run_UnitCell('4UnitCell.pdb', '4tleap_uc.pdb')
   run_tleap('4tleap_uc.pdb', 'uc', ns_names, reorder_residues='off', logfile='tleap_uc.log')
   run_ChBox('uc', cryst1)
@@ -355,12 +355,14 @@ def run_clean():
     sqm.pdb
     sqm.out
     sqm.in
+    4antechamber*
   """
-  for file in files_to_clean.strip().split():
-    if os.path.isfile(file):
+
+  import glob
+  for filename in files_to_clean.strip().split():
+    for file in glob.glob(filename):
       os.remove(file)
 
-#fix residue names for phenix, add original Bfactors
 def run(rargs):
   working_params = setup_options_args(rargs)
   inputs = working_params.amber_prep.input
@@ -368,16 +370,14 @@ def run(rargs):
   base = os.path.basename(inputs.pdb_file_name).split('.')[0]
   cryst1=initializePdb(inputs.pdb_file_name)
   ns_names=run_pdb4amber('init.pdb')
-  # run_elbow_antechamber(ns_names)
+  run_elbow_antechamber(ns_names)
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" %base
   print >> sys.stderr, "=================================================="
   run_tleap('4tleap.pdb','asu',ns_names,reorder_residues='on', logfile='tleap_asu.log')
-  run_ChBox(base,cryst1)
+  run_ChBox('asu',cryst1)
   run_ambpdb('asu')
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-  import code; code.interact(local=dict(globals(), **locals()))
-  sys.exit()
   finalizePdb('new2.pdb', cryst1, base)
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
