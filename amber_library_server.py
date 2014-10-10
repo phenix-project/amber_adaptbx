@@ -5,27 +5,30 @@ from libtbx.utils import Sorry
 
 parent_dir = os.path.dirname(libtbx.env.dist_path("elbow"))
 
-def repo_dir():
+def repo_dir(verbose=False):
   env_dir = os.environ.get("AMBER_LIBRARY_DIR", None)
   if env_dir is not None:
     return env_dir
   install_dir = os.path.join(parent_dir, "chem_data", "amberlibrary")
   if os.path.exists(install_dir):
     return install_dir
+  if verbose:
+    print """
+    Couldn't find amberlibrary
+      1. Set AMBER_LIBRARY_DIR in environment
+      2. Add/link to $PHENIX/chem_data
+    """ 
   return None
 
 def is_in_components_lib(residue_name):
-  if path_in_components_lib(residue_name): return True
+  rc = path_in_components_lib(residue_name)
+  if rc: return rc
   else: return False
 
 def path_in_components_lib(residue_name):
   rd = repo_dir()
   if rd is None:
-    raise Sorry( """
-    Couldn't find amberlibrary
-      1. Set AMBER_LIBRARY_DIR in environment
-      2. Add/link to $PHENIX/chem_data
-    """)
+    return None
   preamble = os.path.join(rd,
                           residue_name[0].lower(),
                           residue_name.upper(),
@@ -36,6 +39,7 @@ def path_in_components_lib(residue_name):
       break
     files.append("%s.%s" % (preamble, ext))
   else:
+    assert len(files)==2
     return files
   return False
 

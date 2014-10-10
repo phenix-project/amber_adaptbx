@@ -20,6 +20,9 @@ amber_prep
   {
     pdb_file_name = None
       .type = path
+    nproc = 1
+      .type = int
+      .short_caption = Number processes to use
   }
   actions
   {
@@ -127,6 +130,35 @@ def initializePdb(pdb_filename):
   f.write(pdbstring)
   f.close()
   return cryst1
+
+def validatePdb(pdb_hierarchy):
+  #pdb_hierarchy.show()
+  from mmtbx import conformation_dependent_library
+  gaps=[]
+  for three in conformation_dependent_library.generate_protein_threes(
+      hierarchy=pdb_hierarchy,
+      geometry=None,
+      include_non_linked=True,
+      ):
+    if not three.are_linked():
+      print three.show()
+      gaps.append(three)
+  if gaps:
+    return gaps
+  return False
+
+def get_molecule_from_hierarchy(hierarchy, resname):
+  # only works for non altloc files
+  from elbow.chemistry.MoleculeClass import MoleculeClass
+  mol = MoleculeClass()
+  for residue_group in hierarchy.residue_groups():
+    for atom_group in residue_group.atom_groups():
+      if atom_group.resname==resname:
+        for atom in atom_group.atoms():
+          mol.AddAtom(atom.element, xyz=atom.xyz)
+          mol[-1].name = atom.name
+        break
+  return mol
   
 # run pdb4amber
 def run_pdb4amber(pdb_filename):
@@ -134,48 +166,96 @@ def run_pdb4amber(pdb_filename):
   return ns_names
   
 # run elbow and antechamber
-def run_elbow_antechamber(ns_names):
+def _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=False):
+  debug=1
+  pdb_mol = get_molecule_from_hierarchy(pdb_hierarchy, residue_name)
+  names = []
+  for atom in pdb_mol:
+    names.append(atom.name.strip())
+  pdb_set = set(names)
+  print >> sys.stderr, "\n=================================================="
+  print >> sys.stderr, "Running elbow/antechamber for %s " %residue_name
+  print >> sys.stderr, "=================================================="
+  if debug:
+    import pickle
+    pf = "%s.pickle" % residue_name
+    if os.path.exists(pf):
+      f=file(pf, "rb")
+      mol=pickle.load(f)
+      f.close()
+    else:
+      mol = builder.run(chemical_component=residue_name,
+                        no_output=True,
+                        silent=True)
+      mol.WritePickle()
+  else:
+    # this needs to be changed for novel ligands
+    mol = builder.run(chemical_component=residue_name,
+                      no_output=True,
+                      silent=True)
+  names = []
+  for atom in mol:
+    names.append(atom.name.strip())
+  cc_set_h = set(names)
+  names = []
+  for atom in mol:
+    if atom.isH(): continue
+    names.append(atom.name.strip())
+  cc_set = set(names)
+  if ( pdb_set.symmetric_difference(cc_set) and
+       pdb_set.symmetric_difference(cc_set_h)
+       ):
+    from elbow.utilities import molecule_superposition
+    pdb_mol.Bondise(add_bond_order=False)
+    rc = molecule_superposition.run(mol,
+                                    pdb_mol,
+                                    use_hydrogens=False,
+                                    seed_with_unique_atoms=True,
+      )
+    #molecule_superposition.print_return_list(rc)
+    for atom1, atom2 in rc:
+      atom1.name = atom2.name
+
+  mol.WritePDB('4antechamber_%s.pdb' %residue_name)                  
+  mol.Multiplicitise()
+  print mol.DisplayBrief()
+  cmd='antechamber -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
+      -nc %d -m %d -s 2 -pf y -c bcc -at gaff' \
+      %(residue_name, residue_name, mol.charge, mol.multiplicity)
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  stdo = StringIO.StringIO()
+  ero.show_stdout(out=stdo)
+  for line in stdo.getvalue().splitlines():
+    if line.find('APS')>-1:
+      print line
+    if line.find('Error')>-1:
+      print line
+  cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
+      -nc %s -m %d -s 2 -pf y -c bcc -at gaff' \
+      %(residue_name, mol.charge, mol.multiplicity)    
+  print cmd
+  ero=easy_run.fully_buffered(cmd)
+  stdo = StringIO.StringIO()
+  ero.show_stdout(out=stdo)
+  for line in stdo.getvalue().splitlines():
+    if line.find('APS')>-1:
+      print line
+    if line.find('Error')>-1:
+      print line          
+  cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
+  print cmd
+  easy_run.fully_buffered(cmd)
+
+def run_elbow_antechamber(pdb_hierarchy, ns_names, nproc=1, debug=False):
+  if nproc>1:
+    print "\n\tParallel processes not implemented\n"
   for residue_name in ns_names:
-    #~ if amber_library_server.is_in_components_lib(residue_name):
-    if False:
+    if amber_library_server.is_in_components_lib(residue_name):
       print "%s already in amber monomer library. Skipping elbow/antechamber run for this residue.\n" %residue_name
       continue
     else:
-      print >> sys.stderr, "\n=================================================="
-      print >> sys.stderr, "Running elbow/antechamber for %s " %residue_name
-      print >> sys.stderr, "=================================================="
-      mol = builder.run(chemical_component=residue_name,
-                      no_output=True, silent=True)
-      mol.WritePDB('4antechamber_%s.pdb' %residue_name)                  
-      mol.Multiplicitise()
-      print mol.DisplayBrief()
-      cmd='antechamber -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
-          -nc %d -m %d -s 2 -pf y -c bcc -at gaff' \
-          %(residue_name, residue_name, mol.charge, mol.multiplicity)
-      print cmd
-      ero=easy_run.fully_buffered(cmd)
-      stdo = StringIO.StringIO()
-      ero.show_stdout(out=stdo)
-      for line in stdo.getvalue().splitlines():
-        if line.find('APS')>-1:
-          print line
-        if line.find('Error')>-1:
-          print line
-      cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
-          -nc %s -m %d -s 2 -pf y -c bcc -at gaff' \
-          %(residue_name, mol.charge, mol.multiplicity)    
-      print cmd
-      ero=easy_run.fully_buffered(cmd)
-      stdo = StringIO.StringIO()
-      ero.show_stdout(out=stdo)
-      for line in stdo.getvalue().splitlines():
-        if line.find('APS')>-1:
-          print line
-        if line.find('Error')>-1:
-          print line          
-      cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
-      print cmd
-      easy_run.fully_buffered(cmd)
+      _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=debug)
   return 0
 
 # prepare tleap input (set box) or run pytleap?
@@ -191,9 +271,9 @@ def run_tleap(input_pdb, output_base,ns_names, reorder_residues, logfile):
   f.write('loadAmberParams frcmod.spce\n')
   for res in ns_names:
     if amber_library_server.is_in_components_lib(res):
-        res_path=amber_library_server.path_in_components_lib(res)
-        f.write('%s = loadmol2 %s\n' %(res,res_path[1]))
-        f.write('loadAmberParams %s\n' %(res_path[0]))
+      res_path=amber_library_server.path_in_components_lib(res)
+      f.write('%s = loadmol2 %s\n' %(res,res_path[1]))
+      f.write('loadAmberParams %s\n' %(res_path[0]))
     else:
       f.write('%s = loadmol2 %s.mol2\n' %(res,res))
       f.write('loadAmberParams %s.frcmod\n' %res)
@@ -368,9 +448,15 @@ def run(rargs):
   inputs = working_params.amber_prep.input
   actions = working_params.amber_prep.actions
   base = os.path.basename(inputs.pdb_file_name).split('.')[0]
+  pdb_inp = pdb.input(inputs.pdb_file_name)
+  pdb_hierarchy=pdb_inp.construct_hierarchy()
+  invalid = validatePdb(pdb_hierarchy)
+  assert not invalid, 'PDB input is not "valid"'
   cryst1=initializePdb(inputs.pdb_file_name)
   ns_names=run_pdb4amber('init.pdb')
-  run_elbow_antechamber(ns_names)
+  #
+  run_elbow_antechamber(pdb_hierarchy, ns_names, nproc=inputs.nproc)
+  #
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" %base
   print >> sys.stderr, "=================================================="

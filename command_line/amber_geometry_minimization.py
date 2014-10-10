@@ -197,8 +197,10 @@ def process_input_files(inputs, params, log):
     is_non_crystallographic_unit_cell # XXX bad hack
   return processed_pdb_file
 
-def get_geometry_restraints_manager(processed_pdb_file, xray_structure, params,
-    log=sys.stdout):
+def get_geometry_restraints_manager(processed_pdb_file,
+                                    xray_structure,
+                                    params,
+                                    log=sys.stdout):
   has_hd = None
   if(xray_structure is not None):
     sctr_keys = xray_structure.scattering_type_registry().type_count_dict().keys()
