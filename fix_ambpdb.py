@@ -54,7 +54,8 @@ def run (pre_amber_pdb_file, post_amber_pdb_file, output_pdb_file="out.pdb"):
           for resi_pre in chain_pre.conformers()[0].residues():
               if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
                 for atom_pre in resi_pre.atoms():
-                  if atom_pre.name == atom_post.name and atom_pre.i_seq==atom_post.i_seq:
+                  # if atom_pre.name == atom_post.name and atom_pre.i_seq==atom_post.i_seq:
+                  if atom_pre.name == atom_post.name:
                     atom_post.b=atom_pre.b
                     atom_post.occ=atom_pre.occ
                     chain_post.id=chain_pre.id
