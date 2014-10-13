@@ -16,5 +16,11 @@ if [ ! -z "$AMBERHOME" ]; then
     else
       export LD_LIBRARY_PATH=${AMBERHOME}/lib:${LD_LIBRARY_PATH}
     fi
+    if [ -z "$PYTHONPATH" ]; then
+      export PYTHONPATH="${AMBERHOME}/lib/python2.7/site-packages"
+    else
+      export export PYTHONPATH="${AMBERHOME}/lib/python2.7/site-packages:${PYTHONPATH}"
+    fi
+    
   fi
 fi
