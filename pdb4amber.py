@@ -135,8 +135,6 @@ def pdb_read(pdbin, noter):
     if insertion_code[i] != ' ' and residue_number[i]+insertion_code[i] not in insert_resnums:
       insert_resnums.append(residue_number[i]+insertion_code[i])
       insert_resnames.append(residue_name[i])
-# forget insertion code
-      insertion_code[i] = ' '
 # determine chain id and record it, if not yet found before
     if chain_id[i] != ' ' and chain_id[i] not in chains:
       chains.append(chain_id[i])
@@ -243,33 +241,46 @@ def remove_water(recordlist, filename):
   return(drylist)
 
 #========================================
-def remove_mostpop_altloc(recordlist):
+def remove_mostpop_altloc(recordlist,filename):
 #========================================
   noaltlist = []
   altloc_resnum = []; altloc_resname = []
+  minor_altloc = open(filename+'_minor_altloc.pdb', 'w')
+  format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
+  report_list=[]
+          
 #keep most populous conformation
   import collections
+  #n_altlocs is a dict where key is a unique atom identifier and value is
+  # a two element list. First element contains list of occupancy values 
+  # of all occurrences of that atom. Second element counts the appearance
+  # of the atom during the second iteration.
   n_altlocs=collections.OrderedDict()
-#first iteration to set up dict with no. altloc occurences for each atom  
+#first iteration to set up dict with occupancies for each altloc atom  
   for record in recordlist:
     id = "%s_%s" %(record[8],record[3])
     if record[4] != ' ':
       if id not in n_altlocs.keys():
-        n_altlocs[id] = [1,0.0,0,[]]
+        n_altlocs[id] = [ [float(record[14])], 0 ]
       else:
-        n_altlocs[id][0] += 1
-#now iterate again and keep only the record with the highest occupancy      
+        n_altlocs[id][0].append( float(record[14]) )
+        
+#now iterate again.      
   for record in recordlist:
     id = "%s_%s" %(record[8],record[3])
     if id in n_altlocs.keys():
-      if float(record[14]) > n_altlocs[id][1]:
-        n_altlocs[id][1] = float(record[14])
-        n_altlocs[id][3] = record
-      n_altlocs[id][2] += 1
-      #if all altloc occurences have been checked, add record to list 
-      if n_altlocs[id][2] == n_altlocs[id][0]:
-        noaltlist.append(n_altlocs[id][3])
-    #if no altlocs, add record directly to list    
+      # find index of highest occupancy occurence
+      alt_max = n_altlocs[id][0].index( max(n_altlocs[id][0]) )
+      # if current atom has highest occupancy altloc, add to list
+      if n_altlocs[id][1] == alt_max:
+        record[4] = ' '
+        noaltlist.append(record)
+        report_list.append(record)
+      # otherwise write to minor_altloc file and discard  
+      else:
+        minor_altloc.write(format % tuple(record))
+      n_altlocs[id][1] += 1  
+    #if current atom has no altlocs, add directly to list    
     else:
       record[4] = ' '
       noaltlist.append(record)
@@ -277,12 +288,13 @@ def remove_mostpop_altloc(recordlist):
   if n_altlocs:
     print >> sys.stderr, "\n---------- Alternate Locations (Original Residues!)"
     print >> sys.stderr, "The following atoms had alternate locations:"
-    for id,value in n_altlocs.iteritems():
-      record=value[3]
+    for record in report_list:
       print >> sys.stderr, "%s_%-4s %s"%(record[5], record[8].strip(), record[3])
     print >> sys.stderr, "The alternate coordinates have been discarded."
     print >> sys.stderr, "Only the highest occupancy of each atom was kept."         
-      
+    print >> sys.stderr, "Alternate conformations were printed to %s_minor_altloc.pdb" %filename
+    
+  minor_altloc.close()    
   return(noaltlist)
 
 #========================================
@@ -496,17 +508,21 @@ def non_standard_elbow(recordlist):
 
   for record in recordlist:
     if record[5].strip() not in RES and record[5] != '   ':
+      # if 1st instance of this residue, add atom and get chain/resid
       if record[5].strip() not in ns_resname:
         ns_resname.append(record[5].strip())
         try: f.close()
         except: pass  
         f=open('4antechamber_%s.pdb' %(record[5].strip()), 'w')
         resid=record[8]
+        chain=record[7]
         f.write(format % tuple(record))
       else: 
-        if record[8]==resid:
+        #if next atom in the 1st instance of the residue, add atom
+        if record[8]==resid and record[7]==chain:
           f.write(format % tuple(record))
         else:
+          #if next instance of the residue, close f and continue
           if not f.closed: f.close()  
 
   return ns_resname
@@ -582,8 +598,6 @@ def find_disulfide(recordlist, filename):
       
     sslink = open('%s_sslink'%filename, 'w')
     dist = [[0 for i in range(ncys)] for j in range(ncys)]
-#PAJ TODO: once verify that CONECT records are correctly being print >> sys.stderr,ed,
-# remove sslink file and modify pytleap accordingly.
     for i in range(0, ncys-1):
       for j in range(i+1, ncys):
         dx = float(cys_sgx[i]) - float(cys_sgx[j])
@@ -620,34 +634,40 @@ def find_disulfide(recordlist, filename):
 def find_gaps(recordlist):
 #========================================
   global RESPROT
-  ca_atoms = []; ca_resnum = []; ca_resname = [];
-  ca_x = []; ca_y = []; ca_z = []
+  ca_atoms = [];
   gaplist = [];
-
-  for record in recordlist:
+ 
+  def is_ter(index):
+    resnum = recordlist[index][8]
+    next = 1
+    while True:
+      if recordlist[index+next][0] in ['TER   ', 'MODEL ', 'ENDMDL']:
+        return True
+      elif recordlist[index+next][8]==resnum:
+        next+=1
+      else:
+        return False
+          
+  for i,record in enumerate(recordlist):
     if ('CA' in record[3] or 'CH3' in record[3]) and record[5] in RESPROT:
-      ca_atoms.append(record[1])
-      ca_resnum.append(record[8])
-      ca_resname.append(record[5])
-      ca_x.append(float(record[11]))
-      ca_y.append(float(record[12]))
-      ca_z.append(float(record[13]))
+      ca_atoms.append(i)
 
   nca = len(ca_atoms)
   ngaps = 0
 
   for i in range(nca-1):
-    dx = ca_x[i] - ca_x[i+1]
-    dx2 = dx*dx
-    dy = ca_y[i] - ca_y[i+1]
-    dy2 = dy*dy
-    dz = ca_z[i] - ca_z[i+1]
-    dz2 = dz*dz
-    gap = sqrt(dx2 +dy2 +dz2)
-
+    if is_ter(ca_atoms[i]):
+      continue
+    ca1 = recordlist[ca_atoms[i]]
+    ca2 = recordlist[ca_atoms[i+1]]
+    dx = float(ca1[11]) - float(ca2[11])
+    dy = float(ca1[12]) - float(ca2[12])
+    dz = float(ca2[13]) - float(ca2[13])
+    gap = sqrt(dx*dx +dy*dy +dz*dz)
+    
     if gap > 5.0:
-      gaprecord = (gap, ca_resname[i], int(ca_resnum[i]), ca_resname[i+1],\
-                   int(ca_resnum[i+1]))
+      gaprecord = (gap, ca1[5], int(ca1[8]), ca2[5],\
+                   int(ca2[8]))
       gaplist.append(gaprecord)
       ngaps += 1
 
@@ -721,7 +741,7 @@ def run(arg_pdbout, arg_pdbin,
   recordlist = atom_wrap(recordlist)
   # remove alternate locations and keep only the first one:=============
   if arg_mostpop:
-    recordlist = remove_mostpop_altloc(recordlist)
+    recordlist = remove_mostpop_altloc(recordlist, filename)
   else:
     recordlist = remove_altloc(recordlist)
   # remove hydrogens if option -y is used:==============================
@@ -778,7 +798,7 @@ if __name__ ==  "__main__":
                     help = "remove TER, MODEL, ENDMDL cards     (default: no)")
   parser.add_option("--constantph", action = "store_true", dest = "constantph",
                     help = "rename GLU,ASP,HIS for constant pH simulation")
-  parser.add_option("--most_populous", action = "store_true", dest = "mostpop",
+  parser.add_option("--most-populous", action = "store_true", dest = "mostpop",
                     help = "keep most populous alt. conf. (default is to keep 'A')")
   (opt, args) = parser.parse_args()
 
