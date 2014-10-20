@@ -30,6 +30,8 @@ amber_prep
       .type = choice
     clean = on *off
       .type = choice
+    redq = False
+      .type = bool
   }
   output
   {
@@ -259,9 +261,12 @@ def run_elbow_antechamber(pdb_hierarchy, ns_names, nproc=1, debug=False):
   return 0
 
 # prepare tleap input (set box) or run pytleap?
-def run_tleap(input_pdb, output_base,ns_names, reorder_residues, logfile):
+def run_tleap(input_pdb, output_base,ns_names, reorder_residues, logfile, redq=False):
   f=open('tleap.in','w')
-  f.write('source leaprc.ff12SB\n')
+  if redq:
+    f.write('source leaprc.ff14SB.redq\n')
+  else:
+    f.write('source leaprc.ff14SB\n')
   f.write('source leaprc.gaff\n')
   #f.write('loadoff atomic_ions.lib\n')
   f.write('loadamberparams frcmod.ionslrcm_iod\n')
@@ -332,7 +337,7 @@ def run_UnitCell(input_file,output_file):
   ero.show_stdout()
   ero.show_stderr()
 
-def uc(pdb_filename,ns_names,cryst1, base):
+def uc(pdb_filename,ns_names,cryst1, base, redq=False):
   #add SMTRY to 4tleap.pdb -> 4UnitCell.pdb
   with open("4UnitCell.pdb","wb") as fout:
     with open(pdb_filename) as fin:
@@ -344,7 +349,7 @@ def uc(pdb_filename,ns_names,cryst1, base):
         fout.write(line)
   # sys.exit()
   run_UnitCell('4UnitCell.pdb', '4tleap_uc.pdb')
-  run_tleap('4tleap_uc.pdb', 'uc', ns_names, reorder_residues='off', logfile='tleap_uc.log')
+  run_tleap('4tleap_uc.pdb', 'uc', ns_names, reorder_residues='off', logfile='tleap_uc.log', redq=redq)
   run_ChBox('uc', cryst1)
   cmd='cp uc.rst7 4amber_%s.rst7; cp uc.prmtop 4amber_%s.prmtop' %(base,base)
   ero=easy_run.fully_buffered(cmd)
@@ -460,7 +465,7 @@ def run(rargs):
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" %base
   print >> sys.stderr, "=================================================="
-  run_tleap('4tleap.pdb','asu',ns_names,reorder_residues='on', logfile='tleap_asu.log')
+  run_tleap('4tleap.pdb','asu',ns_names,reorder_residues='on', logfile='tleap_asu.log', redq=actions.redq)
   run_ChBox('asu',cryst1)
   run_ambpdb('asu')
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
@@ -468,7 +473,7 @@ def run(rargs):
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
   print >> sys.stderr, "=================================================="
-  uc(inputs.pdb_file_name, ns_names,cryst1, base)
+  uc(inputs.pdb_file_name, ns_names,cryst1, base, redq=actions.redq)
   if actions.minimise == "off":
     pass
   else:
