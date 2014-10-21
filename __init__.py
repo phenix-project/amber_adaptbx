@@ -111,6 +111,9 @@ class energies (scitbx.restraints.energies) :
   def __init__ (self, *args, **kwds) :
     scitbx.restraints.energies.__init__(self, *args, **kwds)
     self.energy_components = None
+    self.amber=True
+    # import code; code.interact(local=dict(globals(), **locals()))
+    # sys.exit()
 
   def show(self):
     print "    Amber total energy: %0.2f" %(self.residual_sum)
@@ -131,6 +134,25 @@ class energies (scitbx.restraints.energies) :
     grms /= gradients_1d.size()
     grms = sqrt(grms)
     return grms
+
+  # this calculates both bond and angle rms but is called
+  def angle_deviations(self, sites_cart, parm, ignore_hd=False, get_deltas=False):
+    return angle_rmsd(parm, sites_cart, ignore_hd, get_deltas)
+
+  def bond_deviations(self, sites_cart, parm, ignore_hd=False, get_deltas=False):
+    return bond_rmsd(parm, sites_cart, ignore_hd, get_deltas)
+
+  def n_angle_proxies(self, parm, ignore_hd=False):
+    if not ignore_hd:
+      return self.energy_components[7]
+    else:
+      return parm.ptr('ntheta')
+
+  def n_bond_proxies(self, parm, ignore_hd=False):
+    if not ignore_hd:
+      return self.energy_components[6]
+    else:
+      return parm.ptr('nbona')
 
 def print_sites_cart(sites_cart):
         for atom in sites_cart:
@@ -174,28 +196,39 @@ def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
   gradients = gradients * (1.0/n_symop)
   return gradients
 
-def bond_angle_rmsd(parm, sites_cart):
+def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
   from math import acos, pi, sqrt
-
-  #bond rmsd
-  bdev = 0
-  # import code; code.interact(local=dict(globals(), **locals()))
-  # sys.exit()
-  for i, bond in enumerate(parm.bonds_inc_h + parm.bonds_without_h):
+  if ignore_hd:
+    bonds = parm.bonds_without_h
+  else:
+    bonds = parm.bonds_inc_h + parm.bonds_without_h
+  bond_deltas = []
+  for i, bond in enumerate(bonds):
     atom1 = sites_cart[bond.atom1.starting_index]
     atom2 = sites_cart[bond.atom2.starting_index]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
-    contrib = bond.bond_type.req - sqrt(dx*dx + dy*dy + dz*dz)
-    bdev += contrib * contrib
-  nbond = i + 1
-  bdev /= nbond
-  bdev = sqrt(bdev)
+    delta = bond.bond_type.req - sqrt(dx*dx + dy*dy + dz*dz)
+    bond_deltas.append(delta)
+  bond_deltas = flex.double(bond_deltas)
+  b_sq  = bond_deltas * bond_deltas
+  b_ave = sqrt(flex.mean_default(b_sq, 0))
+  b_max = sqrt(flex.max_default(b_sq, 0))
+  b_min = sqrt(flex.min_default(b_sq, 0))
+  if not get_deltas:
+    return b_min, b_max, b_ave
+  else:
+    return (b_min, b_max, b_ave), bond_deltas
 
-  #angle rmsd
-  adev = 0
-  for i, angle in enumerate(parm.angles_inc_h + parm.angles_without_h):
+def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
+  from math import acos, pi, sqrt
+  if ignore_hd:
+    angles = parm.angles_without_h
+  else:
+    angles = parm.angles_inc_h + parm.angles_without_h
+  angle_deltas = []
+  for i, angle in enumerate(angles):
     atom1 = sites_cart[angle.atom1.starting_index]
     atom2 = sites_cart[angle.atom2.starting_index]
     atom3 = sites_cart[angle.atom3.starting_index]
@@ -203,14 +236,18 @@ def bond_angle_rmsd(parm, sites_cart):
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
     b = flex.double(b)
-    contrib = angle.angle_type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))
-    contrib *= 180/pi
-    adev += contrib * contrib
-  nang = i + 1
-  adev /= nang
-  adev = sqrt(adev)
-
-  return bdev, adev
+    delta = angle.angle_type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))
+    delta *= 180/pi
+    angle_deltas.append(delta)
+  angle_deltas= flex.double(angle_deltas)
+  a_sq  = angle_deltas * angle_deltas
+  a_ave = sqrt(flex.mean_default(a_sq, 0))
+  a_max = sqrt(flex.max_default(a_sq, 0))
+  a_min = sqrt(flex.min_default(a_sq, 0))
+  if not get_deltas:
+    return (a_min, a_max, a_ave)
+  else:
+    return (a_min, a_max, a_ave), angle_deltas
 
 
 def run(pdb,prmtop, crd):
