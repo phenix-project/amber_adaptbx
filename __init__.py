@@ -221,6 +221,31 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
   else:
     return (b_min, b_max, b_ave), bond_deltas
 
+def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
+  from math import acos, pi, sqrt
+  if ignore_hd:
+    bonds = parm.bonds_without_h
+  else:
+    bonds = parm.bonds_inc_h + parm.bonds_without_h
+  bond_Zs = []
+  for i, bond in enumerate(bonds):
+    atom1 = sites_cart[bond.atom1.starting_index]
+    atom2 = sites_cart[bond.atom2.starting_index]
+    dx = atom1[0] - atom2[0]
+    dy = atom1[1] - atom2[1]
+    dz = atom1[2] - atom2[2]
+    Z = sqrt(bond.bond_type.k)*(bond.bond_type.req - sqrt(dx*dx + dy*dy + dz*dz))
+    bond_Zs.append(Z)
+  bond_Zs = flex.double(bond_Zs)
+  b_sq  = bond_Zs * bond_Zs
+  b_ave = sqrt(flex.mean_default(b_sq, 0))
+  b_max = sqrt(flex.max_default(b_sq, 0))
+  b_min = sqrt(flex.min_default(b_sq, 0))
+  if not get_deltas:
+    return b_min, b_max, b_ave
+  else:
+    return (b_min, b_max, b_ave), bond_Zs
+
 def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
   from math import acos, pi, sqrt
   if ignore_hd:
@@ -248,6 +273,33 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     return (a_min, a_max, a_ave)
   else:
     return (a_min, a_max, a_ave), angle_deltas
+
+def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
+  from math import acos, pi, sqrt
+  if ignore_hd:
+    angles = parm.angles_without_h
+  else:
+    angles = parm.angles_inc_h + parm.angles_without_h
+  angle_Zs = []
+  for i, angle in enumerate(angles):
+    atom1 = sites_cart[angle.atom1.starting_index]
+    atom2 = sites_cart[angle.atom2.starting_index]
+    atom3 = sites_cart[angle.atom3.starting_index]
+    a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
+    b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
+    a = flex.double(a)
+    b = flex.double(b)
+    Z = sqrt(angle.angle_type.k)*(angle.angle_type.theteq - acos(a.dot(b)/(a.norm()*b.norm())))
+    angle_Zs.append(Z)
+  angle_Zs= flex.double(angle_Zs)
+  a_sq  = angle_Zs * angle_Zs
+  a_ave = sqrt(flex.mean_default(a_sq, 0))
+  a_max = sqrt(flex.max_default(a_sq, 0))
+  a_min = sqrt(flex.min_default(a_sq, 0))
+  if not get_deltas:
+    return (a_min, a_max, a_ave)
+  else:
+    return (a_min, a_max, a_ave), angle_Zs
 
 
 def run(pdb,prmtop, crd):
