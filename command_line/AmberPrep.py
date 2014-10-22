@@ -11,6 +11,7 @@ from libtbx import easy_run
 import StringIO
 from amber_adaptbx import fix_ambpdb
 from amber_adaptbx import amber_library_server
+from libtbx.utils import Sorry
 
 master_phil_string = """
 amber_prep
@@ -343,16 +344,22 @@ def uc(pdb_filename,ns_names,cryst1, base, redq=False):
     with open(pdb_filename) as fin:
       smtry = [line for line in fin if "SMTRY" in line]
       smtry = ''.join(smtry)
+      if not smtry:
+        print '"%s"' % smtry
+        raise Sorry("REMARK 290 SMTRY1,2,3 records required")
+        smtry = """REMARK 290   SMTRY1   1  1.000000  0.000000  0.000000        0.00000            
+REMARK 290   SMTRY2   1  0.000000  1.000000  0.000000        0.00000            
+REMARK 290   SMTRY3   1  0.000000  0.000000  1.000000        0.00000
+"""
       fout.write(smtry)
     with open("new.pdb") as fin:
       for line in fin:
         fout.write(line)
-  # sys.exit()
   run_UnitCell('4UnitCell.pdb', '4tleap_uc.pdb')
   run_tleap('4tleap_uc.pdb', 'uc', ns_names, reorder_residues='off', logfile='tleap_uc.log', redq=redq)
   run_ChBox('uc', cryst1)
-  cmd='cp uc.rst7 4amber_%s.rst7; cp uc.prmtop 4amber_%s.prmtop' %(base,base)
-  ero=easy_run.fully_buffered(cmd)
+  os.rename('uc.rst7', '4amber_%s.rst7' % base)
+  os.rename('uc.prmtop', '4amber_%s.prmtop' % base)
 
 def run_minimise(base, cryst1, option=None):
   if option is None: return
@@ -456,7 +463,7 @@ def run(rargs):
   pdb_inp = pdb.input(inputs.pdb_file_name)
   pdb_hierarchy=pdb_inp.construct_hierarchy()
   invalid = validatePdb(pdb_hierarchy)
-  assert not invalid, 'PDB input is not "valid"'
+  if invalid: raise Sorry( 'PDB input is not "valid"' )
   cryst1=initializePdb(inputs.pdb_file_name)
   ns_names=run_pdb4amber('init.pdb')
   #

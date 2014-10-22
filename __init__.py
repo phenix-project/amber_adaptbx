@@ -18,6 +18,8 @@ master_phil_str = """
     .type = path
   coordinate_file_name = None
     .type = path
+  wxc_factor = 0.01
+    .type = float
   use_sander = False
     .type = bool
 """

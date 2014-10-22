@@ -129,6 +129,7 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
                              r_free_pdb_max = 0.35,
                              diff_max       = 0.015,
                              exclude_resname_classes = [],
+                             verbose        = False,
                              ):
   file = libtbx.env.find_in_repositories(relative_path=
     "chem_data/polygon_data/all_mvd.pickle", test=os.path.isfile)
@@ -136,19 +137,22 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
   if 0:
     for key in sorted(database_dict.keys()):
       print key, list(database_dict[key][:9])
+    assert 0
   count = 0
-  for i, (sg, rc) in enumerate(zip(database_dict["space_group"],
+  for i, (sg, rc, na) in enumerate(zip(database_dict["space_group"],
                                    database_dict["resname_classes"],
+                                   database_dict["number_of_atoms"],
                                    )):
-    if sg.find("p 1 (no. 1)")==-1: continue
+    #if sg.find("p 1 (no. 1)")==-1: continue
+    if int(na)>5000: continue
     for e in exclude_resname_classes:
       if rc.find(e)>-1: break
     else:
-      print database_dict["pdb_code"][i],sg,rc
+      if verbose:
+        print "  %5d %s %s %s" % (i+1,database_dict["pdb_code"][i],sg,rc)
       yield database_dict["pdb_code"][i]
       count+=1
     continue
-  print count
 
 def run(only_i=None,
         only_code=None,
