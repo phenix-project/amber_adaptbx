@@ -206,8 +206,15 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     bonds = parm.bonds_inc_h + parm.bonds_without_h
   bond_deltas = []
   for i, bond in enumerate(bonds):
-    atom1 = sites_cart[bond.atom1.starting_index]
-    atom2 = sites_cart[bond.atom2.starting_index]
+    atom1= bond.atom1.starting_index
+    atom2= bond.atom2.starting_index
+    natoms=len(sites_cart)
+    # in non-P1 space groups, amber topology knows entire unit cell bonds
+    # only use bonds from 1st ASU
+    if atom1 >= natoms or atom2 >=natoms:
+      continue
+    atom1 = sites_cart[atom1]
+    atom2 = sites_cart[atom2]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
@@ -231,8 +238,13 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     bonds = parm.bonds_inc_h + parm.bonds_without_h
   bond_Zs = []
   for i, bond in enumerate(bonds):
-    atom1 = sites_cart[bond.atom1.starting_index]
-    atom2 = sites_cart[bond.atom2.starting_index]
+    atom1= bond.atom1.starting_index
+    atom2= bond.atom2.starting_index
+    natoms=len(sites_cart)
+    if atom1 >= natoms or atom2 >=natoms:
+      continue
+    atom1 = sites_cart[atom1]
+    atom2 = sites_cart[atom2]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
@@ -256,9 +268,17 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     angles = parm.angles_inc_h + parm.angles_without_h
   angle_deltas = []
   for i, angle in enumerate(angles):
-    atom1 = sites_cart[angle.atom1.starting_index]
-    atom2 = sites_cart[angle.atom2.starting_index]
-    atom3 = sites_cart[angle.atom3.starting_index]
+    # in non-P1 space groups, amber topology knows entire unit cell angles
+    # only use angles from 1st ASU
+    atom1= angle.atom1.starting_index
+    atom2= angle.atom2.starting_index
+    atom3= angle.atom3.starting_index
+    natoms=len(sites_cart)
+    if atom1 >= natoms or atom2 >=natoms or atom3 >=natoms:
+      continue
+    atom1 = sites_cart[atom1]
+    atom2 = sites_cart[atom2]
+    atom3 = sites_cart[atom3]
     a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
@@ -284,9 +304,15 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     angles = parm.angles_inc_h + parm.angles_without_h
   angle_Zs = []
   for i, angle in enumerate(angles):
-    atom1 = sites_cart[angle.atom1.starting_index]
-    atom2 = sites_cart[angle.atom2.starting_index]
-    atom3 = sites_cart[angle.atom3.starting_index]
+    atom1= angle.atom1.starting_index
+    atom2= angle.atom2.starting_index
+    atom3= angle.atom3.starting_index
+    natoms=len(sites_cart)
+    if atom1 >= natoms or atom2 >=natoms or atom3 >=natoms:
+      continue
+    atom1 = sites_cart[atom1]
+    atom2 = sites_cart[atom2]
+    atom3 = sites_cart[atom3]
     a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
