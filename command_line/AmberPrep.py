@@ -339,19 +339,21 @@ def run_UnitCell(input_file,output_file):
   ero.show_stderr()
 
 def uc(pdb_filename,ns_names,cryst1, base, redq=False):
-  #add SMTRY to 4tleap.pdb -> 4UnitCell.pdb
+  #add SMTRY/CRYST1 to 4tleap.pdb -> 4UnitCell.pdb
   with open("4UnitCell.pdb","wb") as fout:
     with open(pdb_filename) as fin:
-      smtry = [line for line in fin if "SMTRY" in line]
+      lines = fin.readlines()
+      smtry = [line for line in lines if "SMTRY" in line]
       smtry = ''.join(smtry)
       if not smtry:
         print '"%s"' % smtry
         raise Sorry("REMARK 290 SMTRY1,2,3 records required")
-        smtry = """REMARK 290   SMTRY1   1  1.000000  0.000000  0.000000        0.00000            
-REMARK 290   SMTRY2   1  0.000000  1.000000  0.000000        0.00000            
-REMARK 290   SMTRY3   1  0.000000  0.000000  1.000000        0.00000
-"""
       fout.write(smtry)
+      # import code; code.interact(local=locals())
+      cryst1card = [line for line in lines if "CRYST1" in line]
+      if len(cryst1card) <1:
+        raise Sorry("CRYST1 record required")
+      fout.write(cryst1card[0])
     with open("new.pdb") as fin:
       for line in fin:
         fout.write(line)
