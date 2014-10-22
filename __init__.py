@@ -20,7 +20,7 @@ master_phil_str = """
     .type = path
   wxc_factor = 0.01
     .type = float
-  use_sander = False
+  use_sander = True 
     .type = bool
 """
 
