@@ -164,10 +164,11 @@ def get_amber_structs (parm_file_name, rst_file_name):
         return ext.uform(parm_file_name, rst_file_name)
 
 class sander_structs ():
-  def __init__ (self, parm_file_name, rst_file_name):
+  def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
     self.parm = AmberParm(parm_file_name)
     self.rst = Rst7.open(rst_file_name)
     self.inp = sander.pme_input()
+    self.ridingH = ridingH
 
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()
