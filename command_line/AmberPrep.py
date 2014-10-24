@@ -372,21 +372,23 @@ def run_minimise(base, cryst1, option=None):
     f.write("&cntrl\n")
     f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
     f.write(" ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',\n")
-    f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
+    f.write(" imin   = 1, maxcyc =10000, ncyc   = 2000, ntmin  = 1, \n")
     f.write("&end\n")
     f.close()
-    cmd='sander -O -i min_H.in -p %s.prmtop -c %s.rst7 -o min_H.out \
-         -ref %s.rst7 -r %s_minH.rst7' %(base, base, base, base)
+    cmd='sander -O -i min_H.in -p asu.prmtop -c asu.rst7 -o min_H.out \
+         -ref asu.rst7 -r asu_minH.rst7'
     print cmd
     ero=easy_run.fully_buffered(cmd)
-    run_ChBox(base+'_minH',cryst1)
-    cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minH')
+    assert (ero.return_code == 0)
+    run_ChBox('asu_minH',cryst1)
+    cmd='ambpdb -p asu.prmtop <asu_minH.rst7 >new.pdb'
     print cmd
     ero=easy_run.fully_buffered(cmd)
+    assert (ero.return_code == 0)
     ero.show_stdout()
     ero.show_stderr()
     fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
-    finalizePdb('new2.pdb',cryst1, base+'_minH')
+    finalizePdb('new2.pdb',cryst1, base)
 
   elif option=="amber_all":  
     f=open('min_all.in', 'w')
@@ -396,25 +398,26 @@ def run_minimise(base, cryst1, option=None):
     f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
     f.write("&end\n")
     f.close()
-    cmd='sander -O -i min_all.in -p %s.prmtop -c %s.rst7 -o min_all.out \
-         -r %s_minall.rst7'%(base, base, base)
+    cmd='sander -O -i min_all.in -p asu.prmtop -c asu.rst7 -o min_H.out \
+         -ref asu.rst7 -r asu_minall.rst7'
     print cmd
     ero=easy_run.fully_buffered(cmd)  
-    ero=easy_run.fully_buffered(cmd)
-    run_ChBox(base+'_minall',cryst1)
-    cmd='ambpdb -p %s.prmtop <%s.rst7 >new.pdb' %(base, base+'_minall')
+    assert (ero.return_code == 0)
+    run_ChBox('asu_minall',cryst1)
+    cmd='ambpdb -p asu.prmtop <asu_minall.rst7 >new.pdb'
     print cmd
     ero=easy_run.fully_buffered(cmd)
+    assert (ero.return_code == 0)
     ero.show_stdout()
     ero.show_stderr()
     fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
     finalizePdb('new2.pdb',cryst1, base+'_minall')  
 
   elif option=="phenix_all":
-    cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use=True \
-         amber.topology_file_name=%s.prmtop \
-         amber.coordinate_file_name=%s.rst7  \
-         output_file_name_prefix=%s_minPhenix ' %(base,base,base,base)
+    cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use_amber=True \
+         amber.topology_file_name=4amber_%s.prmtop \
+         amber.coordinate_file_name=4amber_%s.rst7  \
+         output_file_name_prefix=4phenix_%s_minPhenix ' %(base,base,base,base)
     restraints = "%s.ligands.cif" % base
     if os.path.exists(restraints):
       cmd += " %s" % restraints
@@ -423,7 +426,7 @@ def run_minimise(base, cryst1, option=None):
     assert (ero.return_code == 0)
     ero.show_stdout()
     ero.show_stderr()
-
+    os.rename('4phenix_%s_minPhenix.pdb' %base, '4phenix_%s.pdb' % base)
   return 0
 
 def run_clean():
