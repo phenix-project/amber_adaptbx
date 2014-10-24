@@ -119,8 +119,8 @@ class run(object):
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
           max_iterations = max_number_of_iterations)
 
-      if hasattr(amber_structs, 'parm'):
-        sander.cleanup()
+    if hasattr(amber_structs, 'parm'):
+      sander.cleanup()
 
   def show(self, amber_structs):
     import amber_adaptbx as amber
