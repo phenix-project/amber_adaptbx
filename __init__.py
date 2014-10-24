@@ -52,6 +52,7 @@ class geometry_manager(object):
       # print "\n\nUSING SANDER\n\n"
       sander_coords = list(sites_cart_uc.as_double())
       # import code; code.interact(local=dict(globals(), **locals()))
+      # sys.exit()
       sander.set_positions(sander_coords)
       ene, frc = sander.energy_forces()
       # sander.cleanup()
@@ -128,12 +129,19 @@ class energies (scitbx.restraints.energies) :
     print "      electrostatics: %0.2f" %(self.energy_components[4])
     print "      van der Waals: %0.2f" %(self.energy_components[5])
     return 0
-    
+
   def get_grms(self):
     from math import sqrt
     gradients_1d = self.gradients.as_double()
     grms = sum(gradients_1d**2)
     grms /= gradients_1d.size()
+    grms = sqrt(grms)
+    return grms
+
+  def get_gnorm(self):
+    from math import sqrt
+    gradients_1d = self.gradients.as_double()
+    grms = sum(gradients_1d**2)
     grms = sqrt(grms)
     return grms
 
