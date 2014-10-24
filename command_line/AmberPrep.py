@@ -372,7 +372,7 @@ def run_minimise(base, cryst1, option=None):
     f.write("&cntrl\n")
     f.write(" ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,\n")
     f.write(" ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',\n")
-    f.write(" imin   = 1, maxcyc =10000, ncyc   = 2000, ntmin  = 1, \n")
+    f.write(" imin   = 1, maxcyc =1000, ncyc   = 200, ntmin  = 1, \n")
     f.write("&end\n")
     f.close()
     cmd='sander -O -i min_H.in -p asu.prmtop -c asu.rst7 -o min_H.out \
