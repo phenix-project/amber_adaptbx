@@ -51,8 +51,8 @@ class geometry_manager(object):
     if hasattr(self.amber_structs,'parm'):
       # print "\n\nUSING SANDER\n\n"
       sander_coords = list(sites_cart_uc.as_double())
-      # import code; code.interact(local=dict(globals(), **locals()))
-      # sys.exit()
+      #~ import code; code.interact(local=dict(globals(), **locals()))
+      #~ sys.exit()
       sander.set_positions(sander_coords)
       ene, frc = sander.energy_forces()
       # sander.cleanup()
@@ -183,11 +183,17 @@ def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   cell = crystal_symmetry.unit_cell()
   sg = crystal_symmetry.space_group()
   for i, op in enumerate(sg.all_ops()):
-    rotn = op.r().as_double()
-    tln = cell.orthogonalize(op.t().as_double())
-    # import code; code.interact(local=dict(globals(), **locals()))
-    # sys.exit()
-    sites_cart_uc.extend( (rotn * sites_cart) + tln)
+    #~ rotn = op.r().as_double()
+    #~ tln = cell.orthogonalize(op.t().as_double())
+    #~ # import code; code.interact(local=dict(globals(), **locals()))
+    #~ # sys.exit()
+    #~ sites_cart_uc.extend( (rotn * sites_cart) + tln)
+    
+    r = op.r().as_double()
+    t = op.t().as_double()
+    sites_frac = cell.fractionalize(sites_cart)
+    sites_cart_uc.extend( cell.orthogonalize(r*sites_frac + t) )
+        
   return sites_cart_uc
     
 def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
@@ -195,15 +201,14 @@ def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
   sg = crystal_symmetry.space_group()
   n_symop = sg.n_smx()
   n_asu_atoms = int(gradients_uc.size() / n_symop)
-  # import code; code.interact(local=dict(globals(), **locals()))
-  # sys.exit()
   gradients = flex.vec3_double(n_asu_atoms)
   for i, op in enumerate(sg.all_ops()):
     inv_rotn = op.r().inverse().as_double()
-    tln = cell.orthogonalize(op.t().as_double())
+    tln = op.t().as_double()
     start = i*n_asu_atoms
     end = (i+1)*n_asu_atoms
-    gradients += inv_rotn * (gradients_uc[start:end])
+    g_frac = cell.fractionalize(gradients_uc[start:end])
+    gradients += inv_rotn * (g_frac-t)
   gradients = gradients * (1.0/n_symop)
   return gradients
 
