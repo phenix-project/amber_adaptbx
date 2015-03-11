@@ -88,7 +88,7 @@ class run(object):
         parm_file_name=prmtop,
         rst_file_name=ambcrd)
       sander.setup(amber_structs.parm,
-             amber_structs.rst.coords,
+             amber_structs.rst.coordinates,
              amber_structs.rst.box,
              amber_structs.inp)
     else:
