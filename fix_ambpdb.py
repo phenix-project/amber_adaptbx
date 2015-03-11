@@ -69,7 +69,10 @@ def run (pre_amber_pdb_file, post_amber_pdb_file, output_pdb_file="out.pdb"):
                     atom_post.occ=atom_pre.occ
                     chain_post.id=chain_pre.id
 
-  pdb_h_post.write_pdb_file(file_name=output_pdb_file, append_end=True,crystal_symmetry=pdb_pre.crystal_symmetry())
+  pdb_h_post.write_pdb_file(file_name=output_pdb_file,
+                            append_end=True,
+                            crystal_symmetry=pdb_pre.crystal_symmetry(),
+    )
     
 if __name__=="__main__":
   import argparse
