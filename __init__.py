@@ -49,11 +49,9 @@ class geometry_manager(object):
     #Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
-    if hasattr(self.amber_structs,'parm'):
+    if self.amber_structs.md_engine == 'sander':
       # print "\n\nUSING SANDER\n\n"
       sander_coords = list(sites_cart_uc.as_double())
-      #~ import code; code.interact(local=dict(globals(), **locals()))
-      #~ sys.exit()
       sander.set_positions(sander_coords)
       ene, frc = sander.energy_forces()
       # sander.cleanup()
@@ -81,7 +79,7 @@ class geometry_manager(object):
                                   nbond, nangl, nmphi]
       result.finalize_target_and_gradients()
 
-    else:
+    elif self.amber_structs.md_engine == 'mdgx':
       # print "\n\nUSING MDGX\n\n"
       #Convert flex arrays to C arrays
       sites_cart_c=ext.ExtractVec(sites_cart_uc.as_double())
@@ -89,7 +87,7 @@ class geometry_manager(object):
       energy_components_c=ext.ExtractVec(self.energy_components)
 
       # Call c++ interface to call mdgx to calculate new gradients and target
-      ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.amber_structs)
+      ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.amber_structs.uform)
       if (compute_gradients) :
         # import code; code.interact(local=dict(globals(), **locals()))
         # sys.exit()
@@ -109,6 +107,9 @@ class geometry_manager(object):
       result.residual_sum = float(energy_components_c[0])
       result.energy_components = list(energy_components_c)
       result.finalize_target_and_gradients()
+    else:
+      print "error: unknown md engine"
+      sys.exit()
     return result
 
 class energies (scitbx.restraints.energies) :
@@ -172,8 +173,16 @@ def print_sites_cart(sites_cart):
 def get_amber_structs (parm_file_name, rst_file_name):
         return ext.uform(parm_file_name, rst_file_name)
 
+class mdgx_structs():
+  def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
+    self.md_engine = 'mdgx'
+    self.parm = AmberParm(parm_file_name)
+    self.uform = ext.uform(parm_file_name, rst_file_name)
+    self.ridingH = ridingH
+
 class sander_structs ():
   def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
+    self.md_engine = 'sander'
     self.parm = AmberParm(parm_file_name)
     self.rst = Rst7.open(rst_file_name)
     self.inp = sander.pme_input()
