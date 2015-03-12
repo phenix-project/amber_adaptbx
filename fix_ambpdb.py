@@ -30,10 +30,9 @@ def run (pre_amber_pdb_file, post_amber_pdb_file, output_pdb_file="out.pdb"):
       atom_group.resname = '  '+atom_group.resname.strip()[0]
     elif atom_group.resname in ['DA5','DA3','DC5','DC3','DG5','DG3','DT5','DT3']:
       atom_group.resname = atom_group.resname[0:2]
-    # this is a temporary fix to reduce bug: reduce requires one-letter
-    # residue names to be right justified
-    elif atom_group.resname.strip() in ['G','A','C','U']:
-      atom_group.resname = '  '+atom_group.resname.strip()
+    # ambpdb now right-justifies residue names so this is not necessary
+    # elif atom_group.resname.strip() in ['G','A','C','U']:
+    #  atom_group.resname = '  '+atom_group.resname.strip()
 
   # even though we're not modifying pdb_pre, we need to change residue 
   # names to ensure matching below
@@ -48,10 +47,9 @@ def run (pre_amber_pdb_file, post_amber_pdb_file, output_pdb_file="out.pdb"):
       atom_group.resname = '  '+atom_group.resname.strip()[0]+' '
     elif atom_group.resname in ['DA5','DA3','DC5','DC3','DG5','DG3','DT5','DT3']:
       atom_group.resname = atom_group.resname[0:2]
-    # this is a temporary fix to reduce bug: reduce requires one-letter
-    # residue names to be right justified
-    elif atom_group.resname.strip() in ['G','A','C','U']:
-      atom_group.resname = '  '+atom_group.resname.strip()
+    # ambpdb now right-justifies residue names so this is not necessary
+    # elif atom_group.resname.strip() in ['G','A','C','U']:
+    #  atom_group.resname = '  '+atom_group.resname.strip()
 
 
   #match residues based on resseq and resname
