@@ -6,6 +6,7 @@ import scitbx.lbfgs
 import sys
 import amber_adaptbx.lbfgs
 from amber_adaptbx import get_amber_structs
+from libtbx.utils import Sorry
 
 class lbfgs(amber_adaptbx.lbfgs.lbfgs):
   def __init__(self,
@@ -50,7 +51,7 @@ class run(object):
                parallelity                    = False,
                generic_restraints             = False,
                grms_termination_cutoff        = 0,
-               use_sander                     = False,
+               md_engine                      = False,
                alternate_nonbonded_off_on     = False,
                log                            = None,
                prmtop                         = None,
@@ -82,7 +83,7 @@ class run(object):
       bond_similarity    = True,
       generic_restraints = True)
 
-    if (use_sander):
+    if md_engine == "sander":
       import sander
       amber_structs = amber_adaptbx.sander_structs(
         parm_file_name=prmtop,
@@ -91,10 +92,12 @@ class run(object):
              amber_structs.rst.coordinates,
              amber_structs.rst.box,
              amber_structs.inp)
-    else:
+    elif md_engine == "mdgx":
       amber_structs = amber_adaptbx.mdgx_structs(
         parm_file_name=prmtop,
         rst_file_name=ambcrd)
+    else:
+      raise Sorry("Unsupported md_engine %s" %md_engine)
 
     self.show(amber_structs)
 

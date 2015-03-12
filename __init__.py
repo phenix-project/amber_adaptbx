@@ -21,8 +21,8 @@ master_phil_str = """
     .type = path
   wxc_factor = None
     .type = float
-  use_sander = True 
-    .type = bool
+  md_engine = "sander"
+    .type = str
 """
 
 class geometry_manager(object):

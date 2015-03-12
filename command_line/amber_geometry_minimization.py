@@ -269,7 +269,7 @@ def run_minimization_amber (
       log,
       prmtop,
       ambcrd,
-      use_sander):
+      md_engine):
   import amber_adaptbx.amber_geometry_minimization
   o = amber_adaptbx.amber_geometry_minimization.run(
     restraints_manager             = restraints_manager,
@@ -285,7 +285,7 @@ def run_minimization_amber (
     planarity                      = params.move.planarity,
     generic_restraints             = False,
     grms_termination_cutoff        = params.grms_termination_cutoff,
-    use_sander                     = use_sander,
+    md_engine                      = md_engine,
     alternate_nonbonded_off_on     = params.alternate_nonbonded_off_on,
     log                            = log,
     prmtop                         = prmtop,
@@ -443,7 +443,7 @@ class run(object):
         log = self.log,
         prmtop = self.params.amber.topology_file_name,
         ambcrd = self.params.amber.coordinate_file_name,
-        use_sander = self.params.amber.use_sander)
+        md_engine = self.params.amber.md_engine)
     else:
       run_minimization(
         selection = self.selection,
