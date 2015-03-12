@@ -19,8 +19,8 @@ master_phil_str = """
     .type = path
   coordinate_file_name = None
     .type = path
-  wxc_factor = None
-    .type = float
+  wxc_factor = False
+    .type = bool
   md_engine = "sander"
     .type = str
 """
