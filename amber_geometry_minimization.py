@@ -92,7 +92,7 @@ class run(object):
              amber_structs.rst.box,
              amber_structs.inp)
     else:
-      amber_structs = amber_adaptbx.get_amber_structs(
+      amber_structs = amber_adaptbx.mdgx_structs(
         parm_file_name=prmtop,
         rst_file_name=ambcrd)
 
@@ -119,7 +119,7 @@ class run(object):
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
           max_iterations = max_number_of_iterations)
 
-    if hasattr(amber_structs, 'parm'):
+    if amber_structs.md_engine == 'sander':
       sander.cleanup()
 
   def show(self, amber_structs):
