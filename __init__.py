@@ -45,7 +45,6 @@ class geometry_manager(object):
   def energies_sites(self,
         crystal_symmetry,
         compute_gradients=False):
-    # import code; code.interact(local=dict(globals(), **locals()))
     #Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
@@ -54,7 +53,6 @@ class geometry_manager(object):
       sander_coords = list(sites_cart_uc.as_double())
       sander.set_positions(sander_coords)
       ene, frc = sander.energy_forces()
-      # sander.cleanup()
       if (compute_gradients) :
         gradients_uc=flex.vec3_double(flex.double(frc)) * -1
         gradients = gradients_uc[0:self.sites_cart.size()]
@@ -78,7 +76,6 @@ class geometry_manager(object):
                                   ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
                                   nbond, nangl, nmphi]
       result.finalize_target_and_gradients()
-
     elif self.amber_structs.md_engine == 'mdgx':
       # print "\n\nUSING MDGX\n\n"
       #Convert flex arrays to C arrays

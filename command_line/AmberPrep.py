@@ -429,6 +429,40 @@ def run_minimise(base, cryst1, option=None):
     os.rename('4phenix_%s_minPhenix.pdb' %base, '4phenix_%s.pdb' % base)
   return 0
 
+def check_special_positions(base):
+  # this is a special case because we are naming the minall minimized pdb
+  # with 'minall'. After we finish all the test cases this will be changed
+  # so that the final pdb is always 4phenix_%s.pdb
+  if os.path.isfile('4phenix_%s_minall.pdb' %base):
+    pdb_file = '4phenix_%s_minall.pdb' %base
+  else:
+    pdb_file = '4phenix_%s.pdb' %base
+  print >> sys.stderr, pdb_file
+  xrs = iotbx.pdb.input(file_name=pdb_file).xray_structure_simple()
+  site_symmetry_table = xrs.site_symmetry_table()
+  if site_symmetry_table.n_special_positions() > 0:
+    print >> sys.stderr, "WARNING: The following atoms occupy special positions."
+    for i in site_symmetry_table.special_position_indices():
+      print >> sys.stderr, "  Atom %d" %i
+    print >> sys.stderr, "It may be a good idea to inspect manually and remove"
+    print >> sys.stderr, "atoms from special positions or rerun minimization."
+  # the following high gradient checker does not work yet
+  # rst = Rst7.open('4amber_%s.rst7' %base)     #box
+  # sander.setup('4amber_%s.prmtop' %base, rst.coordinates, rst.box, sander.pme_input())
+  # crystal_symmetry = xrs.crystal_symmetry()
+  # sites_cart = xrs.sites_cart()
+  # sites_cart_uc=expand_coord_to_unit_cell(sites_cart, crystal_symmetry)
+  # sander.set_positions( list(sites_cart_uc.as_double()) )
+  # ene, frc = sander.energy_forces()
+  # sander.cleanup()
+  # big_frcs = [(i, frc_i) for i, frc_i in enumerate(frc) if frc_i>100000]
+  # if len(big_frcs) >0:
+  #   print >> sys.stderr, "WARNING: The following atoms have very high gradients."
+  #   for i in big_frcs:
+  #     print >> sys.stderr, "%d %f" %(i[0]/3, i[1])
+  else:
+    print >> sys.stderr, "None"
+
 def run_clean():
   files_to_clean = """
     4tleap_nonprot.pdb
@@ -437,7 +471,6 @@ def run_clean():
     4tleap_sslink
     4tleap_uc.pdb
     4UnitCell.pdb
-    asu.prmtop
     asu.rst7
     init.pdb
     leap.log
@@ -453,6 +486,13 @@ def run_clean():
     sqm.out
     sqm.in
     4antechamber*
+    4phenix_4hs2_minPhenix.geo
+    min_H.out
+    min_H.in
+    mdinfo
+    asu_minall.rst7
+    min_all.in
+    asu_minH.rst7
   """
 
   import glob
@@ -482,10 +522,12 @@ def run(rargs):
   run_ambpdb('asu')
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
   finalizePdb('new2.pdb', cryst1, base)
+  #
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
   print >> sys.stderr, "=================================================="
   uc(inputs.pdb_file_name, ns_names,cryst1, base, redq=actions.redq)
+  #
   if actions.minimise == "off":
     pass
   else:
@@ -493,6 +535,11 @@ def run(rargs):
     print >> sys.stderr, "Minimizing input coordinates."
     print >> sys.stderr, "=================================================="
     run_minimise(base, cryst1, actions.minimise)
+  #
+  print >> sys.stderr, "\n=================================================="
+  print >> sys.stderr, "Checking for atoms at special positions."
+  print >> sys.stderr, "=================================================="
+  check_special_positions(base)
   if actions.clean == "on":
     run_clean()
   return '4phenix_%s.pdb' % base
