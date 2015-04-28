@@ -201,6 +201,7 @@ def get_geometry_restraints_manager(processed_pdb_file,
                                     xray_structure,
                                     params,
                                     log=sys.stdout):
+  assert 0, "This is obsoleted, need to add option to phenix.geometry_minimization."
   has_hd = None
   if(xray_structure is not None):
     sctr_keys = xray_structure.scattering_type_registry().type_count_dict().keys()
