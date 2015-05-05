@@ -5,7 +5,11 @@ import os.path
 import sys
 
 
-if os.path.isdir('/net/casegroup2/u2/pjanowsk/bin/phenix_bootstrap/modules/amber'):
+amber_dist = libtbx.env.dist_path("amber")
+if(amber_dist and 
+   os.path.exists(amber_dist) and
+   os.path.isdir(amber_dist)
+   ):
   print "AMBER SCONS: Amber linked. Will attempt MDGX compile."
   Import("env_base", "env_etc")
   ext_sources = [

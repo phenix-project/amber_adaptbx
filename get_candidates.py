@@ -129,6 +129,7 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
                              r_free_pdb_max = 0.35,
                              diff_max       = 0.015,
                              exclude_resname_classes = [],
+                             include_resname_class = None,
                              verbose        = False,
                              ):
   file = libtbx.env.find_in_repositories(relative_path=
@@ -145,6 +146,8 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
                                    )):
     #if sg.find("p 1 (no. 1)")==-1: continue
     if int(na)>5000: continue
+    if include_resname_class is not None and include_resname_class not in rc:
+      continue
     for e in exclude_resname_classes:
       if rc.find(e)>-1: break
     else:
