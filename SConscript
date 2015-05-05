@@ -5,7 +5,7 @@ import os.path
 import sys
 
 
-amber_dist = libtbx.env.dist_path("amber")
+amber_dist = libtbx.env.dist_path("amber", default=None)
 if(amber_dist and 
    os.path.exists(amber_dist) and
    os.path.isdir(amber_dist)
@@ -19,8 +19,8 @@ if(amber_dist and
 
   env_etc.amber_adaptbx_dist = libtbx.env.dist_path("amber_adaptbx")
   amber_dir = os.path.join(os.path.dirname(env_etc.amber_adaptbx_dist),
-    "amber")
-  amber_src_dir = amber_dir + "/src"
+                           "amber")
+  amber_src_dir = os.path.join(amber_dir, "src")
 
   env_etc.amber_common_includes = [
     amber_dir+"/include",
@@ -35,7 +35,8 @@ if(amber_dist and
   env_amber_ext = env_scitbx_boost_python_ext.Clone()
   env_amber_ext.Append(CPPDEFINES='AMBERPHENIX')
   env_amber_ext.Append(LIBS=["fftw3", "netcdf", "mdgx",])
-  env_amber_ext.Append(LIBPATH=["%s/lib" % os.environ["AMBERHOME"]])
+  env_amber_ext.Append(LIBPATH=[
+    os.path.join("%s" % os.environ["AMBERHOME"], "lib")])
   env_etc.include_registry.append(
     env=env_amber_ext,
     paths=env_etc.amber_common_includes)
