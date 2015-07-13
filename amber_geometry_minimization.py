@@ -49,7 +49,6 @@ class run(object):
                chirality                      = False,
                planarity                      = False,
                parallelity                    = False,
-               generic_restraints             = False,
                grms_termination_cutoff        = 0,
                md_engine                      = False,
                alternate_nonbonded_off_on     = False,
@@ -80,8 +79,7 @@ class run(object):
       chirality          = chirality,
       planarity          = planarity,
       reference_dihedral = True,
-      bond_similarity    = True,
-      generic_restraints = True)
+      bond_similarity    = True)
 
     if md_engine == "sander":
       import sander
