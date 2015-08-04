@@ -15,14 +15,19 @@ from chemistry.amber.readparm import AmberParm, Rst7
 master_phil_str = """
   use_amber = False
     .type = bool
+    .help = Use Amber for all the gradients in refinement
   topology_file_name = None
     .type = path
+    .help = A topology file needed by Amber. Can be generated using phenix.AmberPrep.
   coordinate_file_name = None
     .type = path
+    .help = A coordinate file needed by Amber. Can be generated using phenix.AmberPrep.
   wxc_factor = False
     .type = bool
-  md_engine = "sander"
-    .type = str
+    .style = hidden
+  md_engine = "*sander mdgx"
+    .type = choice
+    .help = Can be "sander" or if compile during Amber installation "mgdx".
 """
 
 class geometry_manager(object):
