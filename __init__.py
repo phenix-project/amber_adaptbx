@@ -16,16 +16,19 @@ master_phil_str = """
   use_amber = False
     .type = bool
     .help = Use Amber for all the gradients in refinement
+    .short_caption = Enable Amber
   topology_file_name = None
     .type = path
     .help = A topology file needed by Amber. Can be generated using phenix.AmberPrep.
+    .style = bold input_file
   coordinate_file_name = None
     .type = path
     .help = A coordinate file needed by Amber. Can be generated using phenix.AmberPrep.
+    .style = bold input_file
   wxc_factor = False
     .type = bool
     .style = hidden
-  md_engine = "*sander mdgx"
+  md_engine = *sander mdgx
     .type = choice
     .help = Can be "sander" or if compile during Amber installation "mgdx".
 """
@@ -200,14 +203,14 @@ def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
     #~ # import code; code.interact(local=dict(globals(), **locals()))
     #~ # sys.exit()
     #~ sites_cart_uc.extend( (rotn * sites_cart) + tln)
-    
+
     r = op.r().as_double()
     t = op.t().as_double()
     sites_frac = cell.fractionalize(sites_cart)
     sites_cart_uc.extend( cell.orthogonalize(r*sites_frac + t) )
-        
+
   return sites_cart_uc
-    
+
 def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
   cell = crystal_symmetry.unit_cell()
   sg = crystal_symmetry.space_group()
