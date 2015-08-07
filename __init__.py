@@ -36,7 +36,7 @@ master_phil_str = """
     .style = hidden
   md_engine = *sander mdgx
     .type = choice
-    .help = Can be "sander" or if compile during Amber installation "mgdx".
+    .help = Amber MD engine to use. Use "sander" by default. "mdgx" is for developers and requires compilation.
 """
 
 class geometry_manager(object):

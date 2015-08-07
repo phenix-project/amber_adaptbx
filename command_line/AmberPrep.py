@@ -29,10 +29,13 @@ amber_prep
   {
     minimise = amber_all amber_h phenix_all *off
       .type = choice
+      .help = Type of minimization or none.
     clean = on *off
       .type = choice
+      .help = Clean temporary files.
     redq = False
       .type = bool
+      .help = Use reduced charge force field (approximates dialectric)
   }
   output
   {
