@@ -33,6 +33,11 @@ This will create a link to $AMBERHOME in the Phenix installation [***Nigel, why 
 reconfigure Phenix to include Amber and build the code required to
 prepare Amber files and run them seamlessly with Phenix. Amber will remain
 linked and therefore $AMBERHOME should remain set to the Amber installation.
+To test if the interface has installed successfully the user may go to the Phenix modules/amber_adaptbx directory and run:
+
+::
+
+	phenix.python tst_refinement.py
 
 To run Amber in Phenix, in addition to a PDB file, a topology and a coordinate file must be provided for Amber. You can easily create these files by using the provided AmberPrep utility:
 
