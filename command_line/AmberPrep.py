@@ -27,10 +27,10 @@ amber_prep
   }
   actions
   {
-    minimise = amber_all amber_h phenix_all *off
+    minimise = *amber_all amber_h phenix_all off
       .type = choice
       .help = Type of minimization or none.
-    clean = on *off
+    clean = *on off
       .type = choice
       .help = Clean temporary files.
     redq = False
