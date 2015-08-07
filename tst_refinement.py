@@ -39,9 +39,10 @@ def exercise_vAla3 () :
     "topology_file_name=\"%s\"" % top_file,
     "coordinate_file_name=\"%s\"" % crd_file,
     "use_amber=True",
-    "wxc_scale=0.1",
+    "wxc_scale=0.025",
     "--overwrite",
   ]
+  
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
   assert (rc == 0)
   from phenix.refinement.runtime import extract_phenix_refine_r_factors
