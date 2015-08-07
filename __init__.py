@@ -9,7 +9,13 @@ import scitbx.restraints
 import boost.python
 ext = boost.python.import_ext("amber_adaptbx_ext")
 import sander
-from chemistry.amber.readparm import AmberParm, Rst7
+try:
+  from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
+except ImportError:
+  try:
+    from chemistry.amber.readparm import AmberParm, Rst7 #up to AmberTools15
+  except ImportError:
+    raise ImportError("could not import parmed modules. Check path.")
 
 
 master_phil_str = """
