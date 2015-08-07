@@ -1,8 +1,12 @@
 
+To run geometry minimization:
 
 phenix.geometry_minimization vAla3.pdb vAla3.cif macro_cycles=1 max_iter=2 amber.use=True amber.topology_file_name=vAla3.prmtop amber.coordinate_file_name=vAla3.rst7
 
+To run refinement:
+
 phenix.refine vAla3_shaken.pdb vAla3.cif vAla3.mtz topology_file_name=vAla3.prmtop coordinate_file_name=vAla3.rst7 use_amber=True md_engine=sander wxc_scale=0.025 --overwrite refinement.main.number_of_macro_cycles=1
 
-??
+To run refinement with amber and afitt (??):
+
 phenix.refine vAla3_shaken.pdb vAla3.mtz topology_file_name=vAla3.prmtop coordinate_file_name=vAla3.rst7 use_amber=True  refine.strategy=individual_sites --overwrite vAla3.cif refinement.main.number_of_macro_cycles=1 use_afitt=True ligand_file=vAla3.cif afitt.scale=gnorm afitt.ligand_names=NME wxc_scale=0.025
