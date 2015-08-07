@@ -7,10 +7,10 @@ import iotbx.pdb
 
 def exercise_vAla3 () :
   pdb_file = libtbx.env.find_in_repositories(
-    relative_path="amber_adaptbx/vAla3/vAla3.pdb",
+    relative_path="amber_adaptbx/test_vAla3/vAla3.pdb",
     test=os.path.isfile)
   top_file = libtbx.env.find_in_repositories(
-    relative_path="amber_adaptbx/vAla3/vAla3.prmtop",
+    relative_path="amber_adaptbx/test_vAla3/vAla3.prmtop",
     test=os.path.isfile)
   crd_file = os.path.splitext(top_file)[0] + ".rst7"
   cif_file = os.path.splitext(top_file)[0] + ".cif"
@@ -66,6 +66,15 @@ def exercise_vAla3 () :
   assert sites_cart_inp.rms_difference(sites_cart_min) <0.06, \
     "RMSD of amber-minimized structure is %5.4f (<0.06 required to pass)." \
     % sites_cart_inp.rms_difference(sites_cart_min)
+
+  remove_files = ['vAla3_minimized.geo', 
+                  'vAla3_minimized.pdb',
+                  'vAla3_shaken_minimized.geo',
+                  'vAla3_shaken_minimized.pdb',
+                  'vAla3_shaken.pdb']
+  for file in remove_files:
+    if os.path.exists(file):
+      os.remove(file) 
 
 
 if (__name__ == "__main__") :

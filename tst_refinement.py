@@ -6,7 +6,7 @@ import os.path
 
 def exercise_vAla3 () :
   pdb_file = libtbx.env.find_in_repositories(
-    relative_path="amber_adaptbx/vAla3/vAla3.pdb",
+    relative_path="amber_adaptbx/test_vAla3/vAla3.pdb",
     test=os.path.isfile)
   top_file = os.path.splitext(pdb_file)[0] + ".prmtop"
   crd_file = os.path.splitext(pdb_file)[0] + ".rst7"
@@ -51,6 +51,17 @@ def exercise_vAla3 () :
   r_work : %s != 0.00
   r_free : %s != 0.00
   """ % (r_work, r_free)
+
+  remove_files = ['vAla3.mtz', 'vAla3_shaken.pdb', 
+                  'vAla3_shaken_refine_001.eff',
+                  'vAla3_shaken_refine_001.geo',
+                  'vAla3_shaken_refine_001.log',
+                  'vAla3_shaken_refine_001.mtz',
+                  'vAla3_shaken_refine_001.pdb',
+                  'vAla3_shaken_refine_002.def']
+  for file in remove_files:
+    if os.path.exists(file):
+      os.remove(file)                  
 
 if (__name__ == "__main__") :
   exercise_vAla3()
