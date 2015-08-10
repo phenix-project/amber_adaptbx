@@ -6,8 +6,8 @@ import iotbx.pdb
 import argparse
 from scitbx.array_family import flex
 import scitbx.restraints
-import boost.python
-ext = boost.python.import_ext("amber_adaptbx_ext")
+#~ import boost.python
+#~ ext = boost.python.import_ext("amber_adaptbx_ext")
 import sander
 try:
   from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
@@ -91,6 +91,8 @@ class geometry_manager(object):
                                   nbond, nangl, nmphi]
       result.finalize_target_and_gradients()
     elif self.amber_structs.md_engine == 'mdgx':
+      import boost.python
+      ext = boost.python.import_ext("amber_adaptbx_ext")
       # print "\n\nUSING MDGX\n\n"
       #Convert flex arrays to C arrays
       sites_cart_c=ext.ExtractVec(sites_cart_uc.as_double())
@@ -186,6 +188,8 @@ def get_amber_structs (parm_file_name, rst_file_name):
 
 class mdgx_structs():
   def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
+    import boost.python
+    ext = boost.python.import_ext("amber_adaptbx_ext")
     self.md_engine = 'mdgx'
     self.parm = AmberParm(parm_file_name)
     self.uform = ext.uform(parm_file_name, rst_file_name)
