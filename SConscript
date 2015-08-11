@@ -6,9 +6,11 @@ import sys
 
 
 amber_dist = libtbx.env.dist_path("amber", default=None)
+amberhome = os.environ.get("AMBERHOME", False)
 if(amber_dist and 
    os.path.exists(amber_dist) and
-   os.path.isdir(amber_dist)
+   os.path.isdir(amber_dist) and
+   amberhome
    ):
   print "AMBER SCONS: Amber linked. Will attempt MDGX compile."
   Import("env_base", "env_etc")
