@@ -59,7 +59,7 @@ the two Amber files for atom order and must be used in phenix.refine replacing
 
 ::
 
-  phenix.refine 4phenix_9xyz.pdb 9xyz.mtz use_amber=True topology_file_name=4amber_9xyz.prmtop coordinate_file_name=4amber_9xyz.rst7 wxc_factor=0.025
+  phenix.refine 4phenix_9xyz.pdb 9xyz.mtz use_amber=True topology_file_name=4amber_9xyz.prmtop coordinate_file_name=4amber_9xyz.rst7 wxc_scale=0.025
 
 Here is list of keywords:
 
@@ -67,9 +67,9 @@ Here is list of keywords:
     use_amber - turn on refinement with Amber geometry restraints. ("True" or "False"; default = False)
     topology_file_name - relative path to the Amber topology file. This is the *prmtop file created by AmberPrep.
     coordinate_file_name - relative path to the Amber coordinate file. This is the *rst7 file created by AmberPrep.
-    wxc_factor - relative weight between the x-ray and the Amber geometry restraint terms in refinement.By default this is
+    wxc_scale - relative weight between the x-ray and the Amber geometry restraint terms in refinement.By default this is
                  set to 0.5 which is the value that works best with conventional (Engh&Huber) restraints. When using Amber 
-		 we recommend wxc_factor=0.025, but tests indicate that values from 0.025 to 0.075 work well. Lower values 			 improve model quality while higher values tend to improve R-factors. The user is encouraged to experiment.
+		 we recommend wxc_scale=0.025, but tests indicate that values from 0.025 to 0.075 work well. Lower values 			 improve model quality while higher values tend to improve R-factors. The user is encouraged to experiment.
  		 (Float; default=0.5)
 
 ADDITIONAL INFORMATION:
