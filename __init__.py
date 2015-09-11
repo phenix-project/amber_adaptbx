@@ -6,9 +6,13 @@ import iotbx.pdb
 import argparse
 from scitbx.array_family import flex
 import scitbx.restraints
+from libtbx.utils import Sorry
 #~ import boost.python
 #~ ext = boost.python.import_ext("amber_adaptbx_ext")
-import sander
+try:
+  import sander
+except:
+  raise Sorry("Amber not configured for use in Phenix")
 try:
   from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
 except ImportError:
