@@ -20,6 +20,7 @@ def exercise_vAla3 () :
     "r_free_flags_fraction=0.1",
     "output.file_name=vAla3.mtz",
   ]
+  print "  ~> %s" %  " ".join(args)
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
   assert (rc == 0)
   args = [
@@ -29,6 +30,7 @@ def exercise_vAla3 () :
     "output.file_name=vAla3_shaken.pdb",
     "sites.shake=0.1",
   ]
+  print "  ~> %s" %  " ".join(args)
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
   assert (rc == 0)
   args = [
@@ -42,7 +44,7 @@ def exercise_vAla3 () :
     "wxc_scale=0.025",
     "--overwrite",
   ]
-  
+  print " ~> %s" % " ".join(args)
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
   assert (rc == 0)
   from phenix.refinement.runtime import extract_phenix_refine_r_factors
