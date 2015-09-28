@@ -1,3 +1,5 @@
 {
-  "modules_required_for_build" : ["mmtbx"]
+  "modules_required_for_build" : ["mmtbx"],
+  "optional_modules": ["amber"],
+
 }
