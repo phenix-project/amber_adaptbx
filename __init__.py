@@ -199,8 +199,16 @@ class mdgx_structs():
     self.uform = ext.uform(parm_file_name, rst_file_name)
     self.ridingH = ridingH
 
+def check_file(s,file_name):
+  if file_name is None:
+    raise Sorry('Parameter %s not set. Please supply filename.' % (s))
+  if not os.path.exists(file_name):
+    raise Sorry("Filename %s does not exist" % file_name)
+
 class sander_structs ():
   def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
+    check_file("amber.topology_file_name", parm_file_name)
+    check_file("amber.coordinate_file_name", rst_file_name)
     self.md_engine = 'sander'
     self.parm = AmberParm(parm_file_name)
     self.rst = Rst7.open(rst_file_name)

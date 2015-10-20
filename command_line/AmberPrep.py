@@ -126,6 +126,11 @@ def setup_options_args(rargs):
   f.close()
   return working_params
 
+def get_amber_bin_directory():
+  print os.environ.get("AMBERHOME", False)
+  assert os.environ.get("AMBERHOME", None), "Need to set $AMBERHOME to run AmberPrep"
+  return os.path.join(os.environ["AMBERHOME"], "bin")
+
 # get box info & space group info
 def initializePdb(pdb_filename):
   pdb_inp = pdb.input(pdb_filename)
