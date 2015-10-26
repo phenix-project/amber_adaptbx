@@ -9,10 +9,7 @@ import scitbx.restraints
 from libtbx.utils import Sorry
 #~ import boost.python
 #~ ext = boost.python.import_ext("amber_adaptbx_ext")
-try:
-  import sander
-except:
-  raise Sorry("Amber not configured for use in Phenix")
+import sander, sanderles
 try:
   from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
 except ImportError:
@@ -74,8 +71,12 @@ class geometry_manager(object):
     if self.amber_structs.md_engine == 'sander':
       # print "\n\nUSING SANDER\n\n"
       sander_coords = list(sites_cart_uc.as_double())
-      sander.set_positions(sander_coords)
-      ene, frc = sander.energy_forces()
+      if self.amber_structs.is_LES == True:
+        sanderles.set_positions(sander_coords)
+        ene, frc = sanderles.energy_forces()
+      else:
+        sander.set_positions(sander_coords)
+        ene, frc = sander.energy_forces()
       if (compute_gradients) :
         gradients_uc=flex.vec3_double(flex.double(frc)) * -1
         gradients = gradients_uc[0:self.sites_cart.size()]
@@ -195,6 +196,12 @@ def print_sites_cart(sites_cart):
 def get_amber_structs (parm_file_name, rst_file_name):
         return ext.uform(parm_file_name, rst_file_name)
 
+def check_file(s,filename):
+  if filename is None:
+    raise Sorry("Filename %s is None. Please set this parameter" % s)
+  if not os.path.exists(filename):
+    raise Sorry("Filename %s does not exist" % filename)
+
 class mdgx_structs():
   def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
     import boost.python
@@ -203,6 +210,7 @@ class mdgx_structs():
     self.parm = AmberParm(parm_file_name)
     self.uform = ext.uform(parm_file_name, rst_file_name)
     self.ridingH = ridingH
+    self.is_LES = is_prmtop_LES(parm_file_name)
 
 def check_file(s,file_name):
   if file_name is None:
@@ -217,8 +225,19 @@ class sander_structs ():
     self.md_engine = 'sander'
     self.parm = AmberParm(parm_file_name)
     self.rst = Rst7.open(rst_file_name)
-    self.inp = sander.pme_input()
     self.ridingH = ridingH
+    self.is_LES = is_prmtop_LES(parm_file_name)
+    if self.is_LES == True:
+      self.inp = sanderles.pme_input()
+    else:
+      self.inp = sander.pme_input()
+
+def is_prmtop_LES(parm_file_name):
+  with open(parm_file_name) as f:
+    for line in f:
+      if "FLAG LES_TYPE" in line:
+        return True
+    return False
 
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()

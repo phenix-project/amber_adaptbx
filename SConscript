@@ -4,7 +4,6 @@ from libtbx.utils import Sorry
 import os.path
 import sys
 
-
 amber_dist = libtbx.env.dist_path("amber", default=None)
 amberhome = os.environ.get("AMBERHOME", False)
 if(amber_dist and 
@@ -47,5 +46,5 @@ if(amber_dist and
     target="#lib/amber_adaptbx_ext",
     source=ext_sources)
 
-else:
-  print "AMBER SCONS: no Amber link. Only Sander will be available."
+#else:
+#  print "AMBER SCONS: no Amber link. Only Sander will be available."
