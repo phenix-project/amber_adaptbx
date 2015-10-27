@@ -3,13 +3,13 @@ import os, sys
 import libtbx.load_env
 from libtbx.utils import Sorry
 
-parent_dir = os.path.dirname(libtbx.env.dist_path("elbow"))
+parent_dir = os.path.dirname(libtbx.env.dist_path("amber_adaptbx"))
 
 def repo_dir(verbose=False):
   env_dir = os.environ.get("AMBER_LIBRARY_DIR", None)
   if env_dir is not None:
     return env_dir
-  install_dir = os.path.join(parent_dir, "chem_data", "amberlibrary")
+  install_dir = os.path.join(parent_dir, "chem_data", "amber_library")
   if os.path.exists(install_dir):
     return install_dir
   if verbose:
@@ -48,6 +48,7 @@ def run():
   for code in ["000",
                "HOH",
                "NWM",
+               "NUC",
                ]:
     print code, is_in_components_lib(code), path_in_components_lib(code)
   
