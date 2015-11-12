@@ -131,6 +131,19 @@ def get_amber_bin_directory():
   assert os.environ.get("AMBERHOME", None), "Need to set $AMBERHOME to run AmberPrep"
   return os.path.join(os.environ["AMBERHOME"], "bin")
 
+def check_required_output_filenames(filenames=None):
+  if filenames is None: return
+  print 'Checking output filenames'
+  for filename in filenames:
+    print '  file : %s' % filename
+    if not os.path.exists(filename):
+      raise Sorry("  Output file not present : %s" % filename)
+    if os.stat(filename).st_size==0:
+      raise Sorry("  Output file is empty : %s" % filename)
+
+def print_cmd(cmd):
+  print "\n  ~> %s\n" % cmd
+
 # get box info & space group info
 def initializePdb(pdb_filename):
   pdb_inp = pdb.input(pdb_filename)
@@ -230,10 +243,11 @@ def _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=False):
   mol.WritePDB('4antechamber_%s.pdb' %residue_name)                  
   mol.Multiplicitise()
   print mol.DisplayBrief()
-  cmd='antechamber -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %d -m %d -s 2 -pf y -c bcc -at gaff' \
-      %(residue_name, residue_name, mol.charge, mol.multiplicity)
-  print cmd
+  cmd='antechamber -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2'
+  cmd+=' -nc %d -m %d -s 2 -pf y -c bcc -at gaff'
+  cmd+=" -ek 'qm_theory='AM1', grms_tol=0.0005, scfconv=1.d-10, maxcyc=0, ndiis_attempts=700,'"
+  cmd = cmd%(residue_name, residue_name, mol.charge, mol.multiplicity)
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   stdo = StringIO.StringIO()
   ero.show_stdout(out=stdo)
@@ -242,10 +256,10 @@ def _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=False):
       print line
     if line.find('Error')>-1:
       print line
-  cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %s -m %d -s 2 -pf y -c bcc -at gaff' \
-      %(residue_name, mol.charge, mol.multiplicity)    
-  print cmd
+  cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2'
+  cmd+=' -nc %s -m %d -s 2 -pf y -c bcc -at gaff'
+  cmd = cmd % (residue_name, mol.charge, mol.multiplicity)    
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   stdo = StringIO.StringIO()
   ero.show_stdout(out=stdo)
@@ -255,7 +269,7 @@ def _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=False):
     if line.find('Error')>-1:
       print line          
   cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
-  print cmd
+  print_cmd(cmd)
   easy_run.fully_buffered(cmd)
 
 def run_elbow_antechamber(pdb_hierarchy, ns_names, nproc=1, debug=False):
@@ -270,8 +284,41 @@ def run_elbow_antechamber(pdb_hierarchy, ns_names, nproc=1, debug=False):
   return 0
 
 # prepare tleap input (set box) or run pytleap?
-def run_tleap(input_pdb, output_base,ns_names, reorder_residues, logfile, redq=False):
-  f=open('tleap.in','w')
+def run_tleap(input_pdb,
+              output_base,
+              ns_names,
+              reorder_residues,
+              logfile,
+              redq=False,
+              ):
+  #
+  def _parse_tleap_logfile(logfile):
+    errors = []
+    warnings = []
+    fatals=[]
+    f=file(logfile, "rb")
+    lines=f.read()
+    f.close()
+    for line in lines.splitlines():
+      if line.find("FATAL:")>-1:
+        fatals.append(line)
+      #if line.find("Failed to generate parameters")>-1:
+      #  raise Sorry(line)
+      if line.find("You MUST (!!!) insert a TER record between the residues listed above and")>-1:
+        errors.append(line)
+    if errors:
+      print "Errors in tleap"
+      print "  check logfile %s for explaination" % logfile
+      for line in errors:
+        print line
+    if fatals:
+      print "Fatal errors in tleap"
+      for line in fatals:
+        print line
+      raise Sorry("Fatal errors in tleap")
+    return fatals
+  #
+  f=open('tleap.in','wb')
   if redq:
     f.write('source leaprc.ff14SB.redq\n')
   else:
@@ -298,11 +345,15 @@ def run_tleap(input_pdb, output_base,ns_names, reorder_residues, logfile, redq=F
   f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(output_base, output_base))
   f.write('quit\n')   
   f.close()
-  cmd = 'tleap -f tleap.in >%s' %logfile
-  print cmd
+  cmd = 'tleap -f tleap.in > %s' % logfile
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()
   ero.show_stderr()
+  #fatals = _parse_tleap_logfile(logfile)
+  check_required_output_filenames(["%s.prmtop" % output_base,
+                                   "%s.rst7" % output_base,
+                                   ])
   return 0
 
 #change box size in rst7 file
@@ -310,19 +361,19 @@ def run_ChBox(base,cryst1):
   uc = cryst1.unit_cell().parameters()
   cmd="ChBox -c %s.rst7 -o chbox.rst7" % base
   cmd += " -X %s -Y %s -Z %s -al %s -bt %s -gm %s " % tuple(uc)
-  print cmd
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()
   ero.show_stderr()
   cmd='mv chbox.rst7 %s.rst7' %base
-  print cmd
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   return 0
 
 # make pdb 
 def run_ambpdb(base):
   cmd='ambpdb -p  %s.prmtop <%s.rst7 >new.pdb' %(base, base)
-  print cmd
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()
   ero.show_stderr()
@@ -341,7 +392,7 @@ def finalizePdb(pdb_filename,cryst,base):
 
 def run_UnitCell(input_file,output_file):
   cmd='UnitCell -p %s -o %s' %(input_file, output_file)
-  print cmd
+  print_cmd(cmd)
   ero=easy_run.fully_buffered(cmd)
   ero.show_stdout()
   ero.show_stderr()
@@ -385,12 +436,12 @@ def run_minimise(base, cryst1, option=None):
     f.close()
     cmd='sander -O -i min_H.in -p asu.prmtop -c asu.rst7 -o min_H.out \
          -ref asu.rst7 -r asu_minH.rst7'
-    print cmd
+    print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
     assert (ero.return_code == 0)
     run_ChBox('asu_minH',cryst1)
     cmd='ambpdb -p asu.prmtop <asu_minH.rst7 >new.pdb'
-    print cmd
+    print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
     assert (ero.return_code == 0)
     ero.show_stdout()
@@ -408,12 +459,12 @@ def run_minimise(base, cryst1, option=None):
     f.close()
     cmd='sander -O -i min_all.in -p asu.prmtop -c asu.rst7 -o min_H.out \
          -ref asu.rst7 -r asu_minall.rst7'
-    print cmd
+    print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)  
     assert (ero.return_code == 0)
     run_ChBox('asu_minall',cryst1)
     cmd='ambpdb -p asu.prmtop <asu_minall.rst7 >new.pdb'
-    print cmd
+    print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
     assert (ero.return_code == 0)
     ero.show_stdout()
@@ -429,7 +480,7 @@ def run_minimise(base, cryst1, option=None):
     restraints = "%s.ligands.cif" % base
     if os.path.exists(restraints):
       cmd += " %s" % restraints
-    print cmd
+    print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd).raise_if_errors() #.return_code
     assert (ero.return_code == 0)
     ero.show_stdout()
@@ -525,7 +576,12 @@ def run(rargs):
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" %base
   print >> sys.stderr, "=================================================="
-  run_tleap('4tleap.pdb','asu',ns_names,reorder_residues='on', logfile='tleap_asu.log', redq=actions.redq)
+  run_tleap('4tleap.pdb',
+            'asu',
+            ns_names,
+            reorder_residues='on',
+            logfile='tleap_asu.log',
+            redq=actions.redq)
   run_ChBox('asu',cryst1)
   run_ambpdb('asu')
   fix_ambpdb.run('4tleap.pdb', 'new.pdb', 'new2.pdb' )
