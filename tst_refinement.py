@@ -50,7 +50,7 @@ def exercise_vAla3 () :
   from phenix.refinement.runtime import extract_phenix_refine_r_factors
   (r_work, r_free) = extract_phenix_refine_r_factors(
     file_name="vAla3_shaken_refine_001.pdb")
-  assert r_work.startswith("0.00") and r_free.startswith("0.00"), """
+  assert r_work.startswith("0.0") and r_free.startswith("0.0"), """
   r_work : %s != 0.00
   r_free : %s != 0.00
   """ % (r_work, r_free)
