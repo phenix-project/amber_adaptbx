@@ -457,11 +457,14 @@ def run_minimise(base, cryst1, option=None):
     f.write(" imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, \n")
     f.write("&end\n")
     f.close()
-    cmd='sander -O -i min_all.in -p asu.prmtop -c asu.rst7 -o min_H.out \
+    cmd='sander -O -i min_all.in -p asu.prmtop -c asu.rst7 -o min_all.out \
          -ref asu.rst7 -r asu_minall.rst7'
     print_cmd(cmd)
-    ero=easy_run.fully_buffered(cmd)  
-    assert (ero.return_code == 0)
+    ero=easy_run.fully_buffered(command=cmd)
+    f=file("min_all.out", "rb")
+    lines = f.read()
+    f.close()
+    assert (ero.return_code == 0), "\n\nsander stopped with this output\n\n%s"%lines
     run_ChBox('asu_minall',cryst1)
     cmd='ambpdb -p asu.prmtop <asu_minall.rst7 >new.pdb'
     print_cmd(cmd)

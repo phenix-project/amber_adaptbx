@@ -10,13 +10,15 @@ def run():
     libtbx.env.dist_path("amber_adaptbx"),
     "tst_minimization.py"))
   print cmd
-  easy_run.call(cmd)
+  rc = easy_run.call(cmd)
+  if rc: return rc
   print '  refinement...'
   cmd = "libtbx.python %s" % (os.path.join(
     libtbx.env.dist_path("amber_adaptbx"),
     "tst_refinement.py"))
   print cmd
-  easy_run.call(cmd)
+  rc = easy_run.call(cmd)
+  return rc
 
 if __name__=="__main__":
   args = sys.argv[1:]
