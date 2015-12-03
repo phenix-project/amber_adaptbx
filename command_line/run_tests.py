@@ -11,14 +11,14 @@ def run():
     "tst_minimization.py"))
   print cmd
   rc = easy_run.call(cmd)
-  if rc: return rc
+  if rc: sys.exit(rc)
   print '  refinement...'
   cmd = "libtbx.python %s" % (os.path.join(
     libtbx.env.dist_path("amber_adaptbx"),
     "tst_refinement.py"))
   print cmd
   rc = easy_run.call(cmd)
-  return rc
+  if rc: sys.exit(rc)
 
 if __name__=="__main__":
   args = sys.argv[1:]

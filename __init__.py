@@ -38,8 +38,8 @@ master_phil_str = """
   automatic_wxc_scale = False
     .type = bool
     .style = hidden
-    .help = Use the ratio of the restraints gradident norm and the Amber gradient \
-            norm to set wxc_scale
+    .help = Use the ratio of the restraints gradident norm and the Amber \
+            gradient norm to set wxc_scale
   md_engine = *sander mdgx
     .type = choice
     .help = Amber MD engine to use. Use "sander" by default. "mdgx" is for developers and requires compilation.
