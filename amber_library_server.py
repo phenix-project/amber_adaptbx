@@ -5,6 +5,17 @@ from libtbx.utils import Sorry
 
 parent_dir = os.path.dirname(libtbx.env.dist_path("amber_adaptbx"))
 
+def is_energy_outlier(residue_name):
+  rd = repo_dir()
+  if rd is None: return None
+  outliers = os.path.join(rd, "outliers_min_energy.dat")
+  f=file(outliers, "rb")
+  lines = f.readlines()
+  f.close()
+  for line in lines:
+    if line.find(residue_name.upper())!=-1: return True
+  return False
+
 def repo_dir(verbose=False):
   env_dir = os.environ.get("AMBER_LIBRARY_DIR", None)
   if env_dir is not None:
@@ -27,8 +38,8 @@ def is_in_components_lib(residue_name):
 
 def path_in_components_lib(residue_name):
   rd = repo_dir()
-  if rd is None:
-    return None
+  if rd is None: return None
+  if is_energy_outlier(residue_name): return 0
   preamble = os.path.join(rd,
                           residue_name[0].lower(),
                           residue_name.upper(),

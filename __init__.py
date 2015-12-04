@@ -9,7 +9,10 @@ import scitbx.restraints
 from libtbx.utils import Sorry
 #~ import boost.python
 #~ ext = boost.python.import_ext("amber_adaptbx_ext")
-import sander, sanderles
+try:
+  import sander, sanderles
+except:
+  raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
 try:
   from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
 except ImportError:

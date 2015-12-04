@@ -9,7 +9,9 @@ amberhome = os.environ.get("AMBERHOME", False)
 if(amber_dist and 
    os.path.exists(amber_dist) and
    os.path.isdir(amber_dist) and
-   amberhome
+   amberhome and
+   os.path.exists(amberhome) and
+   os.path.isdir(amberhome)
    ):
   print "AMBER SCONS: Amber linked. Will attempt MDGX compile."
   Import("env_base", "env_etc")
