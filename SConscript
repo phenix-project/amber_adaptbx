@@ -11,6 +11,8 @@ if(amber_dist and
    os.path.exists(amber_dist) and
    os.path.isdir(amber_dist) and
    amberhome and
+   os.path.exists(amberhome) and
+   os.path.isdir(amberhome) and
    amber_mgdx
    ):
   print "AMBER SCONS: Amber linked. Will attempt MDGX compile."
