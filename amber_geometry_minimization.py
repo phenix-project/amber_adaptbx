@@ -82,14 +82,20 @@ class run(object):
       bond_similarity    = True)
 
     if md_engine == "sander":
-      import sander
+      import sander, sanderles
       amber_structs = amber_adaptbx.sander_structs(
         parm_file_name=prmtop,
         rst_file_name=ambcrd)
-      sander.setup(amber_structs.parm,
-             amber_structs.rst.coordinates,
-             amber_structs.rst.box,
-             amber_structs.inp)
+      if amber_structs.is_LES:
+        sanderles.setup(amber_structs.parm,
+               amber_structs.rst.coordinates,
+               amber_structs.rst.box,
+               amber_structs.inp)
+      else:
+        sander.setup(amber_structs.parm,
+               amber_structs.rst.coordinates,
+               amber_structs.rst.box,
+               amber_structs.inp)
     elif md_engine == "mdgx":
       amber_structs = amber_adaptbx.mdgx_structs(
         parm_file_name=prmtop,
@@ -121,7 +127,10 @@ class run(object):
           max_iterations = max_number_of_iterations)
 
     if amber_structs.md_engine == 'sander':
-      sander.cleanup()
+      if amber_structs.is_LES:
+        sanderles.cleanup()
+      else:
+        sander.cleanup()
 
   def show(self, amber_structs):
     import amber_adaptbx as amber
