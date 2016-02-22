@@ -18,7 +18,7 @@ def exercise_vAla3 () :
     "type=real",
     "label=F",
     "r_free_flags_fraction=0.1",
-    "output.file_name=vAla3.mtz",
+    #"output.file_name=vAla3.mtz",
   ]
   print "  ~> %s" %  " ".join(args)
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
@@ -29,6 +29,7 @@ def exercise_vAla3 () :
     cif_file,
     "output.file_name=vAla3_shaken.pdb",
     "sites.shake=0.1",
+    "sort_atoms=False",
   ]
   print "  ~> %s" %  " ".join(args)
   rc = easy_run.fully_buffered(" ".join(args)).raise_if_errors().return_code
@@ -37,11 +38,10 @@ def exercise_vAla3 () :
     "phenix.refine",
     "vAla3_shaken.pdb",
     cif_file,
-    "vAla3.mtz",
+    "vAla3.pdb.mtz",
     "topology_file_name=\"%s\"" % top_file,
     "coordinate_file_name=\"%s\"" % crd_file,
     "use_amber=True",
-    "wxc_scale=0.025",
     "--overwrite",
   ]
   print " ~> %s" % " ".join(args)
