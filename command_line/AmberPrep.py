@@ -1,4 +1,4 @@
-# LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep
+# LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep_obsolete
 
 import os, sys
 import iotbx.pdb
@@ -256,6 +256,7 @@ def _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=False):
       print line
     if line.find('Error')>-1:
       print line
+      raise Sorry(line)
   cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2'
   cmd+=' -nc %s -m %d -s 2 -pf y -c bcc -at gaff'
   cmd = cmd % (residue_name, mol.charge, mol.multiplicity)    
@@ -267,7 +268,7 @@ def _run_elbow_antechamber(pdb_hierarchy, residue_name, debug=False):
     if line.find('APS')>-1:
       print line
     if line.find('Error')>-1:
-      print line          
+      raise Sorry(line)      
   cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
@@ -358,7 +359,7 @@ def run_tleap(input_pdb,
 
 #change box size in rst7 file
 def run_ChBox(base,cryst1):
-  uc = cryst1.unit_cell().parameters()
+  uc = list(cryst1.unit_cell().parameters())
   cmd="ChBox -c %s.rst7 -o chbox.rst7" % base
   cmd += " -X %s -Y %s -Z %s -al %s -bt %s -gm %s " % tuple(uc)
   print_cmd(cmd)
