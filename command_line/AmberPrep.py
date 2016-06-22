@@ -381,9 +381,13 @@ def run_ambpdb(base):
   return 0
 
 #add cryst1 and sscale
-def finalizePdb(pdb_filename,cryst,base):
+def finalizePdb(pdb_filename,
+                cryst,
+                base,
+                sort_atoms=True,
+  ):
   pdb_inp = pdb.input(pdb_filename)
-  pdb_hierarchy=pdb_inp.construct_hierarchy()
+  pdb_hierarchy=pdb_inp.construct_hierarchy(sort_atoms=sort_atoms)
   pdbstring=pdb_hierarchy.as_pdb_string(crystal_symmetry=cryst)
   f=open('4phenix_'+base+'.pdb','w')
   f.write(pdbstring)
