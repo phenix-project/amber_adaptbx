@@ -361,8 +361,8 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
     b = flex.double(b)
-    delta = angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))
-    delta *= 180/pi
+    delta = angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))*180/pi
+    assert abs(delta)<360
     angle_deltas.append(delta)
   angle_deltas= flex.double(angle_deltas)
   a_sq  = angle_deltas * angle_deltas
@@ -395,8 +395,9 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
     b = flex.double(b)
-    Z = sqrt(angle.type.k)*(angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm())))
+    Z = sqrt(angle.type.k)*(angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))*180/pi)
     angle_Zs.append(Z)
+    assert 0
   angle_Zs= flex.double(angle_Zs)
   a_sq  = angle_Zs * angle_Zs
   a_ave = sqrt(flex.mean_default(a_sq, 0))

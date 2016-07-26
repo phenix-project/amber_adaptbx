@@ -42,6 +42,8 @@ import os, sys
 from optparse import OptionParser
 from math import sqrt
 
+from libtbx.utils import Sorry
+
 import signal
 def sigint_handler(*args, **kwargs):
   print >> sys.stderr, "Interrupt signal caught. Exiting"
@@ -725,6 +727,18 @@ def find_incomplete(recordlist):
       continue
   return()
 
+def check_pdb4amber_output(log):
+  for line in log:
+    if line.find('misses')>-1:
+      print line
+      #raise Sorry("model has missing atoms")
+
+class writer(object):
+  def __init__(self, log):
+    self.log=log
+  def write(self, data):
+    self.log.append(data)
+
 def run(arg_pdbout, arg_pdbin, 
         arg_nohyd = True, 
         arg_dry   = False, 
@@ -732,7 +746,12 @@ def run(arg_pdbout, arg_pdbin,
         arg_noter = False,
         arg_constph = False,
         arg_mostpop = False,
-        arg_elbow = False):
+        arg_elbow = False,
+        log = None,
+        ):
+  if log is not None:
+    stderr = sys.stderr
+    sys.stderr = writer(log)
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
   recordlist = pdb_read(pdbin, arg_noter)
@@ -777,6 +796,11 @@ def run(arg_pdbout, arg_pdbin,
   # make final output to new PDB file
   pdb_write(recordlist, arg_pdbout, cnct)
   print >> sys.stderr, ""
+  if log is not None:
+    log = sys.stderr.log
+    sys.stderr = stderr
+  if log:
+    check_pdb4amber_output(log)
   return ns_names
     
 #========================================main===========================

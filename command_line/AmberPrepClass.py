@@ -10,9 +10,9 @@ from amber_adaptbx import pdb4amber
 from elbow.command_line import builder
 from libtbx import easy_run
 import StringIO
-from amber_adaptbx import fix_ambpdb
 from amber_adaptbx import amber_library_server
 from libtbx.utils import Sorry
+import libtbx.load_env
 
 master_phil_string = """
   amber_prep
@@ -25,6 +25,13 @@ master_phil_string = """
       nproc = 1
         .type = int
         .short_caption = Number processes to use
+      antechamber
+        .caption = Options for Amber program antechamber
+      {
+        prefer_input_method = chemical_component elbow *Auto
+          .type = choice
+          .caption = Control to first input chosen for antechamber
+      }
     }
     actions
     {
@@ -34,8 +41,6 @@ master_phil_string = """
         .type = choice
       redq = False
         .type = bool
-      save_cpp_traj_prmtop = True
-        .type = bool
     }
     output
     {
@@ -44,6 +49,8 @@ master_phil_string = """
     }
   }
   """
+#      save_cpp_traj_prmtop = True
+#        .type = bool
 
 master_params = master_phil_string # need for auto documentation
 master_phil = phil.parse(master_phil_string,
@@ -106,7 +113,7 @@ def setup_options_args(rargs):
       if iotbx.pdb.is_pdb_file(arg):
         pdbs.append(arg)
       else:
-        try : 
+        try :
           file_phil = phil.parse(file_name=arg)
         except RuntimeError :
           pass
@@ -133,19 +140,48 @@ def setup_options_args(rargs):
   f.close()
   return working_params
 
-def check_required_output_filenames(filenames=None):
+def test_files_exist(filenames):
+  for filename in filenames:
+    if not os.path.exists(filename):
+      raise Sorry("Filename %s not found" % filename)
+
+def check_required_output_filenames(filenames=None,
+                                    error_display_file=None,
+                                   ):
   # only tleap currently
   if filenames is None: return
   print 'Checking output filenames'
   for filename in filenames:
     print '  file : %s' % filename
     if not os.path.exists(filename):
-      raise Sorry("  Output file not present : %s" % filename)
+      s = "  Output file not present : %s" % filename
+      if error_display_file:
+        s += '\n  Check contents of "%s"' % error_display_file
+      raise Sorry(s)
     if os.stat(filename).st_size==0:
+      s = "  Output file is empty : %s" % filename
+      if error_display_file:
+        s += '\n  Check contents of "%s"' % error_display_file
       raise Sorry("  Output file is empty : %s" % filename)
 
-def print_cmd(cmd):
+def print_cmd(cmd, verbose=False):
   print "\n~> %s\n" % cmd
+  if verbose:
+    print '\nAMBERHOME: %s' % os.environ.get("AMBERHOME", None)
+    path = os.environ.get("PATH", None)
+    print '\nPATH: %s' % ('\n    : '.join(path.split(":"))) 
+
+def get_chemical_components_file_name(code):
+  cc_dir = libtbx.env.dist_path("chem_data", default=None)
+  if not cc_dir: return None
+  cc_file_name = os.path.join(cc_dir,
+                                 'chemical_components',
+                                 code[0].lower(),
+                                 'data_%s.cif' % code.upper(),
+                                 )
+  if os.path.exists(cc_file_name):
+    return cc_file_name
+  return None
 
 class amber_prep_run_class:
   def __init__(self, base_name):
@@ -155,8 +191,7 @@ class amber_prep_run_class:
     outl = "AmberPrepRunner"
     outl += "\n  Base : %s" % self.base
     return outl
-    
-    
+
   # get box info & space group info
   def initializePdb(self, pdb_filename):
     self.pdb_filename  = pdb_filename
@@ -166,6 +201,20 @@ class amber_prep_run_class:
 
   def validatePdb(self):
     assert self.pdb_hierarchy
+
+    #elements = {}
+    #for atom in self.pdb_hierarchy.atoms():
+    #  if atom.element_is_hydrogen():
+    #    elements.setdefault("H", 0)
+    #    elements['H']+=1
+    #  else:
+    #    elements.setdefault('X', 0)
+    #    elements['X']+=1
+    #if 'H' not in elements:
+    #  raise Sorry("no hydrogens found in model")
+    #if elements['H']/elements['X']<.25:
+    #  print 'seems to be very few hydrogens'
+
     from mmtbx import conformation_dependent_library
     gaps=[]
     for three in conformation_dependent_library.generate_protein_threes(
@@ -189,22 +238,42 @@ class amber_prep_run_class:
     f.write(pdbstring)
     f.close()
     self.tleap_input_pdb = "%s_4tleap.pdb" % self.base
+    log = []
     self.ns_names=pdb4amber.run(self.tleap_input_pdb,
                                 self.pdb_filename,
                                 arg_elbow=True,
+                                log=log,
       )
     # init is identical to old method
     if os.path.exists(init): os.remove(init)
 
-  def run_elbow_antechamber(self, nproc=1, debug=False):
+  def run_elbow_antechamber(self,
+                            nproc=1,
+                            prefer_input_method=None,
+                            debug=False):
     assert self.pdb_hierarchy
     assert hasattr(self, "ns_names")
     if nproc>1:
       print "\n\tParallel processes not implemented\n"
     for residue_name in self.ns_names:
+      if prefer_input_method:
+        if prefer_input_method=="chemical_component":
+          _run_antechamber_ccif( residue_name )
+          continue
+        elif prefer_input_method=="elbow":
+          _run_elbow_antechamber(self.pdb_hierarchy, residue_name, debug=debug)
+          continue
       if amber_library_server.is_in_components_lib(residue_name):
-        print "%s already in amber monomer library. Skipping elbow/antechamber run for this residue.\n" %residue_name
+        print """
+  Residue "%s" already in amber monomer library. Skipping elbow/antechamber 
+    run for this residue.
+        """ % residue_name
         continue
+      elif os.path.isfile('%s.mol2' % residue_name):
+        print "%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" %residue_name
+        continue
+      elif get_chemical_components_file_name(residue_name):
+        _run_antechamber_ccif( residue_name )
       else:
         _run_elbow_antechamber(self.pdb_hierarchy, residue_name, debug=debug)
     return 0
@@ -215,25 +284,65 @@ class amber_prep_run_class:
                 output_base,
                 #ns_names,
                 reorder_residues,
-                #logfile,
+                logfile="leap.log",
                 redq=False,
                 verbose=False,
                 ):
+    def _parse_tleap_logfile(logfile):
+      errors = []
+      warnings = []
+      fatals=[]
+      f=file(logfile, "rb")
+      lines=f.read()
+      f.close()
+      for line in lines.splitlines():
+        if line.find("FATAL:")>-1:
+          fatals.append(line)
+        #if line.find("Failed to generate parameters")>-1:
+        #  raise Sorry(line)
+        if line.find("You MUST (!!!) insert a TER record between the residues listed above and")>-1:
+          errors.append(line)
+      if errors:
+        print "Errors in tleap"
+        print "  check logfile %s for explaination" % logfile
+        for line in errors:
+          print line
+      if fatals:
+        print "Fatal errors in tleap"
+        for line in fatals:
+          print line
+        raise Sorry("Fatal errors in tleap")
+      return fatals
+    def _check_tleap_output(lines):
+      stop = ["Could not open file"]
+      for line in lines:
+        for s in stop:
+          if line.find(s)>-1:
+            print_cmd('" --- Testing environment ---"', verbose=True)
+            raise Sorry('tleap error : "%s"' % line)
     assert self.tleap_input_pdb
     assert hasattr(self, "ns_names")
     tleap_input_file = "%s_%s_tleap_input_run" % (self.base, output_base)
     f=file(tleap_input_file, "wb")
+    f.write('logFile %s\n' % logfile)
+
+    # Following should be true in AmberTools14/15:
+    amber_dir = libtbx.env.dist_path("amber")
+    if(os.path.isfile(os.path.join(amber_dir,
+                                   'dat',
+                                   'leap',
+                                   'cmd',
+                                   'leaprc.ff14SB',
+                                   ))):
+      raise Sorry('Amber environment appears to be older than AmberTools16; quitting')
+
+    # Now we can assume that we are dealing with AmberTools16:
     if redq:
       f.write('source leaprc.ff14SB.redq\n')
     else:
-      f.write('source leaprc.ff14SB\n')
-    f.write('source leaprc.gaff\n')
-    #f.write('loadoff atomic_ions.lib\n')
-    f.write('loadamberparams frcmod.ionslrcm_iod\n')
-    f.write('loadamberparams frcmod.ionsjc_spce\n')
-    f.write('WAT = SPC\n')
-    f.write('HOH = SPC\n')
-    f.write('loadAmberParams frcmod.spce\n')
+      f.write('source oldff/leaprc.ff14SB\n')
+    f.write('source leaprc.water.tip3p\n')
+    f.write('source leaprc.gaff2\n')
     for res in self.ns_names:
       if amber_library_server.is_in_components_lib(res):
         res_path=amber_library_server.path_in_components_lib(res)
@@ -254,18 +363,22 @@ class amber_prep_run_class:
       "%s_%s" % (self.base, output_base),
       )
       )
-    f.write('quit\n')   
+    f.write('quit\n')
     f.close()
     cmd = 'tleap -f %s' % tleap_input_file
     print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
+    _check_tleap_output(ero.stdout_lines)
     if verbose:
       ero.show_stdout()
       ero.show_stderr()
     # check output
+    fatals = _parse_tleap_logfile(logfile)
     check_required_output_filenames(["%s_%s.prmtop" % (self.base, output_base),
                                      "%s_%s.rst7" % (self.base, output_base),
-                                     ])
+                                     ],
+                                    error_display_file="leap.log",
+                                    )
     # remove files
     #if os.path.exists(tleap_input_file): os.remove(tleap_input_file)
     return 0
@@ -286,42 +399,67 @@ class amber_prep_run_class:
     ero.show_stderr()
     return 0
 
-  # make pdb 
-  def run_ambpdb(self, save_cpp_traj_prmtop=False):
+  # make pdb
+  def run_ambpdb(self): #, save_cpp_traj_prmtop=False):
     assert self.base
-    cmd='ambpdb -p %s_asu.prmtop < %s_asu.rst7 > %s_new.pdb' % tuple(
+    cmd='ambpdb -bres -p %s_asu.prmtop < %s_asu.rst7 > %s_new.pdb' % tuple(
       [self.base]*3
       )
     print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
     ero.show_stdout()
     ero.show_stderr()
-    fix_ambpdb.run('%s_4tleap.pdb' % self.base,
-                   '%s_new.pdb' % self.base,
-                   '%s_new2.pdb' % self.base,
-      )
-    if save_cpp_traj_prmtop:
-      shutil.copyfile("%s_asu.prmtop" % self.base,
-                      "4cpptraj_%s.prmtop" % self.base,
-                      )
+
+    pdb_pre=iotbx.pdb.input(file_name='%s_4tleap.pdb' %self.base)
+    pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
+    pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' %self.base)
+    pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
+
+    # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
+    for atom_group in pdb_h_post.atom_groups():
+      if atom_group.resname in ["WAT"]:
+        atom_group.resname = "HOH"
+
+    for atom_group in pdb_h_pre.atom_groups():
+      if atom_group.resname in ["WAT"]:
+        atom_group.resname = "HOH"
+
+    #match residues based on resseq and resname
+    #match atoms based on name an i_seq
+    for chain_post in pdb_h_post.chains():
+      for resi_post in chain_post.conformers()[0].residues():
+        for atom_post in resi_post.atoms():
+          for chain_pre in pdb_h_pre.chains():
+            for resi_pre in chain_pre.conformers()[0].residues():
+                if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
+                  for atom_pre in resi_pre.atoms():
+                    if atom_pre.name == atom_post.name:
+                      atom_post.b=atom_pre.b
+                      atom_post.occ=atom_pre.occ
+                      chain_post.id=chain_pre.id
+
+    pdb_h_post.write_pdb_file(file_name='%s_new2.pdb' %self.base,
+                              append_end=True,
+                              crystal_symmetry=pdb_pre.crystal_symmetry(),
+                              )
     return 0
 
   #add cryst1 and sscale
   def finalizePdb(self,
-                  pdb_filename=None, #cryst,base):
+                  pdb_filename=None, sort_atoms=True, type='',
                   ):
     assert self.pdb_hierarchy
     assert self.cryst1
     assert self.base
     if pdb_filename:
       pdb_inp       = pdb.input(pdb_filename)
-      pdb_hierarchy = pdb_inp.construct_hierarchy()
+      pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=sort_atoms)
     else:
       # this returns the altloc to the model so not good!!!
       pdb_hierarchy = self.pdb_hierarchy
       assert 0
     pdbstring=pdb_hierarchy.as_pdb_string(crystal_symmetry=self.cryst1)
-    new_file = '4phenix_'+self.base+'.pdb'
+    new_file = '4phenix_'+self.base+type+'.pdb'
     print 'Writing 4phenix file',new_file
     f=open(new_file,'w')
     f.write(pdbstring)
@@ -347,11 +485,18 @@ class amber_prep_run_class:
         if len(cryst1card) <1:
           raise Sorry("CRYST1 record required")
         fout.write(cryst1card[0])
-      with open("%s_new.pdb" % self.base) as fin:
+      with open("4phenix_%s.pdb" % self.base) as fin:
         for line in fin:
-          fout.write(line)
+          if not "CRYST1" in line:
+            fout.write(line)
     tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
-    run_UnitCell(uc_pdb_file, tleap_pdb_file)
+
+    # temporary file: will be output from UnitCell, input to pdb4amber:
+    tleap_pdb_file1 = "%s_4tleap_uc1.pdb" % self.base
+    run_UnitCell(uc_pdb_file, tleap_pdb_file1)
+
+    #run back through pdb4amber to get new CONECT records for SS bonds:
+    pdb4amber.run(tleap_pdb_file, tleap_pdb_file1, arg_nohyd=False)
     self.run_tleap(tleap_pdb_file,
                    output_base='uc',
                    reorder_residues='off',
@@ -370,25 +515,26 @@ class amber_prep_run_class:
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
        ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',
-       imin   = 1, maxcyc =1000, ncyc   = 200, ntmin  = 1,
-      &end
+       imin   = 1, maxcyc =1000, ncyc   = 200, ntmin  = 1, ntxo = 1,
+      /
       """,
               "amber_all" : """Initial minimization
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
-       imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1,
-      &end
+       imin   = 1, maxcyc = 500, ncyc   = 200, ntmin  = 1, ntxo = 1,
+       ntpr=50, ntr=1, restraint_wt=2.0, restraintmask='@H=',
+      /
       """
     }
 
     if option in ["amber_h", "amber_all"]:
-    
+
       input_file = '%s_%s.in' % (self.base, option)
       f=open('%s_%s.in' % (self.base, option), 'wb')
       f.write(inputs[option])
       f.close()
-      cmd='sander -O -i %s -p %s_asu.prmtop -c %s_asu.rst7 -o %s_%s.out \
-           -ref %s_asu.rst7 -r %s_asu_%s.rst7' % (
+      cmd='sander -O -i %s -p 4amber_%s.prmtop -c 4amber_%s.rst7 -o %s_%s.out \
+           -ref 4amber_%s.rst7 -r %s_%s.rst7' % (
              input_file,
              self.base,
              self.base,
@@ -399,10 +545,15 @@ class amber_prep_run_class:
              option,
              )
       print_cmd(cmd)
+      test_files_exist([input_file,
+                        "4amber_%s.prmtop" % self.base,
+                        "4amber_%s.rst7" % self.base,
+                        "%s_%s.rst7" % (self.base, option),
+                      ])
       ero=easy_run.fully_buffered(cmd)
       assert (ero.return_code == 0)
-      self.run_ChBox('asu_%s' % option)
-      cmd='ambpdb -p %s_asu.prmtop < %s_asu_%s.rst7 > %s_new.pdb' % (
+
+      cmd='ambpdb -bres -p 4amber_%s.prmtop < %s_%s.rst7 > %s_new.pdb' % (
         self.base,
         self.base,
         option,
@@ -413,11 +564,49 @@ class amber_prep_run_class:
       assert (ero.return_code == 0)
       ero.show_stdout()
       ero.show_stderr()
-      fix_ambpdb.run('%s_4tleap.pdb' % self.base,
-                     '%s_new.pdb' % self.base,
-                     '%s_new2.pdb' % self.base,
-        )
-      self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base)
+#      fix_ambpdb.run('%s_4tleap.pdb' % self.base,
+#                     '%s_new.pdb' % self.base,
+#                     '%s_new2.pdb' % self.base,
+#        )
+#      self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base)
+
+      pdb_pre=iotbx.pdb.input(file_name='4phenix_%s.pdb' % self.base)
+      pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
+      pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' % self.base)
+      pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
+
+      for atom_group in pdb_h_post.atom_groups():
+        if atom_group.resname in ["WAT"]:
+          atom_group.resname = "HOH"
+
+      for atom_group in pdb_h_pre.atom_groups():
+        if atom_group.resname in ["WAT"]:
+          atom_group.resname = "HOH"
+
+      #match residues based on resseq and resname
+      #match atoms based on name an i_seq
+      for chain_post in pdb_h_post.chains():
+        for resi_post in chain_post.conformers()[0].residues():
+          for atom_post in resi_post.atoms():
+            for chain_pre in pdb_h_pre.chains():
+              for resi_pre in chain_pre.conformers()[0].residues():
+                  if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
+                    for atom_pre in resi_pre.atoms():
+                      if atom_pre.name == atom_post.name:
+                        atom_pre.xyz=(atom_post.xyz[0],
+                                      atom_post.xyz[1],
+                                      atom_post.xyz[2])
+
+      pdb_h_pre.write_pdb_file(file_name='%s_new2.pdb' % self.base,
+                               append_end=True,
+                               crystal_symmetry=pdb_pre.crystal_symmetry(),
+                               )
+
+      self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base,
+              sort_atoms=False, type='.min')
+      # N.B.: the "4phenix_xxxx.pdb" created by the above statement is
+      #   mostly OK, but has the full unit cell of atoms, not just the
+      #   asu.
 
     elif option=="phenix_all":
       cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use_amber=True \
@@ -447,6 +636,7 @@ class amber_prep_run_class:
         print  "  Atom %d" %i
       print  "It may be a good idea to inspect manually and remove"
       print  "atoms from special positions or rerun minimization."
+    #
     # the following high gradient checker does not work yet
     # rst = Rst7.open('4amber_%s.rst7' %base)     #box
     # sander.setup('4amber_%s.prmtop' %base, rst.coordinates, rst.box, sander.pme_input())
@@ -465,29 +655,29 @@ class amber_prep_run_class:
   def run_clean(self):
     files_to_clean = """
       4tleap_nonprot.pdb
+      4tleap_uc_nonprot.pdb
       4tleap.pdb
+      4tleap_uc1.pdb
       4tleap_renum.txt
+      4tleap_uc_renum.txt
+      4tleap_uc_sslink
       4tleap_sslink
       4tleap_uc.pdb
+      uc_tleap_input_run
+      asu_tleap_input_run
       4UnitCell.pdb
-      init.pdb
       leap.log
       new2.pdb
       new.pdb
-      test.eff
       tleap_asu.log
       tleap.in
       tleap_uc.log
-      asu.prmtop
-      asu.rst7
-      uc.prmtop
-      uc.rst7
       sqm.pdb
       sqm.out
       sqm.in
       4antechamber
-      amber_all.out
       amber_all.in
+      mdinfo
       asu.prmtop
       asu.rst7
       """
@@ -499,6 +689,9 @@ class amber_prep_run_class:
         for filename in glob.glob("%s%s" % (pre, filename)):
           print '  removing' , filename
           os.remove(filename)
+    if os.path.isfile( '%s.eff' % self.base ):
+      print '  removing' , '%s.eff' % self.base
+      os.remove( '%s.eff' % self.base)
 
 def get_molecule_from_hierarchy(hierarchy, resname):
   # only works for non altloc files
@@ -512,20 +705,54 @@ def get_molecule_from_hierarchy(hierarchy, resname):
           mol[-1].name = atom.name
         break
   return mol
-  
+
+# run antechamber from a components.cif file:
+def _run_antechamber_ccif( residue_name,
+                           use_am1_and_maxcyc_zero=True,
+                           debug=False):
+  print >> sys.stdout, "\n=================================================="
+  print >> sys.stdout, "Running antechamber_ccif for %s " %residue_name
+  print >> sys.stdout, "=================================================="
+
+  ccif = get_chemical_components_file_name(residue_name)
+  cmds = []
+  cmd='antechamber -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
+      -s 2 -pf y -c bcc -at gaff2'  %(ccif, residue_name, residue_name)
+  if use_am1_and_maxcyc_zero:
+    cmd += ' -ek "qm_theory=\'AM1\', grms_tol=0.0005, scfconv=1.d-10, maxcyc=0, ndiis_attempts=700,"'
+  cmds.append(cmd)
+
+  for cmd in cmds:
+    print_cmd(cmd)
+    ero=easy_run.fully_buffered(cmd)
+    stdo = StringIO.StringIO()
+    ero.show_stdout(out=stdo)
+    for line in stdo.getvalue().splitlines():
+      if line.find('APS')>-1:
+        print line
+      if line.find('Error')>-1:
+        raise Sorry(line)
+
+  cmd='parmchk2 -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name,
+                                                        residue_name)
+  print_cmd(cmd)
+  easy_run.fully_buffered(cmd)
+
+  # should there be a check for output???
+
 # run elbow and antechamber
 def _run_elbow_antechamber(pdb_hierarchy,
                            residue_name,
-                           use_am1_and_maxcyc_zero=False,
+                           use_am1_and_maxcyc_zero=True,
                            debug=False):
   pdb_mol = get_molecule_from_hierarchy(pdb_hierarchy, residue_name)
   names = []
   for atom in pdb_mol:
     names.append(atom.name.strip())
   pdb_set = set(names)
-  print >> sys.stderr, "\n=================================================="
-  print >> sys.stderr, "Running elbow/antechamber for %s " %residue_name
-  print >> sys.stderr, "=================================================="
+  print >> sys.stdout, "\n=================================================="
+  print >> sys.stdout, "Running elbow/antechamber for %s " %residue_name
+  print >> sys.stdout, "=================================================="
   if debug and 0:
     import pickle
     pf = "%s.pickle" % residue_name
@@ -549,7 +776,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
         )
     else:
       mol = builder.run(chemical_component=residue_name,
-                        no_output=True,
+                        #no_output=True,
+                        #pH=8, # special Amber number...
                         silent=True)
   names = []
   for atom in mol:
@@ -574,23 +802,25 @@ def _run_elbow_antechamber(pdb_hierarchy,
     for atom1, atom2 in rc:
       atom1.name = atom2.name
 
-  mol.WritePDB('4antechamber_%s.pdb' %residue_name)                  
+  mol.WritePDB('4antechamber_%s.pdb' %residue_name,
+               pymol_pdb_bond_order=False,
+              )
   mol.Multiplicitise()
   print mol.DisplayBrief()
 
   cmds = []
   cmd='antechamber -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %d -m %d -s 2 -pf y -c bcc -at gaff' \
+      -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
       %(residue_name, residue_name, mol.charge, mol.multiplicity)
   if use_am1_and_maxcyc_zero:
-    cmd += " -ek 'qm_theory='AM1', grms_tol=0.0005, scfconv=1.d-10, maxcyc=0, ndiis_attempts=700,'"
+    cmd += ' -ek "qm_theory=\'AM1\', grms_tol=0.0005, scfconv=1.d-10, maxcyc=0, ndiis_attempts=700,"'
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
     cmd='antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %s -m %d -s 2 -pf y -c bcc -at gaff' \
-      %(residue_name, mol.charge, mol.multiplicity)    
+      -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
+      %(residue_name, mol.charge, mol.multiplicity)
     cmds.append(cmd)
-  
+
   for cmd in cmds:
     print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
@@ -601,8 +831,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
         print line
       if line.find('Error')>-1:
         raise Sorry(line)
-      
-  cmd='parmchk2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
+
+  cmd='parmchk2 -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' %(residue_name, residue_name)
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
 
@@ -624,7 +854,10 @@ def run(rargs):
   if invalid: raise Sorry( 'PDB input is not "valid"' )
   amber_prep_runner.run_pdb4amber()
   #
-  amber_prep_runner.run_elbow_antechamber(nproc=inputs.nproc)
+  amber_prep_runner.run_elbow_antechamber(
+    nproc=inputs.nproc,
+    prefer_input_method=inputs.antechamber.prefer_input_method,
+  )
   #
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" % base
@@ -637,10 +870,10 @@ def run(rargs):
                               redq=actions.redq,
     )
   amber_prep_runner.run_ChBox("asu")
-  amber_prep_runner.run_ambpdb(save_cpp_traj_prmtop=actions.save_cpp_traj_prmtop)
+  amber_prep_runner.run_ambpdb() #save_cpp_traj_prmtop=actions.save_cpp_traj_prmtop)
   amber_prep_runner.finalizePdb(
-    pdb_filename='%s_new2.pdb' % amber_prep_runner.base)
-  
+      pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=False)
+
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
   print >> sys.stderr, "=================================================="
