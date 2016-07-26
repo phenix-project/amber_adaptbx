@@ -125,13 +125,19 @@ def generate_pdb_codes_01_pavel(d_min_max      = 3.549,
   show_histogram(data = d_min_, n_slots=20)
 
 def generate_pdb_codes_amber(d_min_max      = 3.549,
+                             d_min_min      = 0.5,
                              r_work_pdb_max = 0.30,
                              r_free_pdb_max = 0.35,
                              diff_max       = 0.015,
                              exclude_resname_classes = [],
                              include_resname_class = None,
+                             max_atoms      = 1e9,
                              verbose        = False,
+                             only_code      = None,
                              ):
+  if only_code:
+    yield only_code
+    return
   file = libtbx.env.find_in_repositories(relative_path=
     "chem_data/polygon_data/all_mvd.pickle", test=os.path.isfile)
   database_dict = easy_pickle.load(file)
@@ -140,12 +146,16 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
       print key, list(database_dict[key][:9])
     assert 0
   count = 0
-  for i, (sg, rc, na) in enumerate(zip(database_dict["space_group"],
-                                   database_dict["resname_classes"],
-                                   database_dict["number_of_atoms"],
-                                   )):
+  for i, (sg, rc, na, resolution) in enumerate(
+      zip(database_dict["space_group"],
+          database_dict["resname_classes"],
+          database_dict["number_of_atoms"],
+          database_dict["high_resolution"],
+          )):
     #if sg.find("p 1 (no. 1)")==-1: continue
-    if int(na)>5000: continue
+    if float(resolution)>=d_min_max: continue
+    if float(resolution)<d_min_min: continue
+    if int(na)>max_atoms: continue
     if include_resname_class is not None and include_resname_class not in rc:
       continue
     for e in exclude_resname_classes:
