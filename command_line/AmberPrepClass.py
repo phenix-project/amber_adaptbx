@@ -141,6 +141,7 @@ def setup_options_args(rargs):
   return working_params
 
 def test_files_exist(filenames):
+  #return # doesn't work for minimi=amber_all
   for filename in filenames:
     if not os.path.exists(filename):
       raise Sorry("Filename %s not found" % filename)
@@ -201,20 +202,6 @@ class amber_prep_run_class:
 
   def validatePdb(self):
     assert self.pdb_hierarchy
-
-    #elements = {}
-    #for atom in self.pdb_hierarchy.atoms():
-    #  if atom.element_is_hydrogen():
-    #    elements.setdefault("H", 0)
-    #    elements['H']+=1
-    #  else:
-    #    elements.setdefault('X', 0)
-    #    elements['X']+=1
-    #if 'H' not in elements:
-    #  raise Sorry("no hydrogens found in model")
-    #if elements['H']/elements['X']<.25:
-    #  print 'seems to be very few hydrogens'
-
     from mmtbx import conformation_dependent_library
     gaps=[]
     for three in conformation_dependent_library.generate_protein_threes(
@@ -399,6 +386,44 @@ class amber_prep_run_class:
     ero.show_stderr()
     return 0
 
+  def _pdb_hierarchy_and_remove_wat(self, filename):
+    pdb_inp=iotbx.pdb.input(file_name=filename)
+    pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=False)
+
+    # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
+    for atom_group in pdb_hierarchy.atom_groups():
+      if atom_group.resname in ["WAT"]:
+        atom_group.resname = "HOH"
+    return pdb_inp, pdb_hierarchy
+
+  def _match_hierarchies_and_transfer_to(self,
+                                         hierachy1,
+                                         hierachy2,
+                                         transfer_b=False,
+                                         transfer_occ=False,
+                                         transfer_chain_id=False,
+                                         transfer_xyz=False,
+                                         ):
+    #match residues based on resseq and resname
+    #match atoms based on name an i_seq
+    for chain_post in hierachy2.chains():
+      for resi_post in chain_post.conformers()[0].residues():
+        for atom_post in resi_post.atoms():
+          for chain_pre in hierachy1.chains():
+            for resi_pre in chain_pre.conformers()[0].residues():
+              if ( resi_pre.resseq==resi_post.resseq and
+                   resi_pre.resname.strip()==resi_post.resname.strip()
+                   ):
+                for atom_pre in resi_pre.atoms():
+                  if atom_pre.name == atom_post.name:
+                    if transfer_b: atom_post.b=atom_pre.b
+                    if transfer_occ: atom_post.occ=atom_pre.occ
+                    if transfer_chain_id: chain_post.id=chain_pre.id
+                    if transfer_xyz:
+                      atom_post.xyz=(atom_pre.xyz[0],
+                                     atom_pre.xyz[1],
+                                     atom_pre.xyz[2])
+
   # make pdb
   def run_ambpdb(self): #, save_cpp_traj_prmtop=False):
     assert self.base
@@ -410,34 +435,44 @@ class amber_prep_run_class:
     ero.show_stdout()
     ero.show_stderr()
 
-    pdb_pre=iotbx.pdb.input(file_name='%s_4tleap.pdb' %self.base)
-    pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
-    pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' %self.base)
-    pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
+    ## pdb_pre=iotbx.pdb.input(file_name='%s_4tleap.pdb' %self.base)
+    ## pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
+    ## pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' %self.base)
+    ## pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
 
-    # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
-    for atom_group in pdb_h_post.atom_groups():
-      if atom_group.resname in ["WAT"]:
-        atom_group.resname = "HOH"
+    ## # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
+    ## for atom_group in pdb_h_post.atom_groups():
+    ##   if atom_group.resname in ["WAT"]:
+    ##     atom_group.resname = "HOH"
 
-    for atom_group in pdb_h_pre.atom_groups():
-      if atom_group.resname in ["WAT"]:
-        atom_group.resname = "HOH"
+    ## for atom_group in pdb_h_pre.atom_groups():
+    ##   if atom_group.resname in ["WAT"]:
+    ##     atom_group.resname = "HOH"
 
     #match residues based on resseq and resname
     #match atoms based on name an i_seq
-    for chain_post in pdb_h_post.chains():
-      for resi_post in chain_post.conformers()[0].residues():
-        for atom_post in resi_post.atoms():
-          for chain_pre in pdb_h_pre.chains():
-            for resi_pre in chain_pre.conformers()[0].residues():
-                if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
-                  for atom_pre in resi_pre.atoms():
-                    if atom_pre.name == atom_post.name:
-                      atom_post.b=atom_pre.b
-                      atom_post.occ=atom_pre.occ
-                      chain_post.id=chain_pre.id
+    ## for chain_post in pdb_h_post.chains():
+    ##   for resi_post in chain_post.conformers()[0].residues():
+    ##     for atom_post in resi_post.atoms():
+    ##       for chain_pre in pdb_h_pre.chains():
+    ##         for resi_pre in chain_pre.conformers()[0].residues():
+    ##             if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
+    ##               for atom_pre in resi_pre.atoms():
+    ##                 if atom_pre.name == atom_post.name:
+    ##                   atom_post.b=atom_pre.b
+    ##                   atom_post.occ=atom_pre.occ
+    ##                   chain_post.id=chain_pre.id
 
+    pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_remove_wat('%s_4tleap.pdb' % self.base)
+    pdb_post, pdb_h_post = self._pdb_hierarchy_and_remove_wat('%s_new.pdb' % self.base)
+
+    self._match_hierarchies_and_transfer_to(pdb_h_pre,  # from
+                                            pdb_h_post, # to
+                                            transfer_b=True,
+                                            transfer_occ=True,
+                                            transfer_chain_id=True,
+                                            )
+                                          
     pdb_h_post.write_pdb_file(file_name='%s_new2.pdb' %self.base,
                               append_end=True,
                               crystal_symmetry=pdb_pre.crystal_symmetry(),
@@ -476,9 +511,16 @@ class amber_prep_run_class:
         lines = fin.readlines()
         smtry = [line for line in lines if "SMTRY" in line]
         smtry = ''.join(smtry)
+        rem = 'remark_290.txt'
         if not smtry:
-          print '"%s"' % smtry
-          raise Sorry("REMARK 290 SMTRY1,2,3 records required")
+          if os.path.exists(rem):
+            smtry=file(rem, "rb").read()
+          else:
+            print '"%s"' % smtry
+            raise Sorry("REMARK 290 SMTRY1,2,3 records required")
+        else:
+          print smtry
+          file(rem, "wb").write(smtry)
         fout.write(smtry)
         # import code; code.interact(local=locals())
         cryst1card = [line for line in lines if "CRYST1" in line]
@@ -545,10 +587,11 @@ class amber_prep_run_class:
              option,
              )
       print_cmd(cmd)
+      # test function that may be useful...
       test_files_exist([input_file,
                         "4amber_%s.prmtop" % self.base,
                         "4amber_%s.rst7" % self.base,
-                        "%s_%s.rst7" % (self.base, option),
+                        #"%s_%s.rst7" % (self.base, option),
                       ])
       ero=easy_run.fully_buffered(cmd)
       assert (ero.return_code == 0)
@@ -568,34 +611,43 @@ class amber_prep_run_class:
 #                     '%s_new.pdb' % self.base,
 #                     '%s_new2.pdb' % self.base,
 #        )
-#      self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base)
 
-      pdb_pre=iotbx.pdb.input(file_name='4phenix_%s.pdb' % self.base)
-      pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
-      pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' % self.base)
-      pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
+      ## pdb_pre=iotbx.pdb.input(file_name='4phenix_%s.pdb' % self.base)
+      ## pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
+      ## pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' % self.base)
+      ## pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
 
-      for atom_group in pdb_h_post.atom_groups():
-        if atom_group.resname in ["WAT"]:
-          atom_group.resname = "HOH"
+      ## for atom_group in pdb_h_post.atom_groups():
+      ##   if atom_group.resname in ["WAT"]:
+      ##     atom_group.resname = "HOH"
 
-      for atom_group in pdb_h_pre.atom_groups():
-        if atom_group.resname in ["WAT"]:
-          atom_group.resname = "HOH"
+      ## for atom_group in pdb_h_pre.atom_groups():
+      ##   if atom_group.resname in ["WAT"]:
+      ##     atom_group.resname = "HOH"
 
-      #match residues based on resseq and resname
-      #match atoms based on name an i_seq
-      for chain_post in pdb_h_post.chains():
-        for resi_post in chain_post.conformers()[0].residues():
-          for atom_post in resi_post.atoms():
-            for chain_pre in pdb_h_pre.chains():
-              for resi_pre in chain_pre.conformers()[0].residues():
-                  if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
-                    for atom_pre in resi_pre.atoms():
-                      if atom_pre.name == atom_post.name:
-                        atom_pre.xyz=(atom_post.xyz[0],
-                                      atom_post.xyz[1],
-                                      atom_post.xyz[2])
+      ## #match residues based on resseq and resname
+      ## #match atoms based on name an i_seq
+      ## for chain_post in pdb_h_post.chains():
+      ##   for resi_post in chain_post.conformers()[0].residues():
+      ##     for atom_post in resi_post.atoms():
+      ##       for chain_pre in pdb_h_pre.chains():
+      ##         for resi_pre in chain_pre.conformers()[0].residues():
+      ##             if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
+      ##               for atom_pre in resi_pre.atoms():
+      ##                 if atom_pre.name == atom_post.name:
+      ##                   atom_pre.xyz=(atom_post.xyz[0],
+      ##                                 atom_post.xyz[1],
+      ##                                 atom_post.xyz[2])
+
+      pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_remove_wat('4phenix_%s.pdb' % self.base)
+      pdb_post, pdb_h_post = self._pdb_hierarchy_and_remove_wat('%s_new.pdb' % self.base)
+
+      # there is a function that will transfer the coordinates from one PDB
+      # hierarchy to another but the atoms have to be the same number & order
+      self._match_hierarchies_and_transfer_to(pdb_h_post, # from
+                                              pdb_h_pre,  # to
+                                              transfer_xyz=True,
+                                             )
 
       pdb_h_pre.write_pdb_file(file_name='%s_new2.pdb' % self.base,
                                append_end=True,
