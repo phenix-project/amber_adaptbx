@@ -354,6 +354,10 @@ class amber_prep_run_class:
       )
     f.write('quit\n')
     f.close()
+    #
+    # strangely tleap appends to the logfile so must delete first
+    #
+    if os.path.exists(logfile): os.remove(logfile)
     cmd = 'tleap -f %s' % tleap_input_file
     print_cmd(cmd)
     ero=easy_run.fully_buffered(cmd)
@@ -388,11 +392,9 @@ class amber_prep_run_class:
     ero.show_stderr()
     return 0
 
-  def _pdb_hierarchy_and_remove_wat(self, filename):
-    # should this not be renamed "_pdb_hierarchy_and_rename_wat"?
+  def _pdb_hierarchy_and_rename_wat(self, filename):
     pdb_inp=iotbx.pdb.input(file_name=filename)
     pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=False)
-
     # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
     for atom_group in pdb_hierarchy.atom_groups():
       if atom_group.resname in ["WAT"]:
@@ -438,8 +440,8 @@ class amber_prep_run_class:
     ero.show_stdout()
     ero.show_stderr()
 
-    pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_remove_wat('%s_4tleap.pdb' % self.base)
-    pdb_post, pdb_h_post = self._pdb_hierarchy_and_remove_wat('%s_new.pdb' % self.base)
+    pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('%s_4tleap.pdb' % self.base)
+    pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
 
     self._match_hierarchies_and_transfer_to(pdb_h_pre,  # from
                                             pdb_h_post, # to
@@ -587,8 +589,8 @@ class amber_prep_run_class:
 #                     '%s_new2.pdb' % self.base,
 #        )
 
-      pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_remove_wat('4phenix_%s.pdb' % self.base)
-      pdb_post, pdb_h_post = self._pdb_hierarchy_and_remove_wat('%s_new.pdb' % self.base)
+      pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('4phenix_%s.pdb' % self.base)
+      pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
 
       # there is a function that will transfer the coordinates from one PDB
       # hierarchy to another but the atoms have to be the same number & order
