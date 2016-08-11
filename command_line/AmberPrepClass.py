@@ -327,7 +327,9 @@ class amber_prep_run_class:
     if redq:
       f.write('source leaprc.ff14SB.redq\n')
     else:
-      f.write('source oldff/leaprc.ff14SB\n')
+      f.write('source leaprc.protein.ff14SB\n')
+      f.write('source leaprc.DNA.OL15\n')
+      f.write('source leaprc.RNA.OL3\n')
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
     for res in self.ns_names:
@@ -387,6 +389,7 @@ class amber_prep_run_class:
     return 0
 
   def _pdb_hierarchy_and_remove_wat(self, filename):
+    # should this not be renamed "_pdb_hierarchy_and_rename_wat"?
     pdb_inp=iotbx.pdb.input(file_name=filename)
     pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=False)
 
@@ -434,34 +437,6 @@ class amber_prep_run_class:
     ero=easy_run.fully_buffered(cmd)
     ero.show_stdout()
     ero.show_stderr()
-
-    ## pdb_pre=iotbx.pdb.input(file_name='%s_4tleap.pdb' %self.base)
-    ## pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
-    ## pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' %self.base)
-    ## pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
-
-    ## # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
-    ## for atom_group in pdb_h_post.atom_groups():
-    ##   if atom_group.resname in ["WAT"]:
-    ##     atom_group.resname = "HOH"
-
-    ## for atom_group in pdb_h_pre.atom_groups():
-    ##   if atom_group.resname in ["WAT"]:
-    ##     atom_group.resname = "HOH"
-
-    #match residues based on resseq and resname
-    #match atoms based on name an i_seq
-    ## for chain_post in pdb_h_post.chains():
-    ##   for resi_post in chain_post.conformers()[0].residues():
-    ##     for atom_post in resi_post.atoms():
-    ##       for chain_pre in pdb_h_pre.chains():
-    ##         for resi_pre in chain_pre.conformers()[0].residues():
-    ##             if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
-    ##               for atom_pre in resi_pre.atoms():
-    ##                 if atom_pre.name == atom_post.name:
-    ##                   atom_post.b=atom_pre.b
-    ##                   atom_post.occ=atom_pre.occ
-    ##                   chain_post.id=chain_pre.id
 
     pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_remove_wat('%s_4tleap.pdb' % self.base)
     pdb_post, pdb_h_post = self._pdb_hierarchy_and_remove_wat('%s_new.pdb' % self.base)
@@ -611,33 +586,6 @@ class amber_prep_run_class:
 #                     '%s_new.pdb' % self.base,
 #                     '%s_new2.pdb' % self.base,
 #        )
-
-      ## pdb_pre=iotbx.pdb.input(file_name='4phenix_%s.pdb' % self.base)
-      ## pdb_h_pre = pdb_pre.construct_hierarchy(sort_atoms=False)
-      ## pdb_post=iotbx.pdb.input(file_name='%s_new.pdb' % self.base)
-      ## pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=False)
-
-      ## for atom_group in pdb_h_post.atom_groups():
-      ##   if atom_group.resname in ["WAT"]:
-      ##     atom_group.resname = "HOH"
-
-      ## for atom_group in pdb_h_pre.atom_groups():
-      ##   if atom_group.resname in ["WAT"]:
-      ##     atom_group.resname = "HOH"
-
-      ## #match residues based on resseq and resname
-      ## #match atoms based on name an i_seq
-      ## for chain_post in pdb_h_post.chains():
-      ##   for resi_post in chain_post.conformers()[0].residues():
-      ##     for atom_post in resi_post.atoms():
-      ##       for chain_pre in pdb_h_pre.chains():
-      ##         for resi_pre in chain_pre.conformers()[0].residues():
-      ##             if resi_pre.resseq==resi_post.resseq and resi_pre.resname.strip()==resi_post.resname.strip():
-      ##               for atom_pre in resi_pre.atoms():
-      ##                 if atom_pre.name == atom_post.name:
-      ##                   atom_pre.xyz=(atom_post.xyz[0],
-      ##                                 atom_post.xyz[1],
-      ##                                 atom_post.xyz[2])
 
       pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_remove_wat('4phenix_%s.pdb' % self.base)
       pdb_post, pdb_h_post = self._pdb_hierarchy_and_remove_wat('%s_new.pdb' % self.base)
