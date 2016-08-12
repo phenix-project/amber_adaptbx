@@ -606,9 +606,6 @@ class amber_prep_run_class:
 
       self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base,
               sort_atoms=False, type='.min')
-      # N.B.: the "4phenix_xxxx.pdb" created by the above statement is
-      #   mostly OK, but has the full unit cell of atoms, not just the
-      #   asu.
 
     elif option=="phenix_all":
       cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use_amber=True \
@@ -638,21 +635,6 @@ class amber_prep_run_class:
         print  "  Atom %d" %i
       print  "It may be a good idea to inspect manually and remove"
       print  "atoms from special positions or rerun minimization."
-    #
-    # the following high gradient checker does not work yet
-    # rst = Rst7.open('4amber_%s.rst7' %base)     #box
-    # sander.setup('4amber_%s.prmtop' %base, rst.coordinates, rst.box, sander.pme_input())
-    # crystal_symmetry = xrs.crystal_symmetry()
-    # sites_cart = xrs.sites_cart()
-    # sites_cart_uc=expand_coord_to_unit_cell(sites_cart, crystal_symmetry)
-    # sander.set_positions( list(sites_cart_uc.as_double()) )
-    # ene, frc = sander.energy_forces()
-    # sander.cleanup()
-    # big_frcs = [(i, frc_i) for i, frc_i in enumerate(frc) if frc_i>100000]
-    # if len(big_frcs) >0:
-    #   print >> sys.stderr, "WARNING: The following atoms have very high gradients."
-    #   for i in big_frcs:
-    #     print >> sys.stderr, "%d %f" %(i[0]/3, i[1])
 
   def run_clean(self):
     files_to_clean = """
