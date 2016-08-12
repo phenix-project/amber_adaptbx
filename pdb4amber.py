@@ -2,6 +2,7 @@
 
 # Romain M. Wolf, NIBR Basel, December 2013
 # with revisions by Pawel Janowski & Jason Swails, Rutgers U., Feb. 2014
+#    & Jan. 2015
 
 #  Copyright (c) 2013, Novartis Institutes for BioMedical Research Inc.
 #  All rights reserved.
@@ -33,17 +34,18 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-__version__ = "1.0"
-__date__ = "March 2014"
+__version__ = "1.2"
+__date__ = "January 2015"
 
 # PDB analyzer to prepare protein(-ligand) PDB files for Amber simulations.
 
 import os, sys
+from cStringIO import StringIO
 from optparse import OptionParser
 from math import sqrt
+import subprocess
 
 from libtbx.utils import Sorry
-
 import signal
 def sigint_handler(*args, **kwargs):
   print >> sys.stderr, "Interrupt signal caught. Exiting"
@@ -63,7 +65,7 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
            'WAT','HOH')
 
 #=============================================
-def pdb_read(pdbin, noter):
+def pdb_read(pdbin, noter, model):
 #=============================================
 # only records starting with the following strings are kept...
   if noter:
@@ -76,6 +78,8 @@ def pdb_read(pdbin, noter):
 
   if pdbin == 'stdin':
     records = sys.stdin
+  elif hasattr(pdbin, 'readline'):
+    records = pdbin
   else:
     records = open(pdbin, 'r')
   print >> sys.stderr, "\n=================================================="
@@ -95,6 +99,7 @@ def pdb_read(pdbin, noter):
     charge          18
 
   '''
+
   record_type = []; atom_number = []; blank1 = []
   atom_name = []; alt_loc_ind = []; residue_name = []; blank2 = []
   chain_id = []; residue_number = []; insertion_code = []; blank3 = []
@@ -102,6 +107,23 @@ def pdb_read(pdbin, noter):
   bfactor = []; blank4 = []; element = []; charge = []
 # keep everything in 'ACCEPTED'
   lines = records.readlines()
+
+  if model != 0:
+    import re
+    start, end = -1,-1
+    for i, line in enumerate(lines):
+      if re.search(r'^MODEL\s+%d\s' %model, line):
+        start = i
+        break
+    for i in range (start, len(lines)):
+      if lines[i][0:6]=='ENDMDL':
+        end = i
+        break
+    assert start !=-1, "Requested MODEL %d not found." %model
+    assert end !=-1, "ENDMDL line after MODEL %d not found." %model
+    lines = lines[start:end]
+    # import code; code.interact(local=dict(globals(), **locals()))
+
   for line in lines:
     # make all lines 80 characters long (fill up with blanks if necessary)
     # so that the line parser will not fail on shorter lines...
@@ -111,7 +133,10 @@ def pdb_read(pdbin, noter):
       continue
 # make clean divider lines without additional stuff that might hurt later
     elif line[0:6].rstrip() in DIVIDERS:
-      line = line[0:6].rstrip()
+      if line[0:5] == 'MODEL':
+        line = line.rstrip()
+      else:
+        line = line[0:6].rstrip()
       line = (line + (80-len(line)) * ' ')
     else:
       pass
@@ -121,7 +146,7 @@ def pdb_read(pdbin, noter):
     blank1.append(line[11:12])
     atom_name.append(line[12:16])
     alt_loc_ind.append(line[16:17]); residue_name.append(line[17:20])
-    blank2.append(line[20:21]);
+    blank2.append(line[20:21])
     chain_id.append(line[21:22])
     residue_number.append(line[22:26])
     insertion_code.append(line[26:27])
@@ -130,7 +155,7 @@ def pdb_read(pdbin, noter):
     occupancy.append(line[54:60]); bfactor.append(line[60:66])
     blank4.append(line[66:76]); element.append(line[76:78])
     charge.append(line[78:80])
-  insert_resnums = []; insert_resnames = []; chains = [];
+  insert_resnums = []; insert_resnames = []; chains = []
   recordlist = []
   for i, record in enumerate(record_type):
 # determine insertion code
@@ -155,11 +180,11 @@ def pdb_read(pdbin, noter):
   if insert_resnums:
     print >> sys.stderr, "\n----------Insertions"
     print >> sys.stderr, "The following (original-number) residues were considered as insertions:"
-    print >> sys.stderr, "They will be renumbered 'normally' in the final 1-N sequence." 
+    print >> sys.stderr, "They will be renumbered 'normally' in the final 1-N sequence."
     for i in range(0,len(insert_resnums)):
       print >> sys.stderr, "%s%s"%(insert_resnames[i],(insert_resnums[i]))
 
-  return(recordlist)
+  return recordlist
 
 #==================================================
 def pdb_write(recordlist, filename, cnct=''):
@@ -168,21 +193,21 @@ def pdb_write(recordlist, filename, cnct=''):
 # using the format below
   if filename == 'stdout':
     pdbout = sys.stdout
-  else:  
+  else:
     pdbout  = open(filename, 'w')
   format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   for i, record in enumerate(recordlist):
     pdbout.write(format % tuple(record))
   pdbout.write(cnct)
-  pdbout.write('END'+(77 * ' ')+'\n')  
+  pdbout.write('END'+(77 * ' ')+'\n')
   if pdbout != sys.stdout:
     pdbout.close()
 
 #==================================================
-def prot_only(recordlist, filename):
+def prot_only(recordlist):
 #==================================================
-# this strips any residues not recogized by Amber libraries...
-# in a personalized Amber installation with additional libraries, 
+# this strips any residues not recognized by Amber libraries...
+# in a personalized Amber installation with additional libraries,
 # you might consider extending this list
   global RESPROT
   protlist=[]
@@ -191,7 +216,7 @@ def prot_only(recordlist, filename):
       continue
     else:
       protlist.append(record)
-  return(protlist)
+  return protlist
 
 #==================================================
 def remove_hydrogens(recordlist):
@@ -199,13 +224,15 @@ def remove_hydrogens(recordlist):
   nohlist = []
 
   for record in recordlist:
-    if record[3][0] == 'H' or record[3][1] == 'H':
+    if record[3][0] == 'H' or record[3][0:2] == ' H' \
+      or record[3][0:2]=='1H' or record[3][0:2]=='2H' or record[3][0:2]=='3H' \
+      or record[3][0:3]==' 1H' or record[3][0:3]==' 2H' or record[3][0:3]==' 3H':
       continue
     else:
       nohlist.append(record)
 
 # return the record list with all hydrogens removed
-  return(nohlist)
+  return nohlist
 
 #========================================
 def remove_water(recordlist, filename):
@@ -218,7 +245,7 @@ def remove_water(recordlist, filename):
   for record in recordlist:
 # if previous record was water, remove TER card
     if is_prev_water and record[0]=='TER   ':
-      is_prev_water=0      
+      is_prev_water=0
 # if oxygen, then count water
     elif (record[5] == 'HOH' or record[5] == 'WAT') and 'O' in record[3]:
       nwaters +=1
@@ -233,32 +260,31 @@ def remove_water(recordlist, filename):
     else:
       drylist.append(record)
       is_prev_water=0
- 
+
 # report the water removal to the screen
   print >> sys.stderr, "\n---------- Water"
   print >> sys.stderr, "%d water molecules have been removed"%nwaters
   print >> sys.stderr, "and stored in the file %s_water.pdb"%filename
 # return the dry record list with all water removed
   pdb_write(waterlist, filename+'_water.pdb')
-  return(drylist)
+  return drylist
 
 #========================================
 def remove_mostpop_altloc(recordlist,filename):
 #========================================
   noaltlist = []
-  altloc_resnum = []; altloc_resname = []
   minor_altloc = open(filename+'_minor_altloc.pdb', 'w')
-  format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
+  pdbformat = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   report_list=[]
-          
+
 #keep most populous conformation
   import collections
   #n_altlocs is a dict where key is a unique atom identifier and value is
-  # a two element list. First element contains list of occupancy values 
+  # a two element list. First element contains list of occupancy values
   # of all occurrences of that atom. Second element counts the appearance
   # of the atom during the second iteration.
   n_altlocs=collections.OrderedDict()
-#first iteration to set up dict with occupancies for each altloc atom  
+#first iteration to set up dict with occupancies for each altloc atom
   for record in recordlist:
     id = "%s_%s" %(record[8],record[3])
     if record[4] != ' ':
@@ -266,8 +292,8 @@ def remove_mostpop_altloc(recordlist,filename):
         n_altlocs[id] = [ [float(record[14])], 0 ]
       else:
         n_altlocs[id][0].append( float(record[14]) )
-        
-#now iterate again.      
+
+#now iterate again.
   for record in recordlist:
     id = "%s_%s" %(record[8],record[3])
     if id in n_altlocs.keys():
@@ -278,26 +304,26 @@ def remove_mostpop_altloc(recordlist,filename):
         record[4] = ' '
         noaltlist.append(record)
         report_list.append(record)
-      # otherwise write to minor_altloc file and discard  
+      # otherwise write to minor_altloc file and discard
       else:
-        minor_altloc.write(format % tuple(record))
-      n_altlocs[id][1] += 1  
-    #if current atom has no altlocs, add directly to list    
+        minor_altloc.write(pdbformat % tuple(record))
+      n_altlocs[id][1] += 1
+    #if current atom has no altlocs, add directly to list
     else:
       record[4] = ' '
       noaltlist.append(record)
-      
+
   if n_altlocs:
     print >> sys.stderr, "\n---------- Alternate Locations (Original Residues!)"
     print >> sys.stderr, "The following atoms had alternate locations:"
     for record in report_list:
       print >> sys.stderr, "%s_%-4s %s"%(record[5], record[8].strip(), record[3])
     print >> sys.stderr, "The alternate coordinates have been discarded."
-    print >> sys.stderr, "Only the highest occupancy of each atom was kept."         
+    print >> sys.stderr, "Only the highest occupancy of each atom was kept."
     print >> sys.stderr, "Alternate conformations were printed to %s_minor_altloc.pdb" %filename
-    
-  minor_altloc.close()    
-  return(noaltlist)
+
+  minor_altloc.close()
+  return noaltlist
 
 #========================================
 def remove_altloc(recordlist):
@@ -325,7 +351,7 @@ def remove_altloc(recordlist):
     print >> sys.stderr, "The alternate coordinates have been discarded."
     print >> sys.stderr, "Only the first occurrence for each atom was kept."
 
-  return(noaltlist)
+  return noaltlist
 
 #==================================================
 def atom_wrap(recordlist):
@@ -351,7 +377,7 @@ def atom_wrap(recordlist):
       wraplist.append(record)
       continue
 
-  return(wraplist)
+  return wraplist
 
 #========================================
 def renumber(recordlist, filename):
@@ -375,7 +401,7 @@ def renumber(recordlist, filename):
       record[9] = ' '
       current = 1
       record[1] = iatom
-      iatom = iatom + 1
+      iatom += 1
 
       if record[3] == ' CA ' or record[3] == ' CH3':
         final.append(record[8])
@@ -392,7 +418,7 @@ def renumber(recordlist, filename):
       record[8] = current
       record[9] = ' '
       record[1] = iatom
-      iatom = iatom + 1
+      iatom += 1
 
       if record[3] == ' CA ' or record[3] == ' CH3':
         final.append(record[8])
@@ -406,11 +432,11 @@ def renumber(recordlist, filename):
         original.append(record[8]+record[9])
         oriresname.append(record[5])
 
-      current = current + 1
+      current += 1
       record[8] = current
       record[9] = ' '
       record[1] = iatom
-      iatom = iatom + 1
+      iatom += 1
 
       if record[3] == ' CA ' or record[3] == ' CH3':
         final.append(record[8])
@@ -419,47 +445,47 @@ def renumber(recordlist, filename):
 
 
   for i in range(0, len(original)):
-    table.write("%3s %5s    %3s %5s\n"%(oriresname[i], (original[i]), \
-                                    finresname[i], (final[i])))
+    table.write("%3s %5s    %3s %5s\n" %(oriresname[i], (original[i]),
+                                    finresname[i], final[i]) )
 
-  return(renumbered)
+  return renumbered
 
 #========================================
 def non_standard(recordlist, filename):
 #========================================
 # define the common AA and less common AA names that make up proteins
 # and that are recognized by Amber routines in ATOM (or HETATM) records
-  RES = ('A', 'A3', 'A5', 'ACE', \
-         'ALA', 'AN', 'ARG', 'ASH', \
-         'ASN', 'ASP', 'Br-', 'C', \
-         'C3', 'C5', 'CN', 'CYM', \
-         'CYS', 'CYX', 'Cl-', 'Cs+', \
-         'DA', 'DA3', 'DA5', 'DAN', \
-         'DC', 'DC3', 'DC4', 'DC5', \
-         'DCN', 'DG', 'DG3', 'DG5', \
-         'DGN', 'DT', 'DT3', 'DT5', \
-         'DTN', 'F-', 'G', 'G3', \
-         'G5', 'GLH', 'GLN', 'GLU', \
-         'GLY', 'GN', 'HID', 'HIE', \
-         'HIP', 'HIS', 'HOH', 'HYP', \
-         'I-', 'ILE', 'K+', 'LEU', \
-         'LYN', 'LYS', 'Li+', 'MET', \
-         'Mg+', 'NHE', 'NME', 'Na+', \
-         'OHE', 'PHE', 'PL3', 'PRO', \
-         'Rb+', 'SER', 'SPC', 'SPF', \
-         'SPG', 'T4E', 'THR', 'TP3', \
-         'TP4', 'TP5', 'TPF', 'TRP', \
-         'TYR', 'U', 'U3', 'U5', \
-         'UN', 'VAL', 'WAT', 'U5', \
+  RES = ('A', 'A3', 'A5', 'ACE',
+         'ALA', 'AN', 'ARG', 'ASH',
+         'ASN', 'ASP', 'Br-', 'C',
+         'C3', 'C5', 'CN', 'CYM',
+         'CYS', 'CYX', 'Cl-', 'Cs+',
+         'DA', 'DA3', 'DA5', 'DAN',
+         'DC', 'DC3', 'DC4', 'DC5',
+         'DCN', 'DG', 'DG3', 'DG5',
+         'DGN', 'DT', 'DT3', 'DT5',
+         'DTN', 'F-', 'G', 'G3',
+         'G5', 'GLH', 'GLN', 'GLU',
+         'GLY', 'GN', 'HID', 'HIE',
+         'HIP', 'HIS', 'HOH', 'HYP',
+         'I-', 'ILE', 'K+', 'LEU',
+         'LYN', 'LYS', 'Li+', 'MET',
+         'Mg+', 'NHE', 'NME', 'Na+',
+         'OHE', 'PHE', 'PL3', 'PRO',
+         'Rb+', 'SER', 'SPC', 'SPF',
+         'SPG', 'T4E', 'THR', 'TP3',
+         'TP4', 'TP5', 'TPF', 'TRP',
+         'TYR', 'U', 'U3', 'U5',
+         'UN', 'VAL', 'WAT', 'U5',
          'UN', 'VAL', 'WAT')
 
   hetero = open(filename+'_nonprot.pdb', 'w')
-  format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
+  pdbformat = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   ns_resname = []
 
   for record in recordlist:
     if record[5].strip() not in RES and record[5] != '   ':
-      hetero.write(format % tuple(record))
+      hetero.write(pdbformat % tuple(record))
       if record[5] not in ns_resname:
           ns_resname.append(record[5])
 
@@ -470,42 +496,42 @@ def non_standard(recordlist, filename):
     print >> sys.stderr, "file %s_nonprot.pdb"%filename
     print >> sys.stderr, "\n".join(ns_resname)
 
-  return(ns_resname)
+  return ns_resname
 
 #========================================
 def non_standard_elbow(recordlist):
 #========================================
 # define the common AA and less common AA names that make up proteins
 # and that are recognized by Amber routines in ATOM (or HETATM) records
-  RES = ('A', 'A3', 'A5', 'ACE', \
-         'ALA', 'AN', 'ARG', 'ASH', \
-        'ASN', 'ASP', 'BA', 'BR', \
-        'C', 'C3', 'C5', 'CA', \
-        'CD', 'CL', 'CN', 'CO', \
-        'CS', 'CU', 'CYM', 'CYS', \
-        'CYX', 'DA', 'DA3', 'DA5', \
-        'DAN', 'DC', 'DC3', 'DC4', \
-        'DC5', 'DCN', 'DG', 'DG3', \
-        'DG5', 'DGN', 'DT', 'DT3', \
-        'DT5', 'DTN', 'EU', 'F', \
-        'FE2', 'G', 'G3', 'G5', \
-        'GLH', 'GLN', 'GLU', 'GLY', \
-        'GN', 'HG', 'HID', 'HIE', \
-        'HIP', 'HIS', 'HOH', 'HYP', \
-        'ILE', 'IOD', 'K', 'LEU', \
-        'LI', 'LYN', 'LYS', 'MET', \
-        'MG', 'MN', 'NA', 'NHE', \
-        'NI', 'NME', 'OHE', 'PB', \
-        'PD', 'PHE', 'PL3', 'PRO', \
-        'PT', 'RB', 'SER', 'SPC', \
-        'SPF', 'SPG', 'SR', 'T4E', \
-        'THR', 'TP3', 'TP4', 'TP5', \
-        'TPF', 'TRP', 'TYR', 'U', \
-        'U3', 'U5', 'UN', 'V2+', \
+  RES = ('A', 'A3', 'A5', 'ACE',
+         'ALA', 'AN', 'ARG', 'ASH',
+        'ASN', 'ASP', 'BA', 'BR',
+        'C', 'C3', 'C5', 'CA',
+        'CD', 'CL', 'CN', 'CO',
+        'CS', 'CU', 'CYM', 'CYS',
+        'CYX', 'DA', 'DA3', 'DA5',
+        'DAN', 'DC', 'DC3', 'DC4',
+        'DC5', 'DCN', 'DG', 'DG3',
+        'DG5', 'DGN', 'DT', 'DT3',
+        'DT5', 'DTN', 'EU', 'F',
+        'FE2', 'G', 'G3', 'G5',
+        'GLH', 'GLN', 'GLU', 'GLY',
+        'GN', 'HG', 'HID', 'HIE',
+        'HIP', 'HIS', 'HOH', 'HYP',
+        'ILE', 'IOD', 'K', 'LEU',
+        'LI', 'LYN', 'LYS', 'MET',
+        'MG', 'MN', 'NA', 'NHE',
+        'NI', 'NME', 'OHE', 'PB',
+        'PD', 'PHE', 'PL3', 'PRO',
+        'PT', 'RB', 'SER', 'SPC',
+        'SPF', 'SPG', 'SR', 'T4E',
+        'THR', 'TP3', 'TP4', 'TP5',
+        'TPF', 'TRP', 'TYR', 'U',
+        'U3', 'U5', 'UN', 'V2+',
         'VAL', 'WAT', 'YB2', 'ZN')
 
-  
-  format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
+
+  pdbformat = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   ns_resname = []
 
   for record in recordlist:
@@ -514,45 +540,78 @@ def non_standard_elbow(recordlist):
       if record[5].strip() not in ns_resname:
         ns_resname.append(record[5].strip())
         try: f.close()
-        except: pass  
+        except: pass
         f=open('4antechamber_%s.pdb' %(record[5].strip()), 'w')
         resid=record[8]
         chain=record[7]
-        f.write(format % tuple(record))
-      else: 
+        f.write(pdbformat % tuple(record))
+      else:
         #if next atom in the 1st instance of the residue, add atom
         if record[8]==resid and record[7]==chain:
-          f.write(format % tuple(record))
+          f.write(pdbformat % tuple(record))
         else:
           #if next instance of the residue, close f and continue
-          if not f.closed: f.close()  
+          if not f.closed: f.close()
 
   return ns_resname
-
 
 #========================================
 def find_his(recordlist):
 #========================================
-  nhis = 0; hisresname = []; hisresnum = []
-  histidines = ('HIS', 'HID', 'HIP', 'HIN', 'HIE')
+
+  amber_hist = {}
+  standard_hist = {}
+  res_to_change = {}
   for record in recordlist:
-    if record[5] in histidines and record[3] == ' CA ':
-      hisresname.append(record[5])
-      hisresnum.append(record[8])
-      nhis += 1
+    if record[5] in ('HID', 'HIP', 'HIE') and record[3] == ' CA ':
+      amber_hist[record[8]] = record[5]
+    if record[5] == 'HIS':
+        if record[8] not in standard_hist:
+          standard_hist[record[8]] = [record[3].strip()]
+        else:
+          standard_hist[record[8]].append(record[3].strip())
 
-  if nhis > 0:
-    print >> sys.stderr, "\n---------- Histidines (Renumbered Residues!)"
-    print >> sys.stderr, "The following %d histidines are found in the PDB file: "%nhis
+  print >> sys.stderr, "\n---------- Histidines (Renumbered Residues!)"
+  if len(amber_hist) == 0 and len(standard_hist) == 0:
+    print >> sys.stderr, "No histidine residues found."
+    return recordlist
 
-    for i, rname in enumerate(hisresname):
-      print >> sys.stderr, '%s_%d' % (rname, int(hisresnum[i]))
+  if len(amber_hist) > 0:
+    print >> sys.stderr, "The following histidine residues are already named according to Amber convention."
+    for rnum, rname in amber_hist.iteritems():
+      print >> sys.stderr, '%s_%d' % (rname, rnum)
 
-    print >> sys.stderr, "If HIS, Amber will consider them as HIE (epsilon-HIS) by default."
-    print >> sys.stderr, "You might need to check their tautomerism or protonation state"
-    print >> sys.stderr, "and change them to HID (delta-HIS) or HIP (protonated HIS)"
+  if len(standard_hist) > 0:
+    for rnum,atoms in standard_hist.items():
+      if 'HD1' in atoms and 'HE2' in atoms:
+        res_to_change[rnum] = 'HIP'
+        del standard_hist[rnum]
+      elif 'HD1' in atoms and 'HE2' not in atoms:
+        res_to_change[rnum] = 'HID'
+        del standard_hist[rnum]
+      elif 'HD1' not in atoms and 'HE2' in atoms:
+        res_to_change[rnum] = 'HIE'
+        del standard_hist[rnum]
 
-  return(recordlist)
+  if len(res_to_change) > 0:
+    print >> sys.stderr, "The following HIS residues will be changed to Amber convention names:"
+    for rnum, rname in res_to_change.items():
+       print >> sys.stderr, "HIS %d --> %s." %(rnum, rname)
+    for record in recordlist:
+      if record[8] in res_to_change.keys():
+        record[5] = res_to_change[record[8]]
+
+  if len(standard_hist) > 0:
+    print >> sys.stderr, "It was not possible to determine the protonation state of the following HIS"
+    print >> sys.stderr, "residues based on presence of hydrogens. Amber will consider them as HIE"
+    print >> sys.stderr, "(epsilon-HIS) by default. If other protonation state desired change to HID"
+    print >> sys.stderr, "(delta-HIS) or HIP (protonated HIS) by hand."
+    for rnum in standard_hist.keys():
+       print >> sys.stderr, "HIS_%d" %rnum
+
+  return recordlist
+
+
 
 #========================================
 def constph(recordlist):
@@ -594,10 +653,10 @@ def find_disulfide(recordlist, filename):
       cys_sgz.append(record[13])
       cys_sqn.append(record[1])
       ncys += 1
-  
+
   cnct=''
   if ncys > 0:
-      
+
     sslink = open('%s_sslink'%filename, 'w')
     dist = [[0 for i in range(ncys)] for j in range(ncys)]
     for i in range(0, ncys-1):
@@ -609,7 +668,7 @@ def find_disulfide(recordlist, filename):
         dz = float(cys_sgz[i]) - float(cys_sgz[j])
         dz2 = dz*dz
         dist[i][j] = sqrt(dx2 +dy2 +dz2)
-        if dist[i][j] < 2.5 and dist[i][j] > 0.1:
+        if 3.0 > dist[i][j] > 0.1:
           cyx_residues.append(cys_residues[i])
           cyx_residues.append(cys_residues[j])
           print >> sys.stderr,("CYS_%s - CYS_%s: S-S distance = %f Ang."%(cys_residues[i],
@@ -630,15 +689,15 @@ def find_disulfide(recordlist, filename):
 
   else:
     print >> sys.stderr, "No disulfide bonds have been detected."
-  return(recordlist,cnct)
+  return recordlist, cnct
 
 #========================================
 def find_gaps(recordlist):
 #========================================
   global RESPROT
-  ca_atoms = [];
-  gaplist = [];
- 
+  ca_atoms = []
+  gaplist = []
+
   def is_ter(index):
     resnum = recordlist[index][8]
     next = 1
@@ -649,7 +708,7 @@ def find_gaps(recordlist):
         next+=1
       else:
         return False
-          
+
   for i,record in enumerate(recordlist):
     if ('CA' in record[3] or 'CH3' in record[3]) and record[5] in RESPROT:
       ca_atoms.append(i)
@@ -666,19 +725,18 @@ def find_gaps(recordlist):
     dy = float(ca1[12]) - float(ca2[12])
     dz = float(ca2[13]) - float(ca2[13])
     gap = sqrt(dx*dx +dy*dy +dz*dz)
-    
+
     if gap > 5.0:
-      gaprecord = (gap, ca1[5], int(ca1[8]), ca2[5],\
-                   int(ca2[8]))
+      gaprecord = (gap, ca1[5], int(ca1[8]), ca2[5], int(ca2[8]))
       gaplist.append(gaprecord)
       ngaps += 1
 
   if ngaps > 0:
     print >> sys.stderr, "\n---------- Gaps (Renumbered Residues!)"
-    format = "gap of %lf A between %s_%d and %s_%d"
+    cformat = "gap of %lf A between %s_%d and %s_%d"
 
     for i, gaprecord in enumerate(gaplist):
-      print >> sys.stderr, (format % tuple(gaprecord))
+      print >> sys.stderr, (cformat % tuple(gaprecord))
 
     print >> sys.stderr, "You MUST (!!!) insert a TER record between the residues listed above and"
     print >> sys.stderr, "consider to introduce caps (ACE and NME) at the dangling N- and C-terminals."
@@ -691,14 +749,14 @@ def find_incomplete(recordlist):
 # finds residues with missing heavy atoms in the following list of residues;
 # dictionary with number of heavy atoms:
   #PAJ TODO:complete this list with nucleic acids
-  HEAVY = {'ALA':5,  'ARG':11, 'ASN':8,  'ASP':8, \
-           'CYS':6,  'GLN':9,  'GLU':9,  'GLY':4, \
-           'HIS':10, 'ILE':8,  'LEU':8,  'LYS':9, \
-           'MET':8,  'PHE':11, 'PRO':7,  'SER':6, \
-           'THR':7,  'TRP':14, 'TYR':12, 'VAL':7, \
-           'HID':10, 'HIE':10, 'HIN':10, 'HIP':10, \
+  HEAVY = {'ALA':5,  'ARG':11, 'ASN':8,  'ASP':8,
+           'CYS':6,  'GLN':9,  'GLU':9,  'GLY':4,
+           'HIS':10, 'ILE':8,  'LEU':8,  'LYS':9,
+           'MET':8,  'PHE':11, 'PRO':7,  'SER':6,
+           'THR':7,  'TRP':14, 'TYR':12, 'VAL':7,
+           'HID':10, 'HIE':10, 'HIN':10, 'HIP':10,
            'CYX':6,  'ASH':8,  'GLH':9,  'LYH':9}
-  print >> sys.stderr, '\n---------- Missing Heavy Atoms (Renumbered Residues!)' 
+  print >> sys.stderr, '\n---------- Missing Heavy Atoms (Renumbered Residues!)'
   resnum = []
   resname = []
   resheavy = []
@@ -711,7 +769,7 @@ def find_incomplete(recordlist):
         missing = HEAVY[resname[j]] - resheavy[j]
         if missing > 0:
           flag = 1
-          print >> sys.stderr, "%s_%s misses %d heavy atom(s)"%(resname[j], res, missing) 
+          print >> sys.stderr, "%s_%s misses %d heavy atom(s)"%(resname[j], res, missing)
       if flag == 0:
         print >> sys.stderr, "None"
       return()
@@ -739,23 +797,53 @@ class writer(object):
   def write(self, data):
     self.log.append(data)
 
-def run(arg_pdbout, arg_pdbin, 
-        arg_nohyd = True, 
-        arg_dry   = False, 
-        arg_prot  = False, 
+def run(arg_pdbout, arg_pdbin,
+        arg_nohyd = True,
+        arg_dry   = False,
+        arg_prot  = False,
         arg_noter = False,
         arg_constph = False,
         arg_mostpop = False,
-        arg_elbow = False,
         log = None,
+        arg_reduce = False,
+        arg_model = 0,
+        arg_elbow = False
         ):
   if log is not None:
     stderr = sys.stderr
     sys.stderr = writer(log)
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
-  recordlist = pdb_read(pdbin, arg_noter)
-  
+
+  # optionally run reduce on input file
+  if arg_reduce:
+    if arg_pdbin == 'stdin':
+      pdbfile = sys.stdin
+    else:
+      pdbfile = open(arg_pdbin, 'r')
+    try:
+      reduce = os.path.join(os.getenv('AMBERHOME') or '', 'bin', 'reduce')
+      if not os.path.exists(reduce):
+        reduce = 'reduce'
+      process = subprocess.Popen([reduce, '-BUILD', '-NUC', '-'], stdin=pdbfile,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = process.communicate()
+      out = out.decode()
+      err = err.decode()
+      if process.wait():
+        print >> sys.stderr, ("REDUCE returned non-zero exit status: "
+                              "See reduce_info.log for more details")
+        open('reduce_info.log', 'w').write(err)
+      # Uncomment the following to print out the reduce log even if it worked
+#     else:
+#       open('reduce_info.log', 'w').write(err)
+      pdbh = StringIO(out)
+      recordlist = pdb_read(pdbh, arg_noter, arg_model)
+    finally:
+      if pdbfile is not sys.stdin: pdbfile.close()
+  else:
+    recordlist = pdb_read(pdbin, arg_noter, arg_model)
+
   # wrap all atom names to pure standard (always):======================
   recordlist = atom_wrap(recordlist)
   # remove alternate locations and keep only the first one:=============
@@ -773,7 +861,7 @@ def run(arg_pdbout, arg_pdbin,
     ns_names=non_standard_elbow(recordlist)
   # keep only protein:==================================================
   if arg_prot:
-    recordlist = prot_only(recordlist, filename)
+    recordlist = prot_only(recordlist)
   # remove water if -d option used:=====================================
   if arg_dry:
     recordlist = remove_water(recordlist, filename)
@@ -796,13 +884,8 @@ def run(arg_pdbout, arg_pdbin,
   # make final output to new PDB file
   pdb_write(recordlist, arg_pdbout, cnct)
   print >> sys.stderr, ""
-  if log is not None:
-    log = sys.stderr.log
-    sys.stderr = stderr
-  if log:
-    check_pdb4amber_output(log)
   return ns_names
-    
+
 #========================================main===========================
 if __name__ ==  "__main__":
   parser = OptionParser(version=__version__)
@@ -824,10 +907,15 @@ if __name__ ==  "__main__":
                     help = "rename GLU,ASP,HIS for constant pH simulation")
   parser.add_option("--most-populous", action = "store_true", dest = "mostpop",
                     help = "keep most populous alt. conf. (default is to keep 'A')")
+  parser.add_option("--reduce", action = "store_true", dest = "reduce",
+                    help = "Run Reduce first to add hydrogens.  (default: no)")
+  parser.add_option("--model", type = "int", dest = "model", default = 0,
+                    help = "Model to use from a multi-model pdb file (integer).  (default: use all models)")
   (opt, args) = parser.parse_args()
 
   if opt.pdbin == opt.pdbout:
-    print >> sys.stderr, "The input and output file names cannot be the same!"
+    print >> sys.stderr, "The input and output file names cannot be the same!\n"
+    sys.exit(1)
 
   # Make sure that if we are reading from stdin it's being directed from a pipe
   # or a file. We don't want to wait for user input that will never come.
@@ -836,5 +924,5 @@ if __name__ ==  "__main__":
     if os.isatty(sys.stdin.fileno()):
       sys.exit(parser.print_help() or 1)
 
-  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter, 
-      opt.constantph, opt.mostpop)
+  run(opt.pdbout, opt.pdbin, opt.nohyd, opt.dry, opt.prot, opt.noter,
+      opt.constantph, opt.mostpop, opt.reduce, opt.model)
