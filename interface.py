@@ -1,4 +1,6 @@
+import os, sys
 import amber_adaptbx
+import numpy as np
 
 def get_amber_struct_object(params):
   amber_params = params.amber
@@ -37,5 +39,11 @@ def get_amber_struct_object(params):
   else:
     raise Sorry("Unsupported md_engine %s" \
           %params.amber.md_engine)
+
+  if amber_params.order_mapping_file_name is not None:
+    order_map_file_name = amber_params.order_mapping_file_name
+    amber_structs.order_map_file_name = order_map_file_name
+    mapped_arr = np.loadtxt(order_map_file_name, dtype='i4').transpose()
+    amber_structs.order_converter = dict(a2p=mapped_arr[0], p2a=mapped_arr[1])
 
   return amber_structs, sander

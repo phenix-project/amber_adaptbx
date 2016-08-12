@@ -15,12 +15,17 @@ except:
   raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
 try:
   from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
+  import parmed
 except ImportError:
   try:
     from chemistry.amber.readparm import AmberParm, Rst7 #up to AmberTools15
   except ImportError:
     raise ImportError("could not import parmed modules. Check path.")
 
+from amber_adaptbx.amber_phenix_reorder import (
+    initialize_order_converter, reorder_coords_phenix_to_amber,
+    reorder_force_amber_to_phenix, get_indices_convert_dict_from_array
+    )
 
 master_phil_str = """
   use_amber = False
@@ -35,14 +40,16 @@ master_phil_str = """
     .type = path
     .help = A coordinate file needed by Amber. Can be generated using phenix.AmberPrep.
     .style = bold input_file
+  order_mapping_file_name = None
+    .type = path
+    .help = A pickled file that maps amber's coordinates to phenix's coordinates. If given, reuse this map.
+    .style = bold input_file
   wxc_factor = .1
     .type = float
     .style = hidden
   md_engine = *sander mdgx
     .type = choice
     .help = Amber MD engine to use. Use "sander" by default. "mdgx" is for developers and requires compilation.
-"""
-experimental_obsolete = """
   automatic_wxc_scale = False
     .type = bool
     .style = hidden
@@ -51,6 +58,9 @@ experimental_obsolete = """
 """
 
 class geometry_manager(object):
+  COUNT = 0
+  # all objects share the same order_converter
+  order_converter = None
 
   def __init__(self,
         sites_cart=None,
@@ -65,8 +75,19 @@ class geometry_manager(object):
     self.number_of_restraints=number_of_restraints
     self.amber_structs=amber_structs
 
+    # order_converter is a Python dict that map amber atom order to phenix order
+    # assign later
+
+    if geometry_manager.COUNT == 0 and self.amber_structs.is_LES:
+      # compute order_converter from original sites_cart or load from file
+      initialize_order_converter(self)
+
+    # increase COUNT to avoid recompute order_converter
+    geometry_manager.COUNT += 1
+
     if self.energy_components is None:
       self.energy_components = flex.double([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+
   def energies_sites(self,
         crystal_symmetry,
         compute_gradients=False):
@@ -74,12 +95,14 @@ class geometry_manager(object):
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
     if self.amber_structs.md_engine == 'sander':
-      # print "\n\nUSING SANDER\n\n"
-      sander_coords = list(sites_cart_uc.as_double())
-      if self.amber_structs.is_LES == True:
+      # print "\nUSING SANDER"
+      if self.amber_structs.is_LES:
+        sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
         sanderles.set_positions(sander_coords)
         ene, frc = sanderles.energy_forces()
+        frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
       else:
+        sander_coords = list(sites_cart_uc.as_double())
         sander.set_positions(sander_coords)
         ene, frc = sander.energy_forces()
       if (compute_gradients) :
@@ -242,8 +265,15 @@ class sander_structs ():
     self.rst = Rst7.open(rst_file_name)
     self.ridingH = ridingH
     self.is_LES = is_prmtop_LES(parm_file_name)
-    if self.is_LES == True:
+
+    self.order_converter = None
+    self.order_map_file_name = None
+
+    if self.is_LES:
       self.inp = sanderles.pme_input()
+      parm = parmed.load_file(parm_file_name, rst_file_name)
+      # use initial_coordinates for mapping with phenix's sites_cart
+      self.initial_coordinates = parm.coordinates
     else:
       self.inp = sander.pme_input()
 
@@ -409,7 +439,6 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     b = flex.double(b)
     Z = sqrt(angle.type.k)*(angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))*180/pi)
     angle_Zs.append(Z)
-    assert 0
   angle_Zs= flex.double(angle_Zs)
   a_sq  = angle_Zs * angle_Zs
   a_ave = sqrt(flex.mean_default(a_sq, 0))
