@@ -282,18 +282,24 @@ class amber_prep_run_class:
       f=file(logfile, "rb")
       lines=f.read()
       f.close()
+      warnings = {
+        #"Failed to generate parameters": None,
+        "You MUST (!!!) insert a TER record between the residues listed above and": None,
+        "WARNING: The unperturbed charge of the unit:" : \
+        "Very negatively charged molecules with no indication of how they are to be neutralized might cause problems",
+        }
       for line in lines.splitlines():
         if line.find("FATAL:")>-1:
           fatals.append(line)
-        #if line.find("Failed to generate parameters")>-1:
-        #  raise Sorry(line)
-        if line.find("You MUST (!!!) insert a TER record between the residues listed above and")>-1:
-          errors.append(line)
+        for warning, msg in warnings.items():
+          if line.find(warning)>-1:
+            errors.append(line)
+            if msg: errors.append(" > %s" % msg)
       if errors:
-        print "Errors in tleap"
-        print "  check logfile %s for explaination" % logfile
+        print "Errors and warnings in tleap"
+        print "  check logfile %s for explaination\n" % logfile
         for line in errors:
-          print line
+          print "  %s\n" % line
       if fatals:
         print "Fatal errors in tleap"
         for line in fatals:
@@ -572,6 +578,11 @@ class amber_prep_run_class:
                       ])
       ero=easy_run.fully_buffered(cmd)
       assert (ero.return_code == 0)
+      test_files_exist([input_file,
+                        "4amber_%s.prmtop" % self.base,
+                        "4amber_%s.rst7" % self.base,
+                        "%s_%s.rst7" % (self.base, option),
+                      ])
 
       cmd='ambpdb -bres -p 4amber_%s.prmtop < %s_%s.rst7 > %s_new.pdb' % (
         self.base,
