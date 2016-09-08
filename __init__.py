@@ -128,15 +128,15 @@ class geometry_manager(object):
                                   ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
                                   nbond, nangl, nmphi]
       result.finalize_target_and_gradients()
-      print "    Amber total energy: %0.2f" %(result.residual_sum)
-      print "      bonds (n=%d): %0.2f" %(result.energy_components[6],
-                                             result.energy_components[1])
-      print "      angles (n=%d): %0.2f" %(result.energy_components[7],
-                                             result.energy_components[2])
-      print "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
-                                             result.energy_components[3])
-      print "      electrostatics: %0.2f" %(result.energy_components[4])
-      print "      van der Waals: %0.2f" %(result.energy_components[5])
+      ## print "    Amber total energy: %0.2f" %(result.residual_sum)
+      ## print "      bonds (n=%d): %0.2f" %(result.energy_components[6],
+      ##                                        result.energy_components[1])
+      ## print "      angles (n=%d): %0.2f" %(result.energy_components[7],
+      ##                                        result.energy_components[2])
+      ## print "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
+      ##                                        result.energy_components[3])
+      ## print "      electrostatics: %0.2f" %(result.energy_components[4])
+      ## print "      van der Waals: %0.2f" %(result.energy_components[5])
 
     elif self.amber_structs.md_engine == 'mdgx':
       import boost.python
