@@ -163,10 +163,6 @@ gradient calculation (the default is to use Sander and MDGX use should
 only be reserved for advanced users) you will also need to change the
 soft link to Amber in your Phenix modules directory.
 
-2. To use MDGX instead of Sander for gradient calculation, use
-md_engine=mdgx keyword for phenix.refine. The default md_engine is
-Sander.
-
 3. phenix.refine with Amber also has a hidden wxc_factor parameter. In
 ordinary refinement the x-ray term is scaled by the ratio of the
 gradient norms between the x-ray and geometry terms times the
