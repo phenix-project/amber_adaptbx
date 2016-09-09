@@ -11,6 +11,7 @@ from elbow.command_line import builder
 from libtbx import easy_run
 import StringIO
 from amber_adaptbx import amber_library_server
+from amber_adaptbx.scripts.les_build import LESBuilder
 from libtbx.utils import Sorry
 import libtbx.load_env
 
@@ -40,6 +41,8 @@ master_phil_string = """
       clean = *on off
         .type = choice
       redq = False
+        .type = bool
+      LES = False
         .type = bool
     }
     output
@@ -532,7 +535,7 @@ class amber_prep_run_class:
     os.rename('%s_uc.rst7'   % self.base, '4amber_%s.rst7'   % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
-  def run_minimise(self, option=None):
+  def run_minimise(self, option=None, is_LES=False):
     assert self.base
     if option is None: return
 
@@ -551,6 +554,13 @@ class amber_prep_run_class:
       /
       """
     }
+    prmtop_file_name = '4amber_%s.prmtop' % self.base
+    rst7_file_name = '4amber_%s.rst7' % self.base
+    output_rst7_file_name = ' %s_%s.rst7' % (self.base, option)
+    if is_LES:
+      prmtop_file_name = prmtop_file_name.replace('.prmtop', '.LES.prmtop')
+      rst7_file_name = rst7_file_name.replace('.rst7', '.LES.rst7')
+      output_rst7_file_name = output_rst7_file_name.replace('.rst7', '.LES.rst7')
 
     if option in ["amber_h", "amber_all"]:
 
@@ -558,17 +568,18 @@ class amber_prep_run_class:
       f=open('%s_%s.in' % (self.base, option), 'wb')
       f.write(inputs[option])
       f.close()
-      cmd='sander -O -i %s -p 4amber_%s.prmtop -c 4amber_%s.rst7 -o %s_%s.out \
-           -ref 4amber_%s.rst7 -r %s_%s.rst7' % (
+      cmd='sander -O -i %s -p %s -c %s -o %s_%s.out \
+           -ref %s -r %s' % (
              input_file,
-             self.base,
-             self.base,
-             self.base,
-             option,
-             self.base,
+             prmtop_file_name,
+             rst7_file_name,
              self.base,
              option,
+             rst7_file_name,
+             output_rst7_file_name
              )
+      if is_LES:
+        cmd = cmd.replace('sander', 'sander.LES')
       print_cmd(cmd)
       # test function that may be useful...
       test_files_exist([input_file,
@@ -584,10 +595,9 @@ class amber_prep_run_class:
                         "%s_%s.rst7" % (self.base, option),
                       ])
 
-      cmd='ambpdb -bres -p 4amber_%s.prmtop < %s_%s.rst7 > %s_new.pdb' % (
-        self.base,
-        self.base,
-        option,
+      cmd='ambpdb -bres -p %s < %s > %s_new.pdb' % (
+        prmtop_file_name,
+        rst7_file_name,
         self.base,
         )
       print_cmd(cmd)
@@ -619,10 +629,16 @@ class amber_prep_run_class:
               sort_atoms=False, type='.min')
 
     elif option=="phenix_all":
-      cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use_amber=True \
-           amber.topology_file_name=4amber_%s.prmtop \
-           amber.coordinate_file_name=4amber_%s.rst7  \
-           output_file_name_prefix=4phenix_%s_minPhenix ' % tuple([self.base]*4)
+      if is_LES:
+        cmd='phenix.geometry_minimization 4phenix_%s.LES.pdb amber.use_amber=True \
+             amber.topology_file_name=%s \
+             amber.coordinate_file_name=%s  \
+             output_file_name_prefix=4phenix_%s_minPhenix' % (self.base, prmtop_file_name, rst7_file_name, self.base)
+      else:
+        cmd='phenix.geometry_minimization 4phenix_%s.pdb amber.use_amber=True \
+             amber.topology_file_name=4amber_%s.prmtop \
+             amber.coordinate_file_name=4amber_%s.rst7  \
+             output_file_name_prefix=4phenix_%s_minPhenix ' % tuple([self.base]*4)
       restraints = "%s.ligands.cif" % self.base
       if os.path.exists(restraints):
         cmd += " %s" % restraints
@@ -872,15 +888,27 @@ def run(rargs):
   print >> sys.stderr, "\n=================================================="
   print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
   print >> sys.stderr, "=================================================="
+
   amber_prep_runner.uc(redq=actions.redq)
+  if actions.LES:
+   pdb_file_name = working_params.amber_prep.input.pdb_file_name
+   non_les_prmtop_file_name = '4amber_%s.prmtop' % amber_prep_runner.base
+   non_les_rst7_file_name = '4amber_%s.rst7' % amber_prep_runner.base
+   les_builder = LESBuilder(
+           pdb_file_name,
+           prmtop=non_les_prmtop_file_name,
+           rst7_file=non_les_rst7_file_name)
+   les_builder.run()
+
   if actions.minimise == "off":
     pass
   else:
     print >> sys.stderr, "\n=================================================="
     print >> sys.stderr, "Minimizing input coordinates."
     print >> sys.stderr, "=================================================="
-    amber_prep_runner.run_minimise(actions.minimise)
+    amber_prep_runner.run_minimise(actions.minimise, actions.LES)
   amber_prep_runner.check_special_positions()
+
   if actions.clean == "on": amber_prep_runner.run_clean()
   outl = "\n\nExample\n\n  phenix.geometry_minimization"
   outl += " 4phenix_%s.pdb use_amber=True" % (
@@ -889,6 +917,10 @@ def run(rargs):
   outl += " amber.topology_file_name=4amber_%s.prmtop" % amber_prep_runner.base
   outl += " amber.coordinate_file_name=4amber_%s.rst7" % amber_prep_runner.base
   outl += "\n\n\n"
+  if actions.LES:
+    outl = (outl.replace('.pdb', '.LES.pdb')
+                .replace('.prmtop', '.LES.prmtop')
+                .replace('.rst7', '.LES.rst7'))
   print outl
   return '4phenix_%s.pdb' % amber_prep_runner.base
 
@@ -906,3 +938,4 @@ if __name__=="__main__":
                         "intermediate files", action='True', default=False )
     args = parser.parse_args()
     run(args.pdb_file_name, minimize=args.min, clean=args.no_clean)
+    amber_prep_runner.run_minimise(actions.minimise, actions.LES)
