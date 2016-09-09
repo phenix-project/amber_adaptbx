@@ -3,6 +3,7 @@
 from iotbx import pdb
 from scitbx.array_family import flex
 import numpy as np
+from collections import OrderedDict
 
 __all__ = ['initialize_order_converter',
            'get_indices_convert_dict_from_array',
@@ -65,12 +66,21 @@ def initialize_order_converter(self):
             self.amber_structs.initial_coordinates[:asu_n_atoms])
 
     # asu
-    asu_p2a_indices = geometry_manager.order_converter['p2a'].tolist()
-    asu_a2p_indices = geometry_manager.order_converter['a2p'].tolist()
+    asu_p2a_indices = geometry_manager.order_converter['p2a']
+    asu_a2p_indices = geometry_manager.order_converter['a2p']
+
+    # unitcell
+    uc_p2a_indices = []
+    uc_a2p_indices = []
+
+    for index in range(n_models):
+      # need to increase atom indices
+      uc_p2a_indices.extend((asu_p2a_indices + index * asu_n_atoms).tolist())
+      uc_a2p_indices.extend((asu_a2p_indices + index * asu_n_atoms).tolist())
 
     # extend array for unitcell
-    geometry_manager.order_converter['p2a'] = np.array(asu_p2a_indices * n_models)
-    geometry_manager.order_converter['a2p'] = np.array(asu_a2p_indices * n_models)
+    geometry_manager.order_converter['p2a'] = np.array(uc_p2a_indices)
+    geometry_manager.order_converter['a2p'] = np.array(uc_a2p_indices)
 
     # save to disk for debugging
     order_converter = geometry_manager.order_converter
@@ -127,8 +137,8 @@ def get_indices_convert_dict(fn):
   pdb_inp = pdb.input(file_name=fn)
   pdb_hierarchy = pdb_inp.construct_hierarchy()
   
-  newids = dict((atom.id_str(), idx) for (idx, atom) in enumerate(pdb_hierarchy.atoms()))
-  oldids= dict((atom.id_str(), idx) for (idx, atom) in enumerate(pdb_inp.atoms()))
+  newids = OrderedDict((atom.id_str(), idx) for (idx, atom) in enumerate(pdb_hierarchy.atoms()))
+  oldids= OrderedDict((atom.id_str(), idx) for (idx, atom) in enumerate(pdb_inp.atoms()))
   
   return {'p2a': np.array([newids[atom.id_str()] for atom in pdb_inp.atoms()]),
           'a2p': np.array([oldids[atom.id_str()] for atom in pdb_hierarchy.atoms()])}
@@ -152,7 +162,7 @@ def make_dict(big_arr):
   ...            [3.466, 7.893, 9.134]])
   {'1.2 4.6 7.9': 0, '3.5 7.9 9.1': 1}
   """
-  return dict((' '.join(str(round3(i)) for i in arr), idx) for (idx, arr) in enumerate(big_arr))
+  return OrderedDict((' '.join(str(round3(i)) for i in arr), idx) for (idx, arr) in enumerate(big_arr))
 
 def get_indices(ids_dict, big_arr):
   """
@@ -165,7 +175,20 @@ def get_indices(ids_dict, big_arr):
   >>> get_indices(ids_dict, arr)
   array([0, 1])
   """
-  string_list = [ids_dict[' '.join(str(round3(i)) for i in arr)] for arr in big_arr]
+  msg = "sites_cart (read from pdb) and amber_coords (read from rst7) do not have matched value"
+  string_list = []
+  for index, arr in enumerate(big_arr):
+    try:
+      string_list.append(ids_dict[' '.join(str(round3(i)) for i in arr)])
+    except KeyError:
+      print("**********ATTENTION***************")
+      print(msg)
+      print('atom index = {}, coordinates = {}'.format(index, arr))
+      key = list(ids_dict.keys())[index]
+      print('expected {}'.format(key))
+      rounding_example = ' '.join(str(round3(el)) for el in arr)
+      print('Notes about lookup table key: e.g {} will be rounded to {}'.format(arr, rounding_example))
+      raise KeyError(msg)
   return np.array(string_list)
 
 def get_indices_convert_dict_from_array(sites_cart, amber_coords):
@@ -192,12 +215,8 @@ def get_indices_convert_dict_from_array(sites_cart, amber_coords):
   old_ids = make_dict(old_arr)
   new_ids = make_dict(new_arr)
 
-  try:
-    return {'p2a': get_indices(new_ids, old_arr),
-            'a2p': get_indices(old_ids, new_arr)}
-  except KeyError:
-    msg = """sites_cart and amber_coords do not have matched value. Make sure to use correct pdb and rst7 files"""
-    raise KeyError(msg)
+  return {'p2a': get_indices(new_ids, old_arr),
+          'a2p': get_indices(old_ids, new_arr)}
 
 if __name__ == '__main__':
   import parmed as pmd
