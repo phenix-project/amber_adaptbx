@@ -47,9 +47,6 @@ master_phil_str = """
   wxc_factor = .1
     .type = float
     .style = hidden
-  md_engine = *sander mdgx
-    .type = choice
-    .help = Amber MD engine to use. Use "sander" by default. "mdgx" is for developers and requires compilation.
   automatic_wxc_scale = False
     .type = bool
     .style = hidden
@@ -94,83 +91,48 @@ class geometry_manager(object):
     #Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
-    if self.amber_structs.md_engine == 'sander':
-      # print "\nUSING SANDER"
-      if self.amber_structs.is_LES:
-        sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
-        sanderles.set_positions(sander_coords)
-        ene, frc = sanderles.energy_forces()
-        frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
-      else:
-        sander_coords = list(sites_cart_uc.as_double())
-        sander.set_positions(sander_coords)
-        ene, frc = sander.energy_forces()
-      if (compute_gradients) :
-        gradients_uc=flex.vec3_double(flex.double(frc)) * -1
-        gradients = gradients_uc[0:self.sites_cart.size()]
-        # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
-      else :
-        gradients = self.gradients_factory(
-          flex.double(self.sites_cart.size() * 3,0))
-      result = energies(
-        compute_gradients=compute_gradients,
-        gradients=gradients,
-        gradients_size=None,
-        gradients_factory=None,
-        normalization=False)
-      result.number_of_restraints = self.number_of_restraints
-      result.residual_sum = ene.tot
-      ptrfunc = self.amber_structs.parm.ptr
-      nbond = ptrfunc('nbonh') + ptrfunc('nbona')
-      nangl = ptrfunc('ntheth') + ptrfunc('ntheta')
-      nmphi = ptrfunc('nphih') + ptrfunc('nphia')
-      result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
-                                  ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
-                                  nbond, nangl, nmphi]
-      result.finalize_target_and_gradients()
-      ## print "    Amber total energy: %0.2f" %(result.residual_sum)
-      ## print "      bonds (n=%d): %0.2f" %(result.energy_components[6],
-      ##                                        result.energy_components[1])
-      ## print "      angles (n=%d): %0.2f" %(result.energy_components[7],
-      ##                                        result.energy_components[2])
-      ## print "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
-      ##                                        result.energy_components[3])
-      ## print "      electrostatics: %0.2f" %(result.energy_components[4])
-      ## print "      van der Waals: %0.2f" %(result.energy_components[5])
-
-    elif self.amber_structs.md_engine == 'mdgx':
-      import boost.python
-      ext = boost.python.import_ext("amber_adaptbx_ext")
-      # print "\n\nUSING MDGX\n\n"
-      #Convert flex arrays to C arrays
-      sites_cart_c=ext.ExtractVec(sites_cart_uc.as_double())
-      gradients_c=ext.ExtractVec(flex.double(sites_cart_uc.size() * 3, 0))
-      energy_components_c=ext.ExtractVec(self.energy_components)
-
-      # Call c++ interface to call mdgx to calculate new gradients and target
-      ext.callMdgx(sites_cart_c, gradients_c, energy_components_c, self.amber_structs.uform)
-      if (compute_gradients) :
-        # import code; code.interact(local=dict(globals(), **locals()))
-        # sys.exit()
-        gradients_uc = self.gradients_factory(gradients_c) * -1
-        gradients = gradients_uc[0:self.sites_cart.size()]
-        # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
-      else :
-        gradients = self.gradients_factory(
-          flex.double(self.sites_cart.size() * 3,0))
-      result = energies(
-        compute_gradients=compute_gradients,
-        gradients=gradients,
-        gradients_size=None,
-        gradients_factory=None,
-        normalization=False)
-      result.number_of_restraints = self.number_of_restraints
-      result.residual_sum = float(energy_components_c[0])
-      result.energy_components = list(energy_components_c)
-      result.finalize_target_and_gradients()
+    if self.amber_structs.is_LES:
+      sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
+      sanderles.set_positions(sander_coords)
+      ene, frc = sanderles.energy_forces()
+      frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
     else:
-      print "error: unknown md engine"
-      sys.exit()
+      sander_coords = list(sites_cart_uc.as_double())
+      sander.set_positions(sander_coords)
+      ene, frc = sander.energy_forces()
+    if (compute_gradients) :
+      gradients_uc=flex.vec3_double(flex.double(frc)) * -1
+      gradients = gradients_uc[0:self.sites_cart.size()]
+      # gradients = collapse_grad_to_asu(gradients_uc, crystal_symmetry)
+    else :
+      gradients = self.gradients_factory(
+        flex.double(self.sites_cart.size() * 3,0))
+    result = energies(
+      compute_gradients=compute_gradients,
+      gradients=gradients,
+      gradients_size=None,
+      gradients_factory=None,
+      normalization=False)
+    result.number_of_restraints = self.number_of_restraints
+    result.residual_sum = ene.tot
+    ptrfunc = self.amber_structs.parm.ptr
+    nbond = ptrfunc('nbonh') + ptrfunc('nbona')
+    nangl = ptrfunc('ntheth') + ptrfunc('ntheta')
+    nmphi = ptrfunc('nphih') + ptrfunc('nphia')
+    result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
+                                ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
+                                nbond, nangl, nmphi]
+    result.finalize_target_and_gradients()
+    print "    Amber total energy: %0.2f" %(result.residual_sum)
+    print "      bonds (n=%d): %0.2f" %(result.energy_components[6],
+                                           result.energy_components[1])
+    print "      angles (n=%d): %0.2f" %(result.energy_components[7],
+                                           result.energy_components[2])
+    print "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
+                                           result.energy_components[3])
+    print "      electrostatics: %0.2f" %(result.energy_components[4])
+    print "      van der Waals: %0.2f" %(result.energy_components[5])
+
     return result
 
 class energies (scitbx.restraints.energies) :
@@ -239,16 +201,6 @@ def check_file(s,filename):
     raise Sorry("Filename %s is None. Please set this parameter" % s)
   if not os.path.exists(filename):
     raise Sorry("Filename %s does not exist" % filename)
-
-class mdgx_structs():
-  def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
-    import boost.python
-    ext = boost.python.import_ext("amber_adaptbx_ext")
-    self.md_engine = 'mdgx'
-    self.parm = AmberParm(parm_file_name)
-    self.uform = ext.uform(parm_file_name, rst_file_name)
-    self.ridingH = ridingH
-    self.is_LES = is_prmtop_LES(parm_file_name)
 
 def check_file(s,file_name):
   if file_name is None:
@@ -449,78 +401,3 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   else:
     return (a_min, a_max, a_ave), angle_Zs
 
-
-def run(pdb,prmtop, crd):
-
-  #===================================================================#
-  #                                                                   #
-  #  BEFORE C++                                                       #
-  #                                                                   #
-  #===================================================================#
-
-  #file i/o
-  pdb_file = os.path.abspath(pdb)
-  pdb_inp = iotbx.pdb.input(file_name=pdb_file)
-  pdb_atoms = pdb_inp.atoms_with_labels()
-  symm = pdb_inp.crystal_symmetry()
-  xray_structure = pdb_inp.xray_structure_simple(enable_scattering_type_unknown=True)
-
-
-  #     initiate flex arrays for coordinates, gradients, energy
-  sites_cart=xray_structure.sites_cart()
-  gradients=flex.double(len(sites_cart)*3)
-  target=flex.double([6.7,1.0,2.0,3.0,4.0,5.0,0.0,0.0,0.0,0.0])
-  print "Number of atom sites: %d " %sites_cart.size()
-  print "\nGradients and target BEFORE C call:"
-  print list(gradients[1:10])
-  print target[0]
-
-  #===================================================================#
-  #                                                                   #
-  #  CALL C++                                                         #
-  #                                                                   #
-  #===================================================================#
-
-  U=ext.uform(prmtop, crd)
-
-  #Convert flex arrays to C arrays
-  sites_cart_c=ext.ExtractVec(sites_cart.as_double())
-  gradients_c=ext.ExtractVec(gradients)
-  target_c=ext.ExtractVec(target)
-
-  # Call c++ interface to call mdgx to calculate new gradients and target
-  ext.callMdgx(sites_cart_c, gradients_c, target_c, U)
-
-  # Convert back into python types (eg. into flex arrays for phenix to use)
-  gradients=flex.vec3_double(gradients_c)*-1
-
-  target= flex.double(target_c)
-
-  #===================================================================#
-  #                                                                   #
-  #  AFTER C++                                                        #
-  #                                                                   #
-  #===================================================================#
-
-
-  print "\nGradients and target AFTER C call:"
-  print list(gradients[0:10])
-  print target[0]
-  print target[9]
-
-  print "Amber_total_energy: %7.6f"             %(target[0])
-  print "  bonds (n= ): %7.6f"                  %(target[1])
-  print "  angles (n= ): %7.6f"                         %(target[2])
-  print "  dihedrals (n= ): %7.6f"              %(target[3])
-  print "  electrostatics: %7.6f"               %(target[4])
-  print "  vanderWaals: %7.6f"                  %(target[5])
-
-  return 0
-
-if __name__ == "__main__" :
-        parser = argparse.ArgumentParser()
-        parser.add_argument("pdb", help="name of pdb file")
-        parser.add_argument("prmtop", help="name of topology file")
-        parser.add_argument("crd", help="name of coordinate file")
-        args = parser.parse_args()
-        run(args.pdb,args.prmtop, args.crd)
