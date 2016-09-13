@@ -50,7 +50,6 @@ class run(object):
                planarity                      = False,
                parallelity                    = False,
                grms_termination_cutoff        = 0,
-               md_engine                      = False,
                alternate_nonbonded_off_on     = False,
                log                            = None,
                prmtop                         = None,
@@ -81,27 +80,20 @@ class run(object):
       reference_dihedral = True,
       bond_similarity    = True)
 
-    if md_engine == "sander":
-      import sander, sanderles
-      amber_structs = amber_adaptbx.sander_structs(
-        parm_file_name=prmtop,
-        rst_file_name=ambcrd)
-      if amber_structs.is_LES:
-        sanderles.setup(amber_structs.parm,
-               amber_structs.rst.coordinates,
-               amber_structs.rst.box,
-               amber_structs.inp)
-      else:
-        sander.setup(amber_structs.parm,
-               amber_structs.rst.coordinates,
-               amber_structs.rst.box,
-               amber_structs.inp)
-    elif md_engine == "mdgx":
-      amber_structs = amber_adaptbx.mdgx_structs(
-        parm_file_name=prmtop,
-        rst_file_name=ambcrd)
+    import sander, sanderles
+    amber_structs = amber_adaptbx.sander_structs(
+      parm_file_name=prmtop,
+      rst_file_name=ambcrd)
+    if amber_structs.is_LES:
+      sanderles.setup(amber_structs.parm,
+             amber_structs.rst.coordinates,
+             amber_structs.rst.box,
+             amber_structs.inp)
     else:
-      raise Sorry("Unsupported md_engine %s" %md_engine)
+      sander.setup(amber_structs.parm,
+             amber_structs.rst.coordinates,
+             amber_structs.rst.box,
+             amber_structs.inp)
 
     self.show(amber_structs)
 
@@ -126,11 +118,10 @@ class run(object):
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
           max_iterations = max_number_of_iterations)
 
-    if amber_structs.md_engine == 'sander':
-      if amber_structs.is_LES:
-        sanderles.cleanup()
-      else:
-        sander.cleanup()
+    if amber_structs.is_LES:
+      sanderles.cleanup()
+    else:
+      sander.cleanup()
 
   def show(self, amber_structs):
     import amber_adaptbx as amber
