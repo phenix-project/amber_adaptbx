@@ -87,7 +87,9 @@ class geometry_manager(object):
 
   def energies_sites(self,
         crystal_symmetry,
+        log=None,
         compute_gradients=False):
+    # if log==None: assert 0
     #Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
@@ -123,15 +125,16 @@ class geometry_manager(object):
                                 ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
-    print "    Amber total energy: %0.2f" %(result.residual_sum)
-    print "      bonds (n=%d): %0.2f" %(result.energy_components[6],
+    if log==None: log=sys.stdout
+    print >>log, "    Amber total energy: %0.2f" %(result.residual_sum)
+    print >>log, "      bonds (n=%d): %0.2f" %(result.energy_components[6],
                                            result.energy_components[1])
-    print "      angles (n=%d): %0.2f" %(result.energy_components[7],
+    print >>log, "      angles (n=%d): %0.2f" %(result.energy_components[7],
                                            result.energy_components[2])
-    print "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
+    print>>log,  "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
                                            result.energy_components[3])
-    print "      electrostatics: %0.2f" %(result.energy_components[4])
-    print "      van der Waals: %0.2f" %(result.energy_components[5])
+    print>>log,  "      electrostatics: %0.2f" %(result.energy_components[4])
+    print>>log,  "      van der Waals: %0.2f" %(result.energy_components[5])
 
     return result
 

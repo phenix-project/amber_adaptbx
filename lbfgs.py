@@ -18,6 +18,7 @@ class lbfgs(object):
       lbfgs_exception_handling_params=None,
       disable_asu_cache=False,
       sites_cart_selection=None,
+      log=None,
       site_labels=None):
     if (lbfgs_termination_params is None):
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
@@ -49,7 +50,9 @@ class lbfgs(object):
           sites_cart=self.tmp.sites_shifted,
           amber_structs=self.amber_structs,)
     amber_geometry=amber_geometry_manager.energies_sites(
-      crystal_symmetry = self.tmp.geometry_restraints_manager.crystal_symmetry)
+      crystal_symmetry=self.tmp.geometry_restraints_manager.crystal_symmetry,
+      log=log,
+      )
     self.final_target_result=amber_geometry.energy_components
     sites_cart.clear()
     sites_cart.extend(self.tmp.sites_shifted)

@@ -95,7 +95,7 @@ class run(object):
              amber_structs.rst.box,
              amber_structs.inp)
 
-    self.show(amber_structs)
+    self.show(amber_structs, log=log)
 
     for i_macro_cycle in xrange(number_of_macro_cycles):
       print >> self.log, "  macro-cycle:", i_macro_cycle
@@ -123,10 +123,13 @@ class run(object):
     else:
       sander.cleanup()
 
-  def show(self, amber_structs):
+  def show(self, amber_structs, log=None):
     import amber_adaptbx as amber
     amber_geometry_manager=amber.geometry_manager(
        sites_cart=self.pdb_hierarchy.atoms().extract_xyz(),
        amber_structs=amber_structs)
-    amber_geometry=amber_geometry_manager.energies_sites(self.restraints_manager.geometry.crystal_symmetry)
+    amber_geometry=amber_geometry_manager.energies_sites(
+       self.restraints_manager.geometry.crystal_symmetry,
+       log=log,
+       )
     amber_geometry.show()
