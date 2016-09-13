@@ -884,6 +884,7 @@ def run(arg_pdbout, arg_pdbin,
   # make final output to new PDB file
   pdb_write(recordlist, arg_pdbout, cnct)
   print >> sys.stderr, ""
+  sys.stderr = stderr
   return ns_names
 
 #========================================main===========================
