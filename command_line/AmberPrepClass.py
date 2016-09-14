@@ -721,9 +721,9 @@ def get_molecule_from_hierarchy(hierarchy, resname):
 def _run_antechamber_ccif( residue_name,
                            use_am1_and_maxcyc_zero=True,
                            debug=False):
-  print >> sys.stdout, "\n=================================================="
-  print >> sys.stdout, "Running antechamber_ccif for %s " %residue_name
-  print >> sys.stdout, "=================================================="
+  print "\n=================================================="
+  print "Running antechamber_ccif for %s " %residue_name
+  print "=================================================="
 
   ccif = get_chemical_components_file_name(residue_name)
   cmds = []
@@ -761,9 +761,9 @@ def _run_elbow_antechamber(pdb_hierarchy,
   for atom in pdb_mol:
     names.append(atom.name.strip())
   pdb_set = set(names)
-  print >> sys.stdout, "\n=================================================="
-  print >> sys.stdout, "Running elbow/antechamber for %s " %residue_name
-  print >> sys.stdout, "=================================================="
+  print "\n=================================================="
+  print "Running elbow/antechamber for %s " %residue_name
+  print "=================================================="
   if debug and 0:
     import pickle
     pf = "%s.pickle" % residue_name
@@ -870,9 +870,9 @@ def run(rargs):
     prefer_input_method=inputs.antechamber.prefer_input_method,
   )
   #
-  print >> sys.stderr, "\n=================================================="
-  print >> sys.stderr, "Preparing asu files and 4phenix_%s.pdb" % base
-  print >> sys.stderr, "=================================================="
+  print "\n=================================================="
+  print "Preparing asu files and 4phenix_%s.pdb" % base
+  print "=================================================="
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
                               'asu',
                               #ns_names,
@@ -885,9 +885,9 @@ def run(rargs):
   amber_prep_runner.finalizePdb(
       pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=False)
 
-  print >> sys.stderr, "\n=================================================="
-  print >> sys.stderr, "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
-  print >> sys.stderr, "=================================================="
+  print "\n=================================================="
+  print "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
+  print "=================================================="
 
   amber_prep_runner.uc(redq=actions.redq)
   if actions.LES:
@@ -903,9 +903,9 @@ def run(rargs):
   if actions.minimise == "off":
     pass
   else:
-    print >> sys.stderr, "\n=================================================="
-    print >> sys.stderr, "Minimizing input coordinates."
-    print >> sys.stderr, "=================================================="
+    print "\n=================================================="
+    print "Minimizing input coordinates."
+    print "=================================================="
     amber_prep_runner.run_minimise(actions.minimise, actions.LES)
   amber_prep_runner.check_special_positions()
 
