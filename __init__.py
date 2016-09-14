@@ -52,6 +52,9 @@ master_phil_str = """
     .style = hidden
     .help = Use the ratio of the restraints gradident norm and the Amber \
             gradient norm to set wxc_scale
+   print_amber_energies = False
+     .type = bool
+     .help = Print details of Amber energies during refinement
 """
 
 class geometry_manager(object):
@@ -88,6 +91,7 @@ class geometry_manager(object):
   def energies_sites(self,
         crystal_symmetry,
         log=None,
+        print_amber_energies=False,
         compute_gradients=False):
     # if log==None: assert 0
     #Expand sites_cart to unit cell
@@ -126,15 +130,16 @@ class geometry_manager(object):
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
     if log==None: log=sys.stdout
-    print >>log, "    Amber total energy: %0.2f" %(result.residual_sum)
-    print >>log, "      bonds (n=%d): %0.2f" %(result.energy_components[6],
+    if print_amber_energies:
+      print >>log, "    Amber total energy: %0.2f" %(result.residual_sum)
+      print >>log, "      bonds (n=%d): %0.2f" %(result.energy_components[6],
                                            result.energy_components[1])
-    print >>log, "      angles (n=%d): %0.2f" %(result.energy_components[7],
+      print >>log, "      angles (n=%d): %0.2f" %(result.energy_components[7],
                                            result.energy_components[2])
-    print>>log,  "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
+      print>>log,  "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
                                            result.energy_components[3])
-    print>>log,  "      electrostatics: %0.2f" %(result.energy_components[4])
-    print>>log,  "      van der Waals: %0.2f" %(result.energy_components[5])
+      print>>log,  "      electrostatics: %0.2f" %(result.energy_components[4])
+      print>>log,  "      van der Waals: %0.2f" %(result.energy_components[5])
 
     return result
 
