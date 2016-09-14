@@ -289,7 +289,7 @@ class amber_prep_run_class:
         #"Failed to generate parameters": None,
         "You MUST (!!!) insert a TER record between the residues listed above and": None,
         "WARNING: The unperturbed charge of the unit:" : \
-        "Very negatively charged molecules with no indication of how they are to be neutralized might cause problems",
+        "Highly charged molecules with no indication of how they are to be neutralized might cause problems",
         }
       for line in lines.splitlines():
         if line.find("FATAL:")>-1:
@@ -691,6 +691,7 @@ class amber_prep_run_class:
       mdinfo
       asu.prmtop
       asu.rst7
+      remark_290.txt
       """
     import glob
 
