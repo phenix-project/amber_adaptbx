@@ -809,8 +809,8 @@ def run(arg_pdbout, arg_pdbin,
         arg_model = 0,
         arg_elbow = False
         ):
+  stderr = sys.stderr
   if log is not None:
-    stderr = sys.stderr
     sys.stderr = writer(log)
   filename, extension = os.path.splitext(arg_pdbout)
   pdbin = arg_pdbin
