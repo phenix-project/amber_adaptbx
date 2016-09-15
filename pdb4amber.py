@@ -798,7 +798,7 @@ class writer(object):
     self.log.append(data)
 
 def run(arg_pdbout, arg_pdbin,
-        arg_nohyd = True,
+        arg_nohyd = False,
         arg_dry   = False,
         arg_prot  = False,
         arg_noter = False,
@@ -834,9 +834,9 @@ def run(arg_pdbout, arg_pdbin,
         print >> sys.stderr, ("REDUCE returned non-zero exit status: "
                               "See reduce_info.log for more details")
         open('reduce_info.log', 'w').write(err)
-      # Uncomment the following to print out the reduce log even if it worked
-#     else:
-#       open('reduce_info.log', 'w').write(err)
+      # print out the reduce log even if it worked
+      else:
+        open('reduce_info.log', 'w').write(err)
       pdbh = StringIO(out)
       recordlist = pdb_read(pdbh, arg_noter, arg_model)
     finally:
