@@ -696,6 +696,8 @@ def find_gaps(recordlist):
 #========================================
   global RESPROT
   ca_atoms = []
+  c_atoms = []
+  n_atoms = []
   gaplist = []
 
   def is_ter(index):
@@ -709,9 +711,15 @@ def find_gaps(recordlist):
       else:
         return False
 
+  #  N.B.: following only finds gaps in protein chains!
   for i,record in enumerate(recordlist):
-    if ('CA' in record[3] or 'CH3' in record[3]) and record[5] in RESPROT:
+    if (record[3].strip() == 'CA' or 
+        record[3].strip() == 'CH3' ) and record[5] in RESPROT:
       ca_atoms.append(i)
+    if record[3].strip() == 'C'  and record[5] in RESPROT:
+      c_atoms.append(i)
+    if record[3].strip() == 'N'  and record[5] in RESPROT:
+      n_atoms.append(i)
 
   nca = len(ca_atoms)
   ngaps = 0
@@ -719,29 +727,34 @@ def find_gaps(recordlist):
   for i in range(nca-1):
     if is_ter(ca_atoms[i]):
       continue
-    ca1 = recordlist[ca_atoms[i]]
-    ca2 = recordlist[ca_atoms[i+1]]
+    # Following is orignal code, depending only on CA positions:
+    #ca1 = recordlist[ca_atoms[i]]
+    #ca2 = recordlist[ca_atoms[i+1]]
+
+    # Changed here to look at the C-N peptide bond distance:
+    ca1 = recordlist[c_atoms[i]]
+    ca2 = recordlist[n_atoms[i+1]]
+
     dx = float(ca1[11]) - float(ca2[11])
     dy = float(ca1[12]) - float(ca2[12])
-    dz = float(ca2[13]) - float(ca2[13])
+    dz = float(ca1[13]) - float(ca2[13])
     gap = sqrt(dx*dx +dy*dy +dz*dz)
 
-    if gap > 5.0:
+    #if gap > 5.0:  #original version, for CA connectivity
+    if gap > 2.0:
       gaprecord = (gap, ca1[5], int(ca1[8]), ca2[5], int(ca2[8]))
       gaplist.append(gaprecord)
       ngaps += 1
 
   if ngaps > 0:
     print >> sys.stderr, "\n---------- Gaps (Renumbered Residues!)"
-    cformat = "gap of %lf A between %s_%d and %s_%d"
+    cformat = "gap of %lf A between %s %d and %s %d"
 
     for i, gaprecord in enumerate(gaplist):
       print >> sys.stderr, (cformat % tuple(gaprecord))
+    print >> sys.stderr, "Phenix will assume that these are 'real' gaps."
 
-    print >> sys.stderr, "You MUST (!!!) insert a TER record between the residues listed above and"
-    print >> sys.stderr, "consider to introduce caps (ACE and NME) at the dangling N- and C-terminals."
-
-  return()
+  return(gaplist)
 
 #========================================
 def find_incomplete(recordlist):
@@ -856,7 +869,7 @@ def run(arg_pdbout, arg_pdbin,
     recordlist = remove_hydrogens(recordlist)
   # find non-standard Amber residues:===================================
   non_standard(recordlist, filename)
-  ns_names = None
+  ns_names = []
   if arg_elbow:
     ns_names=non_standard_elbow(recordlist)
   # keep only protein:==================================================
@@ -877,7 +890,7 @@ def run(arg_pdbout, arg_pdbin,
   # find possible S-S in the final protein:=============================
   recordlist, cnct = find_disulfide(recordlist, filename)
   # find possible gaps:==================================================
-  find_gaps(recordlist)
+  gaplist = find_gaps(recordlist)
   # count heavy atoms
   find_incomplete(recordlist)
   # =====================================================================
@@ -885,7 +898,7 @@ def run(arg_pdbout, arg_pdbin,
   pdb_write(recordlist, arg_pdbout, cnct)
   print >> sys.stderr, ""
   sys.stderr = stderr
-  return ns_names
+  return ns_names,gaplist
 
 #========================================main===========================
 if __name__ ==  "__main__":
