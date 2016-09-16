@@ -44,6 +44,10 @@ master_phil_string = """
         .type = bool
       LES = False
         .type = bool
+      use_reduce = True
+        .type = bool
+        .caption = Run reduce on the input pdb file to place hydrogens
+        .help = Run reduce on the input pdb file to place hydrogens
     }
     output
     {
@@ -220,22 +224,23 @@ class amber_prep_run_class:
     return False
 
   # run pdb4amber
-  def run_pdb4amber(self):
+  def run_pdb4amber(self, use_reduce):
     assert self.pdb_hierarchy
     pdbstring=self.pdb_hierarchy.as_pdb_string()
-    init = "%s_init.pdb" % self.base
-    f=open(init,'w')
-    f.write(pdbstring)
-    f.close()
+    # init = "%s_init.pdb" % self.base
+    # f=open(init,'w')
+    # f.write(pdbstring)
+    # f.close()
     self.tleap_input_pdb = "%s_4tleap.pdb" % self.base
     log = []
-    self.ns_names=pdb4amber.run(self.tleap_input_pdb,
+    self.ns_names,self.gaplist=pdb4amber.run(self.tleap_input_pdb,
                                 self.pdb_filename,
                                 arg_elbow=True,
-                                log=log,
+                                arg_reduce=use_reduce,
+                                #log=log,
       )
     # init is identical to old method
-    if os.path.exists(init): os.remove(init)
+    # if os.path.exists(init): os.remove(init)
 
   def run_elbow_antechamber(self,
                             nproc=1,
@@ -272,7 +277,7 @@ class amber_prep_run_class:
   def run_tleap(self,
                 input_pdb,
                 output_base,
-                #ns_names,
+                gaplist,
                 reorder_residues,
                 logfile="leap.log",
                 redq=False,
@@ -356,10 +361,17 @@ class amber_prep_run_class:
     f.write('set x box {20.000   20.000   20.000}\n')
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
+    #
+    #  process gaplist
+    #
+    if gaplist:
+      for d,res1,resid1,res2,resid2 in gaplist:
+        f.write('deleteBond x.%d.C x.%d.N\n' % ( resid1, resid2 ) )
+
     f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(
-      "%s_%s" % (self.base, output_base),
-      "%s_%s" % (self.base, output_base),
-      )
+        "%s_%s" % (self.base, output_base),
+        "%s_%s" % (self.base, output_base),
+        )
       )
     f.write('quit\n')
     f.close()
@@ -439,7 +451,7 @@ class amber_prep_run_class:
                                      atom_pre.xyz[2])
 
   # make pdb
-  def run_ambpdb(self): #, save_cpp_traj_prmtop=False):
+  def run_ambpdb(self):
     assert self.base
     cmd='ambpdb -bres -p %s_asu.prmtop < %s_asu.rst7 > %s_new.pdb' % tuple(
       [self.base]*3
@@ -524,9 +536,10 @@ class amber_prep_run_class:
     run_UnitCell(uc_pdb_file, tleap_pdb_file1)
 
     #run back through pdb4amber to get new CONECT records for SS bonds:
-    pdb4amber.run(tleap_pdb_file, tleap_pdb_file1, arg_nohyd=False)
+    self.ns_names,self.gaplist=pdb4amber.run(tleap_pdb_file, tleap_pdb_file1)
     self.run_tleap(tleap_pdb_file,
                    output_base='uc',
+                   gaplist=self.gaplist,
                    reorder_residues='off',
                    #logfile='tleap_uc.log',
                    redq=redq,
@@ -605,10 +618,6 @@ class amber_prep_run_class:
       assert (ero.return_code == 0)
       ero.show_stdout()
       ero.show_stderr()
-#      fix_ambpdb.run('%s_4tleap.pdb' % self.base,
-#                     '%s_new.pdb' % self.base,
-#                     '%s_new2.pdb' % self.base,
-#        )
 
       pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('4phenix_%s.pdb' % self.base)
       pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
@@ -864,7 +873,7 @@ def run(rargs):
   amber_prep_runner.initializePdb(inputs.pdb_file_name)
   invalid = amber_prep_runner.validatePdb()
   if invalid: raise Sorry( 'PDB input is not "valid"' )
-  amber_prep_runner.run_pdb4amber()
+  amber_prep_runner.run_pdb4amber(actions.use_reduce)
   #
   amber_prep_runner.run_elbow_antechamber(
     nproc=inputs.nproc,
@@ -876,13 +885,13 @@ def run(rargs):
   print "=================================================="
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
                               'asu',
-                              #ns_names,
+                              gaplist=amber_prep_runner.gaplist,
                               reorder_residues='on',
                               #logfile='tleap_asu.log',
                               redq=actions.redq,
     )
   amber_prep_runner.run_ChBox("asu")
-  amber_prep_runner.run_ambpdb() #save_cpp_traj_prmtop=actions.save_cpp_traj_prmtop)
+  amber_prep_runner.run_ambpdb()
   amber_prep_runner.finalizePdb(
       pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=False)
 
