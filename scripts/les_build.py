@@ -17,10 +17,6 @@ Output example
 --------------
 4amber_2igd.LES.prmtop  4amber_2igd.LES.rst7  4phenix_2igd.LES.pdb
 
-Notes
------
-output filenames might be changed in the future (e.g changing 2igdab_fix.rst7 to 2igdab.rst7)
-
 API
 ---
 
@@ -43,6 +39,7 @@ class LESBuilder(object):
   prmtop : str, prmtop of the single conformation unitcell pdb, default None (optional)
       if not provided, LESBuilder will use `build_parm_single_conformation` to build prmtop.
       It's better to specify prmtop since `build_parm_single_conformation` does not handle ligand.
+      DAC note: should we not make the single conformer versions mandatory?
       You can use AmberPrep to prepare this prmtop file
   rst7_file : str, corresponding rst7 filename, default None (optional)
      only needed if `prmtop` is given
@@ -100,7 +97,7 @@ class LESBuilder(object):
     new_pdb = self.root_name + '_uc.pdb'
     command_build_unitcell = 'UnitCell -p {} -o {}'.format(
         self.original_pdb_file, new_pdb)
-    print(command_build_unitcell)
+    # print(command_build_unitcell)
     easy_run.fully_buffered(command_build_unitcell)
 
   def add_hydrogens(self):
@@ -108,14 +105,15 @@ class LESBuilder(object):
     new_pdb_with_H = self.root_name + '_uc_H.pdb'
     command_add_hydrogens = 'reduce -build -nuclear {} > {} 2>reduce.log'.format(
         new_pdb, new_pdb_with_H)
-    print(command_add_hydrogens)
+    # print(command_add_hydrogens)
     easy_run.fully_buffered(command_add_hydrogens)
     self.new_pdb_with_H = new_pdb_with_H
 
   def build_parm_single_conformation(self):
-    # should add more ligands
+    # Note: should require that next if statement fails(?)
     if self.prmtop is None and self.rst7_file is None:
       # only do this step if prmtop and rst7_file is not provided
+      assert 0
       leap_input = """
       logFile leap.log
       source leaprc.protein.ff14SB
@@ -153,7 +151,9 @@ class LESBuilder(object):
 
   def build_LES_parm(self):
     # create addles.in
-    print('build_LES_parm')
+    print "\n============================================================"
+    print " Bulding the prmtop and rst7 file with alternate conformers"
+    print "============================================================"
     commands = addles_input(self.original_pdb_file,
                             self.prmtop,
                             self.rst7_file)
@@ -161,7 +161,7 @@ class LESBuilder(object):
     with open(fn, 'w') as fh:
       fh.write('\n'.join(commands))
     command_addles = 'addles <{}'.format(fn)
-    print(command_addles)
+    # print(command_addles)
     easy_run.fully_buffered(command_addles)
 
   def update_LES_coordinates_from_uc(self):
@@ -184,7 +184,7 @@ class LESBuilder(object):
   def write_asu_LES(self):
     """write LES ASU pdb for phenix: 4phenix_{code}.LES.pdb
     """
-    print('write_asu_LES')
+    # print('write_asu_LES')
     les_parm = pmd.load_file('4amber_{}.pdb'.format(self.root_name))
 
     selection = ':1-{}'.format(self.n_asu_residues)
@@ -199,7 +199,7 @@ class LESBuilder(object):
   def rename_4amber_4phenix(self):
     """rename
     """
-    print('rename files')
+    # print('rename files')
     original_name = self.root_name + 'ab.parm7'
     final_parm_name = '4amber_' + self.root_name + '.LES.prmtop'
     os.rename(original_name, final_parm_name)
