@@ -131,17 +131,17 @@ def setup_options_args(rargs):
       phils.append(argument_interpreter.process(arg))
   working_phil = master_phil.fetch(sources=phils)
   assert len(pdbs)==1
-  working_phil.show()
+  #working_phil.show()
   working_params = working_phil.extract()
   working_params.amber_prep.input.pdb_file_name = pdbs[0]
   #check_working_params(working_params)
   preamble = get_output_preamble(working_params)
-  print "  Writing effective parameters to %s.eff\n" % preamble
+  #print "  Writing effective parameters to %s.eff\n" % preamble
   #working_phil.format(python_object=working_params).show()
-  print "#phil __ON__"
-  master_phil.fetch_diff(source=master_phil.format(
-      python_object=working_params)).show()
-  print "#phil __OFF__\n\n"
+  #print "#phil __ON__"
+  #master_phil.fetch_diff(source=master_phil.format(
+  #    python_object=working_params)).show()
+  #print "#phil __OFF__\n\n"
   f=file("%s.eff" % preamble, "wb")
   f.write(working_phil.format(python_object=working_params).as_str())
   f.close()
@@ -223,34 +223,15 @@ class amber_prep_run_class:
       return gaps
     return False
 
-  # run pdb4amber
-  def run_pdb4amber(self, use_reduce):
-    assert self.pdb_hierarchy
-    pdbstring=self.pdb_hierarchy.as_pdb_string()
-    # init = "%s_init.pdb" % self.base
-    # f=open(init,'w')
-    # f.write(pdbstring)
-    # f.close()
-    self.tleap_input_pdb = "%s_4tleap.pdb" % self.base
-    log = []
-    self.ns_names,self.gaplist=pdb4amber.run(self.tleap_input_pdb,
-                                self.pdb_filename,
-                                arg_elbow=True,
-                                arg_reduce=use_reduce,
-                                #log=log,
-      )
-    # init is identical to old method
-    # if os.path.exists(init): os.remove(init)
-
   def run_elbow_antechamber(self,
+                            ns_names=[],
                             nproc=1,
                             prefer_input_method=None,
                             debug=False):
     assert self.pdb_hierarchy
-    assert hasattr(self, "ns_names")
     if nproc>1:
       print "\n\tParallel processes not implemented\n"
-    for residue_name in self.ns_names:
+    for residue_name in ns_names:
       if prefer_input_method:
         if prefer_input_method=="chemical_component":
           _run_antechamber_ccif( residue_name )
@@ -273,10 +254,13 @@ class amber_prep_run_class:
         _run_elbow_antechamber(self.pdb_hierarchy, residue_name, debug=debug)
     return 0
 
-  # prepare tleap input (set box) or run pytleap?
+  #=================================
+  # prepare tleap input:
+  #=================================
   def run_tleap(self,
                 input_pdb,
                 output_base,
+                ns_names,
                 gaplist,
                 reorder_residues,
                 logfile="leap.log",
@@ -292,9 +276,8 @@ class amber_prep_run_class:
       f.close()
       warnings = {
         #"Failed to generate parameters": None,
-        "You MUST (!!!) insert a TER record between the residues listed above and": None,
         "WARNING: The unperturbed charge of the unit:" : \
-        "Highly charged molecules with no indication of how they are to be neutralized might cause problems",
+        "Note: Highly charged molecules with no indication of how they are to be neutralized might cause problems",
         }
       for line in lines.splitlines():
         if line.find("FATAL:")>-1:
@@ -321,8 +304,6 @@ class amber_prep_run_class:
           if line.find(s)>-1:
             print_cmd('" --- Testing environment ---"', verbose=True)
             raise Sorry('tleap error : "%s"' % line)
-    assert self.tleap_input_pdb
-    assert hasattr(self, "ns_names")
     tleap_input_file = "%s_%s_tleap_input_run" % (self.base, output_base)
     f=file(tleap_input_file, "wb")
     f.write('logFile %s\n' % logfile)
@@ -338,15 +319,14 @@ class amber_prep_run_class:
       raise Sorry('Amber environment appears to be older than AmberTools16; quitting')
 
     # Now we can assume that we are dealing with AmberTools16:
-    if redq:
-      f.write('source leaprc.ff14SB.redq\n')
-    else:
-      f.write('source leaprc.protein.ff14SB\n')
-      f.write('source leaprc.DNA.OL15\n')
-      f.write('source leaprc.RNA.OL3\n')
+    f.write('source leaprc.protein.ff14SB\n')
+    f.write('source leaprc.DNA.OL15\n')
+    f.write('source leaprc.RNA.OL3\n')
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
-    for res in self.ns_names:
+    #  (for the future: have some mechanism for modifying the above list)
+
+    for res in ns_names:
       if amber_library_server.is_in_components_lib(res):
         res_path=amber_library_server.path_in_components_lib(res)
         f.write('%s = loadmol2 %s\n' %(res,res_path[1]))
@@ -401,6 +381,7 @@ class amber_prep_run_class:
   def run_ChBox(self, output_base):
     assert self.cryst1
     uc = self.cryst1.unit_cell().parameters()
+    # note: dangerous to use same file for input and output here?
     cmd="ChBox -c %s_%s.rst7 -o %s_%s.rst7" % (self.base,
                                                output_base,
                                                self.base,
@@ -477,7 +458,7 @@ class amber_prep_run_class:
                               )
     return 0
 
-  #add cryst1 and sscale
+  #add cryst1 and sscale; creates 4phenix_base_type_.pdb file
   def finalizePdb(self,
                   pdb_filename=None, sort_atoms=True, type='',
                   ):
@@ -517,7 +498,7 @@ class amber_prep_run_class:
             print '"%s"' % smtry
             raise Sorry("REMARK 290 SMTRY1,2,3 records required")
         else:
-          print smtry
+          # print smtry
           file(rem, "wb").write(smtry)
         fout.write(smtry)
         # import code; code.interact(local=locals())
@@ -536,10 +517,13 @@ class amber_prep_run_class:
     run_UnitCell(uc_pdb_file, tleap_pdb_file1)
 
     #run back through pdb4amber to get new CONECT records for SS bonds:
-    self.ns_names,self.gaplist=pdb4amber.run(tleap_pdb_file, tleap_pdb_file1)
+    ns_names,gaplist=pdb4amber.run(
+          tleap_pdb_file, tleap_pdb_file1, arg_elbow=True,
+          )
     self.run_tleap(tleap_pdb_file,
                    output_base='uc',
-                   gaplist=self.gaplist,
+                   ns_names=ns_names,
+                   gaplist=gaplist,
                    reorder_residues='off',
                    #logfile='tleap_uc.log',
                    redq=redq,
@@ -660,8 +644,11 @@ class amber_prep_run_class:
                 '4phenix_%s.pdb' % self.base)
     return 0
 
-  def check_special_positions(self):
-    pdb_file = '4phenix_%s.pdb' % self.base
+  def check_special_positions(self,is_LES):
+    if is_LES:
+      pdb_file = '4phenix_%s.LES.pdb' % self.base
+    else: 
+      pdb_file = '4phenix_%s.pdb' % self.base
     print 'checking special positions in %s' % pdb_file
     xrs = iotbx.pdb.input(file_name=pdb_file).xray_structure_simple()
     site_symmetry_table = xrs.site_symmetry_table()
@@ -701,18 +688,26 @@ class amber_prep_run_class:
       asu.prmtop
       asu.rst7
       remark_290.txt
+      addles.in
       """
     import glob
 
-    print "\nChecking for files to remove"
+    # print "\nChecking for files to remove"
     for filename in files_to_clean.strip().split():
       for pre in ["", "%s_" % self.base]:
         for filename in glob.glob("%s%s" % (pre, filename)):
-          print '  removing' , filename
+          # print '  removing' , filename
           os.remove(filename)
     if os.path.isfile( '%s.eff' % self.base ):
-      print '  removing' , '%s.eff' % self.base
       os.remove( '%s.eff' % self.base)
+    if os.path.isfile( '%s_uc.pdb' % self.base ):
+      os.remove( '%s_uc.pdb' % self.base)
+    if os.path.isfile( '%s_uc_H.pdb' % self.base ):
+      os.remove( '%s_uc_H.pdb' % self.base)
+    if os.path.isfile( '%sab.rst7' % self.base ):
+      os.remove( '%sab.rst7' % self.base)
+    if os.path.isfile( '4amber_%s.pdb' % self.base ):
+      os.remove( '4amber_%s.pdb' % self.base)
 
 def get_molecule_from_hierarchy(hierarchy, resname):
   # only works for non altloc files
@@ -873,31 +868,61 @@ def run(rargs):
   amber_prep_runner.initializePdb(inputs.pdb_file_name)
   invalid = amber_prep_runner.validatePdb()
   if invalid: raise Sorry( 'PDB input is not "valid"' )
-  amber_prep_runner.run_pdb4amber(actions.use_reduce)
-  #
+
+  print "\n=================================================="
+  print "Running pdb4amber on %s" % inputs.pdb_file_name
+  print "=================================================="
+
+  tleap_input_pdb = "%s_4tleap.pdb" % base
+  log = []
+  ns_names,gaplist=pdb4amber.run(tleap_input_pdb,
+                                inputs.pdb_file_name,
+                                arg_elbow=True,
+                                arg_reduce=actions.use_reduce,
+                                #log=log,
+      )
+
+  print "\n=================================================="
+  print "Setting up library files for non-standard residues"
+  print "=================================================="
+
   amber_prep_runner.run_elbow_antechamber(
-    nproc=inputs.nproc,
+    ns_names, 
+    nproc=inputs.nproc, 
     prefer_input_method=inputs.antechamber.prefer_input_method,
   )
   #
   print "\n=================================================="
   print "Preparing asu files and 4phenix_%s.pdb" % base
   print "=================================================="
+  
+  # at this point, we can ignore any gaps found by pdb4amber, since
+  #   we are just creating pdb files for phenix (which automatically
+  #   finds gaps itself), and for making the unit cell pdb file; in
+  #   the latter case, the second run of pdb4amber (with the unit cell
+  #   pdb file) will find the gaps needed for the construction of the
+  #   4amber_base.prmtop file.
+  #
+  # N.B.: this means that the base_asu.prmtop file should never be used!
+  #   we might want to make user that this file is always removed.
+
+  dummy_gaplist=[]
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
                               'asu',
-                              gaplist=amber_prep_runner.gaplist,
+                              ns_names,
+                              dummy_gaplist,
                               reorder_residues='on',
                               #logfile='tleap_asu.log',
                               redq=actions.redq,
     )
   amber_prep_runner.run_ChBox("asu")
-  amber_prep_runner.run_ambpdb()
+  amber_prep_runner.run_ambpdb()   # (note: only called once)
   amber_prep_runner.finalizePdb(
       pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=False)
 
-  print "\n=================================================="
-  print "Preparing uc files: %s.prmtop and %s.rst7" %(base,base)
-  print "=================================================="
+  print "\n============================================================"
+  print "Preparing unit cell files: 4amber_%s.prmtop and 4amber_%s.rst7" %(base,base)
+  print "============================================================"
 
   amber_prep_runner.uc(redq=actions.redq)
   if actions.LES:
@@ -917,15 +942,24 @@ def run(rargs):
     print "Minimizing input coordinates."
     print "=================================================="
     amber_prep_runner.run_minimise(actions.minimise, actions.LES)
-  amber_prep_runner.check_special_positions()
+
+  amber_prep_runner.check_special_positions(actions.LES)
 
   if actions.clean == "on": amber_prep_runner.run_clean()
-  outl = "\n\nExample\n\n  phenix.geometry_minimization"
-  outl += " 4phenix_%s.pdb use_amber=True" % (
+
+  outl = "\n==================================================\n"
+  outl += "Done.  Three new files have been made:\n"
+  outl += "      4phenix_%s.pdb\n" % amber_prep_runner.base
+  outl += "      4amber_%s.prmtop\n" % amber_prep_runner.base
+  outl += "      4amber_%s.rst7\n" % amber_prep_runner.base
+  outl += "==================================================\n\n"
+  outl += "Example\n\n  phenix.refine"
+  outl += " 4phenix_%s.pdb use_amber=True \\\n" % (
     amber_prep_runner.base,
     )
-  outl += " amber.topology_file_name=4amber_%s.prmtop" % amber_prep_runner.base
-  outl += " amber.coordinate_file_name=4amber_%s.rst7" % amber_prep_runner.base
+  outl += "    amber.topology_file_name=4amber_%s.prmtop \\\n" % amber_prep_runner.base
+  outl += "    amber.coordinate_file_name=4amber_%s.rst7 \\\n" % amber_prep_runner.base
+  outl += "    ....(other refinement keywords here)....."
   outl += "\n\n\n"
   if actions.LES:
     outl = (outl.replace('.pdb', '.LES.pdb')
