@@ -262,6 +262,7 @@ class amber_prep_run_class:
                 output_base,
                 ns_names,
                 gaplist,
+                sslist,
                 reorder_residues,
                 logfile="leap.log",
                 redq=False,
@@ -288,7 +289,7 @@ class amber_prep_run_class:
             if msg: errors.append(" > %s" % msg)
       if errors:
         print "Errors and warnings in tleap"
-        print "  check logfile %s for explaination\n" % logfile
+        # print "  check logfile %s for explaination\n" % logfile
         for line in errors:
           print "  %s\n" % line
       if fatals:
@@ -347,6 +348,12 @@ class amber_prep_run_class:
     if gaplist:
       for d,res1,resid1,res2,resid2 in gaplist:
         f.write('deleteBond x.%d.C x.%d.N\n' % ( resid1, resid2 ) )
+    #
+    #  process sslist
+    #
+    if sslist:
+      for resid1,resid2 in sslist:
+        f.write('bond x.%d.SG x.%d.SG\n' % ( resid1, resid2 ) )
 
     f.write('saveAmberParm x %s.prmtop %s.rst7\n' %(
         "%s_%s" % (self.base, output_base),
@@ -517,13 +524,14 @@ class amber_prep_run_class:
     run_UnitCell(uc_pdb_file, tleap_pdb_file1)
 
     #run back through pdb4amber to get new CONECT records for SS bonds:
-    ns_names,gaplist=pdb4amber.run(
+    ns_names,gaplist,sslist=pdb4amber.run(
           tleap_pdb_file, tleap_pdb_file1, arg_elbow=True,
           )
     self.run_tleap(tleap_pdb_file,
                    output_base='uc',
                    ns_names=ns_names,
                    gaplist=gaplist,
+                   sslist=sslist,
                    reorder_residues='off',
                    #logfile='tleap_uc.log',
                    redq=redq,
@@ -875,7 +883,7 @@ def run(rargs):
 
   tleap_input_pdb = "%s_4tleap.pdb" % base
   log = []
-  ns_names,gaplist=pdb4amber.run(tleap_input_pdb,
+  ns_names,gaplist,sslist=pdb4amber.run(tleap_input_pdb,
                                 inputs.pdb_file_name,
                                 arg_elbow=True,
                                 arg_reduce=actions.use_reduce,
@@ -911,6 +919,7 @@ def run(rargs):
                               'asu',
                               ns_names,
                               dummy_gaplist,
+                              sslist,
                               reorder_residues='on',
                               #logfile='tleap_asu.log',
                               redq=actions.redq,
