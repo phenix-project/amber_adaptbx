@@ -1,4 +1,4 @@
-#! PYTHONEXE
+#! /usr/bin/env phenix.python
 
 # Romain M. Wolf, NIBR Basel, December 2013
 # with revisions by Pawel Janowski & Jason Swails, Rutgers U., Feb. 2014
@@ -69,9 +69,9 @@ def pdb_read(pdbin, noter, model):
 #=============================================
 # only records starting with the following strings are kept...
   if noter:
-    ACCEPTED =  ('ATOM','HETATM')
+    ACCEPTED =  ('ATOM','ATOM 1','ATOM 2','HETATM')
   else:
-    ACCEPTED =  ('ATOM','HETATM', 'TER', 'MODEL', 'ENDMDL')
+    ACCEPTED =  ('ATOM','ATOM 1','ATOM 2','HETATM', 'TER', 'MODEL', 'ENDMDL')
 # records starting with the following strings are considered 'dividers'
 # and they are cleaned for the rest of the line...
   DIVIDERS =  ('TER', 'MODEL', 'ENDMDL')
@@ -197,6 +197,11 @@ def pdb_write(recordlist, filename, cnct=''):
     pdbout  = open(filename, 'w')
   format = "%6s%5s%1s%4s%1s%3s%1s%1s%4s%1s%3s%8s%8s%8s%6s%6s%10s%2s%2s\n"
   for i, record in enumerate(recordlist):
+    # avoid overflow for atom and residue numbers:
+    if str(record[1]).strip():   # should(?) ensure that record[1] is an int
+      record[1] = record[1] % 100000
+    if str(record[8]).strip():   # should(?) ensure that record[8] is an int
+      record[8] = record[8] % 10000
     pdbout.write(format % tuple(record))
   pdbout.write(cnct)
   pdbout.write('END'+(77 * ' ')+'\n')
@@ -642,6 +647,7 @@ def find_disulfide(recordlist, filename):
 #========================================
   cys_residues = [];  cys_sgx = []; cys_sgy = []; cys_sgz = []
   cyx_residues = [];  cys_sqn = []; ncys = 0; ncyx = 0
+  sslist = []
 
   print >> sys.stderr, "\n---------- Cysteines in Disulfide Bonds (Renumbered Residues!)"
   for record in recordlist:
@@ -676,6 +682,8 @@ def find_disulfide(recordlist, filename):
           sslink.write('%s %s\n'%(cys_residues[i], cys_residues[j]))
           ncyx += 1
           cnct += 'CONECT%5d%5d\n' %(cys_sqn[i],cys_sqn[j])
+          ssrecord = ( cys_residues[i], cys_residues[j] )
+          sslist.append( ssrecord )
 
 # rename the CYS to CYX for disulfide-involved cysteines
     for record in recordlist:
@@ -689,7 +697,7 @@ def find_disulfide(recordlist, filename):
 
   else:
     print >> sys.stderr, "No disulfide bonds have been detected."
-  return recordlist, cnct
+  return recordlist, cnct, sslist
 
 #========================================
 def find_gaps(recordlist):
@@ -888,17 +896,18 @@ def run(arg_pdbout, arg_pdbin,
   else:
     recordlist = find_his(recordlist)
   # find possible S-S in the final protein:=============================
-  recordlist, cnct = find_disulfide(recordlist, filename)
+  recordlist, cnct, sslist = find_disulfide(recordlist, filename)
   # find possible gaps:==================================================
   gaplist = find_gaps(recordlist)
   # count heavy atoms
   find_incomplete(recordlist)
   # =====================================================================
   # make final output to new PDB file
-  pdb_write(recordlist, arg_pdbout, cnct)
+  # pdb_write(recordlist, arg_pdbout, cnct)
+  pdb_write(recordlist, arg_pdbout)  # disables printing of CONECT records
   print >> sys.stderr, ""
   sys.stderr = stderr
-  return ns_names,gaplist
+  return ns_names,gaplist,sslist
 
 #========================================main===========================
 if __name__ ==  "__main__":
