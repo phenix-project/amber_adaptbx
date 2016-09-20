@@ -207,6 +207,15 @@ class amber_prep_run_class:
     self.cryst1        = self.pdb_inp.crystal_symmetry_from_cryst1()
     self.pdb_hierarchy = self.pdb_inp.construct_hierarchy()
 
+  def curate_model(self, remove_alt_confs=False):
+    assert self.pdb_hierarchy
+    from mmtbx import pdbtools
+    if remove_alt_confs:
+      # performs removal in place
+      pdbtools.remove_alt_confs(self.pdb_hierarchy,
+                                always_keep_one_conformer=True,
+      )
+
   def validatePdb(self):
     assert self.pdb_hierarchy
     from mmtbx import conformation_dependent_library
@@ -488,6 +497,20 @@ class amber_prep_run_class:
     #~ import code; code.interact(local=locals())
     return 0
 
+  def write_remark_290(self):
+    assert self.pdb_filename
+    with open(self.pdb_filename) as fin:
+      lines = fin.readlines()
+      smtry = [line for line in lines if "SMTRY" in line]
+      smtry = ''.join(smtry)
+      rem = 'remark_290.txt'
+      if not smtry:
+        print '"%s"' % smtry
+        raise Sorry("REMARK 290 SMTRY1,2,3 records required")
+      else:
+        # print smtry
+        file(rem, "wb").write(smtry)
+
   def uc(self, redq=False):
     #add SMTRY/CRYST1 to 4tleap.pdb -> 4UnitCell.pdb
     assert self.base
@@ -705,16 +728,23 @@ class amber_prep_run_class:
         for filename in glob.glob("%s%s" % (pre, filename)):
           # print '  removing' , filename
           os.remove(filename)
-    if os.path.isfile( '%s.eff' % self.base ):
-      os.remove( '%s.eff' % self.base)
-    if os.path.isfile( '%s_uc.pdb' % self.base ):
-      os.remove( '%s_uc.pdb' % self.base)
-    if os.path.isfile( '%s_uc_H.pdb' % self.base ):
-      os.remove( '%s_uc_H.pdb' % self.base)
-    if os.path.isfile( '%sab.rst7' % self.base ):
-      os.remove( '%sab.rst7' % self.base)
-    if os.path.isfile( '4amber_%s.pdb' % self.base ):
-      os.remove( '4amber_%s.pdb' % self.base)
+    for s in ['%s.eff',
+              '%s_curated.pdb',
+              '%s_uc.pdb',
+              '%s_uc_H.pdb',
+              '%sab.rst7',
+              '4amber_%s.pdb',
+              ]:
+      if os.path.isfile( s % self.base ):
+        os.remove( s % self.base)
+
+  def write_pdb_hierarchy(self,pdb_file_name):
+    assert self.pdb_hierarchy
+    self.pdb_hierarchy.write_pdb_file(
+      file_name=pdb_file_name,
+      append_end=True,
+      crystal_symmetry=self.pdb_inp.crystal_symmetry(),
+    )
 
 def get_molecule_from_hierarchy(hierarchy, resname):
   # only works for non altloc files
@@ -875,6 +905,14 @@ def run(rargs):
   amber_prep_runner.initializePdb(inputs.pdb_file_name)
   invalid = amber_prep_runner.validatePdb()
   if invalid: raise Sorry( 'PDB input is not "valid"' )
+  amber_prep_runner.write_remark_290()
+  amber_prep_runner.curate_model(remove_alt_confs=(not actions.LES))
+  # need to write PDB for some of the other methods
+  current_pdb_file_name = inputs.pdb_file_name.replace(
+    '.pdb',
+    '_curated.pdb',
+    )
+  amber_prep_runner.write_pdb_hierarchy(current_pdb_file_name)
 
   print "\n=================================================="
   print "Running pdb4amber on %s" % inputs.pdb_file_name
@@ -883,10 +921,10 @@ def run(rargs):
   tleap_input_pdb = "%s_4tleap.pdb" % base
   log = []
   ns_names,gaplist,sslist=pdb4amber.run(tleap_input_pdb,
-                                inputs.pdb_file_name,
-                                arg_elbow=True,
-                                arg_reduce=actions.use_reduce,
-                                #log=log,
+                                        current_pdb_file_name,
+                                        arg_elbow=True,
+                                        arg_reduce=actions.use_reduce,
+                                        #log=log,
       )
 
   print "\n=================================================="
