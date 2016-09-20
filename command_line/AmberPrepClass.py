@@ -38,8 +38,8 @@ master_phil_string = """
     {
       minimise = amber_all amber_h phenix_all *off
         .type = choice
-      clean = *on off
-        .type = choice
+      clean = True
+        .type = bool
       redq = False
         .type = bool
       LES = False
@@ -719,6 +719,7 @@ class amber_prep_run_class:
       asu.rst7
       remark_290.txt
       addles.in
+      reduce_info.log
       """
     import glob
 
@@ -991,7 +992,7 @@ def run(rargs):
 
   amber_prep_runner.check_special_positions(actions.LES)
 
-  if actions.clean == "on": amber_prep_runner.run_clean()
+  if actions.clean: amber_prep_runner.run_clean()
 
   outl = "\n==================================================\n"
   outl += "Done.  Three new files have been made:\n"
