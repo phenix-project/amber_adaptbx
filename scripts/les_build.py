@@ -81,7 +81,6 @@ class LESBuilder(object):
     # use reduce to add hydrogens to unitcell pdb
     self.add_hydrogens()
     # use tleap to build parm7 and rst7 files for single conformation
-    # TODO: use AmberPrep to handle ligands.
     self.build_parm_single_conformation()
     # use addles to construct LES parm7 and rst7 files
     self.build_LES_parm()
@@ -113,7 +112,7 @@ class LESBuilder(object):
     # Note: should require that next if statement fails(?)
     if self.prmtop is None and self.rst7_file is None:
       # only do this step if prmtop and rst7_file is not provided
-      assert 0
+      # assert 0
       leap_input = """
       logFile leap.log
       source leaprc.protein.ff14SB
@@ -152,7 +151,7 @@ class LESBuilder(object):
   def build_LES_parm(self):
     # create addles.in
     print "\n============================================================"
-    print " Bulding the prmtop and rst7 file with alternate conformers"
+    print " Building the prmtop and rst7 file with alternate conformers"
     print "============================================================"
     commands = addles_input(self.original_pdb_file,
                             self.prmtop,
@@ -170,7 +169,6 @@ class LESBuilder(object):
     uc_parm = pmd.load_file(self.new_pdb_with_H)
     parm = pmd.load_file(self.root_name + 'ab.parm7', self.root_name + 'ab.rst7')
     # add space group
-    # TODO: add symmetry
     parm.space_group = self.space_group
     parm.symmetry = self.symmetry
     parm.box = self.box
@@ -178,7 +176,7 @@ class LESBuilder(object):
     reduce_to_les.update_rst7_and_pdb_coordinates_LES(template_parm=uc_parm,
                                                       target_parm=parm,
                                                       rst7_fn=self.rst7_fn_fix)
-    parm.write_pdb('4amber_{}.pdb'.format(self.root_name))
+    parm.write_pdb('4amber_{}.pdb'.format(self.root_name), standard_resnames=True)
     parm.save(self.rst7_fn_fix, overwrite=True)
 
   def write_asu_LES(self):
@@ -194,7 +192,7 @@ class LESBuilder(object):
     final_parm.symmetry = self.symmetry
     final_parm.box = self.box
     final_parm.space_group = self.space_group
-    final_parm.write_pdb(final_pdb_asu_file)
+    final_parm.write_pdb(final_pdb_asu_file, standard_resnames=True)
 
   def rename_4amber_4phenix(self):
     """rename

@@ -148,7 +148,7 @@ def label_alternates(parm):
   Examples
   --------
   >>> parm = label_alternates(parm)
-  >>> parm.write_pdb("corrected_label.pdb", altlocs='all')
+  >>> parm.write_pdb("corrected_label.pdb", altlocs='all', standard_resnames=True)
   """
   resids = range(len(parm.residues))
   atom_with_residue_dict = get_atom_dict_for_amber_parm(parm, resids=resids)

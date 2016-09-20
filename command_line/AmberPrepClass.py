@@ -588,15 +588,14 @@ class amber_prep_run_class:
       print_cmd(cmd)
       # test function that may be useful...
       test_files_exist([input_file,
-                        "4amber_%s.prmtop" % self.base,
-                        "4amber_%s.rst7" % self.base,
-                        #"%s_%s.rst7" % (self.base, option),
+                        prmtop_file_name,
+                        rst7_file_name,
                       ])
       ero=easy_run.fully_buffered(cmd)
       assert (ero.return_code == 0)
       test_files_exist([input_file,
-                        "4amber_%s.prmtop" % self.base,
-                        "4amber_%s.rst7" % self.base,
+                        prmtop_file_name,
+                        rst7_file_name,
                         "%s_%s.rst7" % (self.base, option),
                       ])
 
