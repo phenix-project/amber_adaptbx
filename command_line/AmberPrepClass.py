@@ -630,7 +630,7 @@ class amber_prep_run_class:
 
       cmd='ambpdb -bres -p %s < %s > %s_new.pdb' % (
         prmtop_file_name,
-        rst7_file_name,
+        output_rst7_file_name,
         self.base,
         )
       print_cmd(cmd)
