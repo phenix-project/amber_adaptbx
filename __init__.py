@@ -52,9 +52,12 @@ master_phil_str = """
     .style = hidden
     .help = Use the ratio of the restraints gradident norm and the Amber \
             gradient norm to set wxc_scale
-   print_amber_energies = False
-     .type = bool
-     .help = Print details of Amber energies during refinement
+  print_amber_energies = False
+    .type = bool
+    .help = Print details of Amber energies during refinement
+  md_engine = *sander
+    .type = choice
+    .help = TODO: Place holder. Will remove this option later. @Dave: do not remove for now.
 """
 
 class geometry_manager(object):
@@ -78,7 +81,7 @@ class geometry_manager(object):
     # order_converter is a Python dict that map amber atom order to phenix order
     # assign later
 
-    if geometry_manager.COUNT == 0 and self.amber_structs.is_LES:
+    if geometry_manager.COUNT == 0:
       # compute order_converter from original sites_cart or load from file
       initialize_order_converter(self)
 
@@ -97,15 +100,14 @@ class geometry_manager(object):
     #Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
+    sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
     if self.amber_structs.is_LES:
-      sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
       sanderles.set_positions(sander_coords)
       ene, frc = sanderles.energy_forces()
-      frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
     else:
-      sander_coords = list(sites_cart_uc.as_double())
       sander.set_positions(sander_coords)
       ene, frc = sander.energy_forces()
+    frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
     if (compute_gradients) :
       gradients_uc=flex.vec3_double(flex.double(frc)) * -1
       gradients = gradients_uc[0:self.sites_cart.size()]
@@ -130,6 +132,9 @@ class geometry_manager(object):
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
     if log==None: log=sys.stdout
+    # following forces printing of Amber energies; placeholder until
+    #    this can become an input keyword
+    print_amber_energies=True
     if print_amber_energies:
       print >>log, "    Amber total energy: %0.2f" %(result.residual_sum)
       print >>log, "      bonds (n=%d): %0.2f" %(result.energy_components[6],
@@ -231,11 +236,11 @@ class sander_structs ():
 
     if self.is_LES:
       self.inp = sanderles.pme_input()
-      parm = parmed.load_file(parm_file_name, rst_file_name)
-      # use initial_coordinates for mapping with phenix's sites_cart
-      self.initial_coordinates = parm.coordinates
     else:
       self.inp = sander.pme_input()
+    parm = parmed.load_file(parm_file_name, rst_file_name)
+    # use initial_coordinates for mapping with phenix's sites_cart
+    self.initial_coordinates = parm.coordinates
 
 def is_prmtop_LES(parm_file_name):
   with open(parm_file_name) as f:

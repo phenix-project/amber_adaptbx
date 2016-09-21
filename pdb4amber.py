@@ -61,17 +61,20 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP',
            'THR', 'TRP', 'TYR', 'VAL',
            'HID', 'HIE', 'HIN', 'HIP',
            'CYX', 'ASH', 'GLH', 'LYH',
-           'ACE', 'NME', 'GL4', 'AS4',
-           'WAT','HOH')
+           'ACE', 'NME', 'GL4', 'AS4')
+RESNA   = ('  C', '  G', '  U', '  A',
+           ' DC', ' DG', ' DT', ' DA')
+RESSOLV = ('WAT', 'HOH')
+           
 
 #=============================================
 def pdb_read(pdbin, noter, model):
 #=============================================
 # only records starting with the following strings are kept...
   if noter:
-    ACCEPTED =  ('ATOM','ATOM 1','ATOM 2','HETATM')
+    ACCEPTED =  ('ATOM','HETATM')
   else:
-    ACCEPTED =  ('ATOM','ATOM 1','ATOM 2','HETATM', 'TER', 'MODEL', 'ENDMDL')
+    ACCEPTED =  ('ATOM','HETATM', 'TER', 'MODEL', 'ENDMDL')
 # records starting with the following strings are considered 'dividers'
 # and they are cleaned for the rest of the line...
   DIVIDERS =  ('TER', 'MODEL', 'ENDMDL')
@@ -214,10 +217,10 @@ def prot_only(recordlist):
 # this strips any residues not recognized by Amber libraries...
 # in a personalized Amber installation with additional libraries,
 # you might consider extending this list
-  global RESPROT
+  global RESPROT, RESNA, RESSOLV
   protlist=[]
   for record in recordlist:
-    if record[5] not in RESPROT:
+    if record[5] not in RESPROT and record[5] not in RESNA and record[5] not in RESSOLV:
       continue
     else:
       protlist.append(record)

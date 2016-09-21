@@ -38,6 +38,10 @@ master_phil_string = """
     {
       minimise = amber_all amber_h phenix_all *off
         .type = choice
+      amber_min_options = ''
+        .type = str
+        .caption = add more amber options for minimization for amber minimization. If not specified, use default values
+        .help = add more amber options for minimization for amber minimization. If not specified, use default values
       clean = True
         .type = bool
       redq = False
@@ -563,7 +567,7 @@ class amber_prep_run_class:
     os.rename('%s_uc.rst7'   % self.base, '4amber_%s.rst7'   % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
-  def run_minimise(self, option=None, is_LES=False):
+  def run_minimise(self, option=None, is_LES=False, amber_min_options=''):
     assert self.base
     if option is None: return
 
@@ -571,17 +575,20 @@ class amber_prep_run_class:
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
        ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',
-       imin   = 1, maxcyc =1000, ncyc   = 200, ntmin  = 1, ntxo = 1,
+       imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, ntxo = 1,
       /
       """,
               "amber_all" : """Initial minimization
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
        imin   = 1, maxcyc = 500, ncyc   = 200, ntmin  = 1, ntxo = 1,
-       ntpr=50, ntr=1, restraint_wt=2.0, restraintmask='@H=',
+       ntpr=50, ntr=1, restraint_wt=2.0, restraintmask=':*',
       /
       """
     }
+    if amber_min_options:
+      inputs['amber_h'] = inputs['amber_h'].replace('/', amber_min_options + '\n /')
+      inputs['amber_all'] = inputs['amber_all'].replace('/', amber_min_options + '\n /')
     prmtop_file_name = '4amber_%s.prmtop' % self.base
     rst7_file_name = '4amber_%s.rst7' % self.base
     output_rst7_file_name = ' %s_%s.rst7' % (self.base, option)
@@ -619,7 +626,6 @@ class amber_prep_run_class:
       test_files_exist([input_file,
                         prmtop_file_name,
                         rst7_file_name,
-                        "%s_%s.rst7" % (self.base, option),
                       ])
 
       cmd='ambpdb -bres -p %s < %s > %s_new.pdb' % (
@@ -988,7 +994,8 @@ def run(rargs):
     print "\n=================================================="
     print "Minimizing input coordinates."
     print "=================================================="
-    amber_prep_runner.run_minimise(actions.minimise, actions.LES)
+    amber_prep_runner.run_minimise(actions.minimise, actions.LES, 
+        amber_min_options=actions.amber_min_options)
 
   amber_prep_runner.check_special_positions(actions.LES)
 

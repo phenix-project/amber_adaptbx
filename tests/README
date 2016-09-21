@@ -1,0 +1,7 @@
+1. run all tests:
+
+    make
+
+2. Further info
+- Check Makefile
+- Check __doc__ in ./run_tests.py
