@@ -7,6 +7,7 @@ from amber_adaptbx.tests.utils import (tempfolder, get_fn,
         assert_energy_and_forces,
         run_sander_minimization,
         get_prmtop_and_rst7_and_pdb_filenames_from_pdb,
+        get_minimized_pdb_filename,
 )
 from amber_adaptbx.tests.config import (PDB_COLLECTION, saved_2igd_prmtop_file,
         saved_2igd_rst7_file,
@@ -50,7 +51,7 @@ def test_command_line_build(pdb_file):
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
 def test_geometry_minimization_from_AmberPrep_with_amber_h_option(pdb_file):
   """ ensure there is no error, there is no assertion """
-  command = "phenix.AmberPrep {} LES=True minimise=amber_h amber_min_options='maxcyc=2'".format(pdb_file)
+  command = "phenix.AmberPrep {} LES=True minimise=amber_h minimization_options='maxcyc=2'".format(pdb_file)
   with tempfolder():
     subprocess.check_output(command.split())
 
@@ -60,9 +61,11 @@ def test_geometry_minimization_from_AmberPrep_with_amber_h_option(pdb_file):
 ])
 def test_geometry_minimization_from_AmberPrep_with_amber_all_option(pdb_file):
   """ ensure there is no error, there is no assertion """
-  command = "phenix.AmberPrep {} LES=True minimise=amber_all amber_min_options='maxcyc=2'".format(pdb_file)
+  command = "phenix.AmberPrep {} LES=True minimise=amber_all minimization_options='maxcyc=2'".format(pdb_file)
   with tempfolder():
+    prmtop_file, rst7_file, new_pdb_file = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file)
     subprocess.check_output(command.split())
+    subprocess.call(['ls'])
 
 @pytest.mark.slow
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
@@ -72,3 +75,20 @@ def test_command_line_minimization_phenix_all(pdb_file):
   with tempfolder():
     subprocess.check_output(command.split())
 
+@pytest.mark.parametrize('pdb_file', [
+    get_fn('2igd.pdb'),
+])
+def test_geometry_minimization_from_AmberPrep_with_amber_all_option_with_assertion_and_larger_maxcyc(pdb_file):
+  """ ensure there is no error, there is no assertion """
+  command = [
+          "phenix.AmberPrep",
+          pdb_file,
+          "LES=True", "minimise=amber_all",
+          "minimization_options='maxcyc=2'",
+          "clean=off",
+  ]
+  with tempfolder():
+    prmtop_file, rst7_file, new_pdb_file = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file)
+    subprocess.check_output(command)
+    subprocess.call(['ls'])
+    assert(os.path.exists(get_minimized_pdb_filename(pdb_file, minimization_type='amber_all', LES=True)))
