@@ -17,10 +17,12 @@ try:
   from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
   import parmed
 except ImportError:
-  try:
-    from chemistry.amber.readparm import AmberParm, Rst7 #up to AmberTools15
-  except ImportError:
-    raise ImportError("could not import parmed modules. Check path.")
+  raise Sorry("Could not import parmed modules. Check path to AmberTools16.")
+  # obsolete
+  #try:
+  #  from chemistry.amber.readparm import AmberParm, Rst7 #up to AmberTools15
+  #except ImportError:
+  #  raise Sorry("could not import parmed modules. Check path.")
 
 from amber_adaptbx.amber_phenix_reorder import (
     initialize_order_converter, reorder_coords_phenix_to_amber,
