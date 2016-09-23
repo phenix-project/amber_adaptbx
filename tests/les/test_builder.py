@@ -65,7 +65,6 @@ def test_geometry_minimization_from_AmberPrep_with_amber_all_option(pdb_file):
   with tempfolder():
     prmtop_file, rst7_file, new_pdb_file = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file)
     subprocess.check_output(command.split())
-    subprocess.call(['ls'])
 
 @pytest.mark.slow
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
@@ -90,5 +89,4 @@ def test_geometry_minimization_from_AmberPrep_with_amber_all_option_with_asserti
   with tempfolder():
     prmtop_file, rst7_file, new_pdb_file = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file)
     subprocess.check_output(command)
-    subprocess.call(['ls'])
     assert(os.path.exists(get_minimized_pdb_filename(pdb_file, minimization_type='amber_all', LES=True)))

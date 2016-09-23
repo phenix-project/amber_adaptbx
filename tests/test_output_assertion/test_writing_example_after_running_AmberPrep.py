@@ -10,6 +10,50 @@ from amber_adaptbx.tests.config import (PDB_COLLECTION, saved_2igd_prmtop_file,
         saved_2igd_rst7_file,
 )
 
+def test_writing_example_after_running_AmberPrep_non_LES_without_minimization():
+  pdb_file = get_fn('2igd.pdb')
+  LES = False
+
+  expected_line = """
+==================================================
+Done.  Three new files have been made:
+      4phenix_2igd.pdb
+      4amber_2igd.prmtop
+      4amber_2igd.rst7
+==================================================
+"""
+  # always create new command_build
+  command_build = [
+          'phenix.AmberPrep',
+          pdb_file,
+          'LES={}'.format(LES),
+  ]
+  with tempfolder():
+    output_build = subprocess.check_output(command_build)
+    assert expected_line in output_build
+
+def test_writing_example_after_running_AmberPrep_LES_without_minimization():
+  pdb_file = get_fn('2igd.pdb')
+  LES = True
+
+  expected_line = """
+==================================================
+Done.  Three new files have been made:
+      4phenix_2igd.LES.pdb
+      4amber_2igd.LES.prmtop
+      4amber_2igd.LES.rst7
+==================================================
+"""
+  # always create new command_build
+  command_build = [
+          'phenix.AmberPrep',
+          pdb_file,
+          'LES={}'.format(LES),
+  ]
+  with tempfolder():
+    output_build = subprocess.check_output(command_build)
+    assert expected_line in output_build
+
 @pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
 @pytest.mark.medium
 def test_writing_example_after_running_AmberPrep_LES_with_minimization(minimization_type):

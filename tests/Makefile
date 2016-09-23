@@ -2,7 +2,8 @@
 # Please see the doc in run_tests.py too
 
 test.all:
-	# about 30 minutes
+	# about > 80 minutes
+	# :D
 	./run_tests.py -v
 
 test.all.verbose:
@@ -36,7 +37,7 @@ test.collect:
 	./run_tests.py -vs --collect-only
 
 test.geometry_minimization:
-	./run_tests.py -vs ./geometry_minimization/
+	./run_tests.py -vs ./test_geometry_minimization/
 
 test.les:
 	./run_tests.py -vs ./les/
