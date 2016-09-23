@@ -33,7 +33,7 @@ def main():
   # we can use original occupancy from ASU pdb file too.
   for atom in asu_new_parm.atoms:
       atom.occupancy = 1.0
-  asu_new_parm.write_pdb(args.output_pdb)
+  asu_new_parm.write_pdb(args.output_pdb, standard_resnames=True)
 
 if __name__ == '__main__':
   main()
