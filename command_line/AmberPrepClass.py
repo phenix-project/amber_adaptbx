@@ -146,9 +146,8 @@ def setup_options_args(rargs):
   #master_phil.fetch_diff(source=master_phil.format(
   #    python_object=working_params)).show()
   #print "#phil __OFF__\n\n"
-  f=file("%s.eff" % preamble, "wb")
-  f.write(working_phil.format(python_object=working_params).as_str())
-  f.close()
+  with open("%s.eff" % preamble, "wb") as f:
+    f.write(working_phil.format(python_object=working_params).as_str())
   return working_params
 
 def test_files_exist(filenames):
@@ -206,8 +205,11 @@ class amber_prep_run_class:
     if self.is_LES:
       self.final_prmtop_file = self.final_prmtop_file.replace('.prmtop', '.LES.prmtop')
       self.final_rst7_file = self.final_rst7_file.replace('.rst7', '.LES.rst7')
+      self.final_pdb_file_4phenix  = self.final_pdb_file_4phenix.replace('.pdb', '.LES.pdb')
     self.non_les_prmtop_file_name = '4amber_%s.prmtop' % self.base
     self.non_les_rst7_file_name = '4amber_%s.rst7' % self.base
+
+    self.remark_290_smtry = ''
 
   def __repr__(self):
     outl = "AmberPrepRunner"
@@ -492,6 +494,8 @@ class amber_prep_run_class:
   def finalizePdb(self,
                   pdb_filename=None, sort_atoms=True, type='',
                   ):
+    # should we change 'type' to something else. This is Python keyword
+    # Please update doc for this method.
     assert self.pdb_hierarchy
     assert self.cryst1
     assert self.base
@@ -503,50 +507,43 @@ class amber_prep_run_class:
       pdb_hierarchy = self.pdb_hierarchy
       assert 0
     pdbstring=pdb_hierarchy.as_pdb_string(crystal_symmetry=self.cryst1)
-    self.final_pdb_file_4phenix = '4phenix_' + self.base + type + '.pdb'
     print('--> final_pdb_file_4phenix', self.final_pdb_file_4phenix)
     print 'Writing 4phenix file', self.final_pdb_file_4phenix
-    f = open(self.final_pdb_file_4phenix,'w')
-    f.write(pdbstring)
-    f.close()
+    output_filename = '4phenix_%s.pdb' % self.base
+    with open(output_filename, 'w') as f:
+      f.write(pdbstring)
+    if type:
+      # update filename after doing minimization
+      # need to make a copy after doing minimization
+      # TODO: should do this in another place?
+      self.final_pdb_file_4phenix = '4phenix_' + self.base + type + '.pdb'
+      easy_run.fully_buffered('cp %s %s' % (output_filename, self.final_pdb_file_4phenix))
     #~ import code; code.interact(local=locals())
     return 0
 
   def write_remark_290(self):
-    assert self.pdb_filename
+    # do we use write_remark_290 in other places?
+    # if not, should rename it. (get_remark_290?)
+    assert self.pdb_filename, 'must exist %s' % format(self.pdb_filename)
     with open(self.pdb_filename) as fin:
       lines = fin.readlines()
       smtry = [line for line in lines if "SMTRY" in line]
       smtry = ''.join(smtry)
-      rem = 'remark_290.txt'
       if not smtry:
         print '"%s"' % smtry
         raise Sorry("REMARK 290 SMTRY1,2,3 records required")
       else:
-        # print smtry
-        file(rem, "wb").write(smtry)
+        self.remark_290_smtry = smtry
 
   def uc(self, redq=False):
     #add SMTRY/CRYST1 to 4tleap.pdb -> 4UnitCell.pdb
-    assert self.base
+    # should we rename this method? build_unitcell?
+    assert self.base, 'must provide base name'
     uc_pdb_file="%s_4UnitCell.pdb" % self.base
     with open(uc_pdb_file, "wb") as fout:
       with open(self.pdb_filename) as fin:
         lines = fin.readlines()
-        smtry = [line for line in lines if "SMTRY" in line]
-        smtry = ''.join(smtry)
-        rem = 'remark_290.txt'
-        if not smtry:
-          if os.path.exists(rem):
-            smtry=file(rem, "rb").read()
-          else:
-            print '"%s"' % smtry
-            raise Sorry("REMARK 290 SMTRY1,2,3 records required")
-        else:
-          # print smtry
-          file(rem, "wb").write(smtry)
-        fout.write(smtry)
-        # import code; code.interact(local=locals())
+        fout.write(self.remark_290_smtry)
         cryst1card = [line for line in lines if "CRYST1" in line]
         if len(cryst1card) <1:
           raise Sorry("CRYST1 record required")
@@ -578,6 +575,27 @@ class amber_prep_run_class:
     os.rename('%s_uc.rst7'   % self.base, '4amber_%s.rst7'   % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
+
+  def _write_LES_pdb_4phenix(self):
+    import parmed as pmd
+    # TODO: update ocupancy
+    asu_parm = pmd.load_file(self.pdb_filename)
+    n_asu_residue = len(asu_parm.residues)
+    selection = ':1-{}'.format(n_asu_residue)
+
+    parm = pmd.load_file(self.final_prmtop_file, xyz=self.final_rst7_file)
+    # strip atoms
+    asu_new_parm = parm[selection]
+    asu_new_parm.box = parm.box
+    asu_new_parm.space_group = asu_parm.space_group
+    asu_new_parm.symmetry = asu_parm.symmetry
+    # update occupancy
+    # we can use original occupancy from ASU pdb file too.
+    for atom in asu_new_parm.atoms:
+        atom.occupancy = 1.0
+    print('--> final_pdb_file_4phenix', self.final_pdb_file_4phenix)
+    asu_new_parm.write_pdb(self.final_pdb_file_4phenix, standard_resnames=True)
+
   def run_minimise(self, minimization_type=None, minimization_options=''):
     assert self.base
     if minimization_type is None: return
@@ -592,8 +610,8 @@ class amber_prep_run_class:
               "amber_all" : """Initial minimization
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
-       imin   = 1, maxcyc = 500, ncyc   = 200, ntmin  = 1, ntxo = 1,
-       ntpr=50, ntr=1, restraint_wt=2.0, restraintmask=':*',
+       imin   = 1, maxcyc = 50, ncyc   = 200, ntmin  = 1, ntxo = 1,
+       ntpr=50, ntr=1, restraint_wt=2.0, restraintmask='!@H=',
       /
       """
     }
@@ -652,29 +670,35 @@ class amber_prep_run_class:
       else:
         self.final_rst7_file = '4amber_' + self.base + '.min.{}.rst7'.format(minimization_type)
       # TODO: Why I can not use os.rename? (Got OSError about file not found. Weird)
+      # save minimized rst7
       easy_run.fully_buffered('cp {} {}'.format(output_rst7_file_name, self.final_rst7_file))
 
-      pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('4phenix_%s.pdb' % self.base)
-      pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
-
-      # there is a function that will transfer the coordinates from one PDB
-      # hierarchy to another but the atoms have to be the same number & order
-      self._match_hierarchies_and_transfer_to(pdb_h_post, # from
-                                              pdb_h_pre,  # to
-                                              transfer_xyz=True,
-                                             )
-
-      pdb_h_pre.write_pdb_file(file_name='%s_new2.pdb' % self.base,
-                               append_end=True,
-                               crystal_symmetry=pdb_pre.crystal_symmetry(),
-                               )
-
       if self.is_LES:
-        type_ = '.LES.min.%s' % minimization_type
+        # TODO: remove this and use Nigel's version.
+        # Why using this right now? Seems too me that the output pdb from Nigel's code
+        # does is not a reordered version of minimized rst7 file. Or may be I made a bug.
+        # we should avoid writing too many files to disk.
+        self.final_pdb_file_4phenix = '4phenix_%s.LES.min.%s.pdb' % (self.base, minimization_type)
+        self._write_LES_pdb_4phenix()
       else:
+        pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('4phenix_%s.pdb' % self.base)
+        pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
+
+        # there is a function that will transfer the coordinates from one PDB
+        # hierarchy to another but the atoms have to be the same number & order
+        self._match_hierarchies_and_transfer_to(pdb_h_post, # from
+                                                pdb_h_pre,  # to
+                                                transfer_xyz=True,
+                                               )
+
+        pdb_h_pre.write_pdb_file(file_name='%s_new2.pdb' % self.base,
+                                 append_end=True,
+                                 crystal_symmetry=pdb_pre.crystal_symmetry(),
+                                 )
+
         type_ = '.min.%s' % minimization_type
-      self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base,
-              sort_atoms=False, type=type_)
+        self.finalizePdb(pdb_filename='%s_new2.pdb' % self.base,
+                sort_atoms=False, type=type_)
     elif minimization_type =="phenix_all":
       if self.is_LES:
         cmd='phenix.geometry_minimization 4phenix_%s.LES.pdb amber.use_amber=True \
@@ -745,8 +769,6 @@ class amber_prep_run_class:
       4antechamber
       amber_all.in
       mdinfo
-      asu.prmtop
-      asu.rst7
       remark_290.txt
       addles.in
       reduce_info.log
@@ -991,7 +1013,7 @@ def run(rargs):
                               reorder_residues='on',
                               #logfile='tleap_asu.log',
                               redq=actions.redq,
-    )
+  )
   amber_prep_runner.run_ChBox("asu")
   amber_prep_runner.run_ambpdb()   # (note: only called once)
   amber_prep_runner.finalizePdb(
