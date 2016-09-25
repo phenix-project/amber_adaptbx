@@ -1,7 +1,9 @@
 # run some most common tests.
 # Please see the doc in run_tests.py too
 
-test.all:
+test.all: test.long
+
+test.long:
 	# about > 80 minutes
 	# :D
 	./run_tests.py -v
@@ -21,6 +23,10 @@ test.fast.verbose:
 	./run_tests.py -vs -m "not slow and not medium"
 
 test.fast:
+	# about 2-3 minutes
+	./run_tests.py -v -m "not slow and not medium"
+
+test.short:
 	# about 2-3 minutes
 	./run_tests.py -v -m "not slow and not medium"
 
@@ -68,3 +74,6 @@ test.non_les_fast:
 
 test.non_les_refine_phenix:
 	./run_tests.py -vs ./normal/ -m "phenix"
+
+test.vAla3:
+	./run_tests.py -v -k 'vAla3'

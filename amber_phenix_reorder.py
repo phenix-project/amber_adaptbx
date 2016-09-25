@@ -61,9 +61,9 @@ def initialize_order_converter(self):
   else:
     # compute reorder map based on original ASU pdb and unitcell rst7 (and parm7) files
     asu_n_atoms = len(self.sites_cart)
-    n_models = int(len(self.amber_structs.initial_coordinates) / asu_n_atoms)
+    n_models = int(len(self.amber_structs.parm.coordinates) / asu_n_atoms)
     geometry_manager.order_converter = get_indices_convert_dict_from_array(self.sites_cart,
-            self.amber_structs.initial_coordinates[:asu_n_atoms])
+            self.amber_structs.parm.coordinates[:asu_n_atoms])
 
     # asu
     asu_p2a_indices = geometry_manager.order_converter['p2a']

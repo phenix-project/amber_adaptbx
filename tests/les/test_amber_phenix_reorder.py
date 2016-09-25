@@ -114,4 +114,4 @@ def test_sander_struct():
   rst7 = get_fn('4lzt_pawel/4lztabH.rst7')
   s_struct = sander_structs(tn, rst7)
   parm = pmd.load_file(tn, rst7)
-  aa_eq(parm.coordinates, s_struct.initial_coordinates)
+  aa_eq(parm.coordinates, s_struct.parm.coordinates)

@@ -1,4 +1,5 @@
 from __future__ import division
+from math import sqrt
 from libtbx import group_args
 import sys, os
 import itertools
@@ -7,27 +8,36 @@ import argparse
 from scitbx.array_family import flex
 import scitbx.restraints
 from libtbx.utils import Sorry
-#~ import boost.python
-#~ ext = boost.python.import_ext("amber_adaptbx_ext")
 try:
   import sander, sanderles
 except:
   raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
-try:
-  from parmed.amber.readparm import AmberParm, Rst7  #post AmberTools15
-  import parmed
-except ImportError:
-  raise Sorry("Could not import parmed modules. Check path to AmberTools16.")
-  # obsolete
-  #try:
-  #  from chemistry.amber.readparm import AmberParm, Rst7 #up to AmberTools15
-  #except ImportError:
-  #  raise Sorry("could not import parmed modules. Check path.")
+
+# require the most updated ParmEd version
+# AmberTools >= 16
+from parmed.amber.readparm import AmberParm, Rst7
+import parmed
 
 from amber_adaptbx.amber_phenix_reorder import (
     initialize_order_converter, reorder_coords_phenix_to_amber,
     reorder_force_amber_to_phenix, get_indices_convert_dict_from_array
-    )
+)
+
+from amber_adaptbx.utils import (
+        tempfolder,
+        expand_coord_to_unit_cell,
+        get_amber_structs,
+        bond_rmsd,
+        bond_rmsZ,
+        angle_rmsZ,
+        angle_rmsd,
+        is_prmtop_LES,
+        collapse_grad_to_asu,
+        check_file,
+        print_sites_cart,
+)
+
+__all__ = ['geometry_manager', 'energies', 'sander_structs']
 
 master_phil_str = """
   use_amber = False
@@ -61,6 +71,7 @@ master_phil_str = """
     .type = choice
     .help = TODO: Place holder. Will remove this option later. @Dave: do not remove for now.
 """
+
 
 class geometry_manager(object):
   COUNT = 0
@@ -150,7 +161,7 @@ class geometry_manager(object):
 
     return result
 
-class energies (scitbx.restraints.energies) :
+class energies(scitbx.restraints.energies) :
   def __init__ (self, *args, **kwds) :
     scitbx.restraints.energies.__init__(self, *args, **kwds)
     self.energy_components = None
@@ -171,7 +182,6 @@ class energies (scitbx.restraints.energies) :
     return 0
 
   def get_grms(self):
-    from math import sqrt
     gradients_1d = self.gradients.as_double()
     grms = sum(gradients_1d**2)
     grms /= gradients_1d.size()
@@ -179,7 +189,6 @@ class energies (scitbx.restraints.energies) :
     return grms
 
   def get_gnorm(self):
-    from math import sqrt
     gradients_1d = self.gradients.as_double()
     grms = sum(gradients_1d**2)
     grms = sqrt(grms)
@@ -204,31 +213,13 @@ class energies (scitbx.restraints.energies) :
     else:
       return parm.ptr('nbona')
 
-def print_sites_cart(sites_cart):
-        for atom in sites_cart:
-                print("%8.3f%8.3f%8.3f"%(atom[0], atom[1], atom[2]))
-
-def get_amber_structs (parm_file_name, rst_file_name):
-        return ext.uform(parm_file_name, rst_file_name)
-
-def check_file(s,filename):
-  if filename is None:
-    raise Sorry("Filename %s is None. Please set this parameter" % s)
-  if not os.path.exists(filename):
-    raise Sorry("Filename %s does not exist" % filename)
-
-def check_file(s,file_name):
-  if file_name is None:
-    raise Sorry('Parameter %s not set. Please supply filename.' % (s))
-  if not os.path.exists(file_name):
-    raise Sorry("Filename %s does not exist" % file_name)
-
-class sander_structs ():
+class sander_structs(object):
   def __init__ (self, parm_file_name, rst_file_name, ridingH=True):
     check_file("amber.topology_file_name", parm_file_name)
     check_file("amber.coordinate_file_name", rst_file_name)
     self.md_engine = 'sander'
-    self.parm = AmberParm(parm_file_name)
+    self.parm = parmed.load_file(parm_file_name, xyz=rst_file_name)
+    # where do we need this self.rst?
     self.rst = Rst7.open(rst_file_name)
     self.ridingH = ridingH
     self.is_LES = is_prmtop_LES(parm_file_name)
@@ -240,179 +231,3 @@ class sander_structs ():
       self.inp = sanderles.pme_input()
     else:
       self.inp = sander.pme_input()
-    parm = parmed.load_file(parm_file_name, rst_file_name)
-    # use initial_coordinates for mapping with phenix's sites_cart
-    self.initial_coordinates = parm.coordinates
-
-def is_prmtop_LES(parm_file_name):
-  with open(parm_file_name) as f:
-    for line in f:
-      if "FLAG LES_TYPE" in line:
-        return True
-    return False
-
-def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
-  sites_cart_uc = flex.vec3_double()
-  cell = crystal_symmetry.unit_cell()
-  sg = crystal_symmetry.space_group()
-  for i, op in enumerate(sg.all_ops()):
-    #~ rotn = op.r().as_double()
-    #~ tln = cell.orthogonalize(op.t().as_double())
-    #~ # import code; code.interact(local=dict(globals(), **locals()))
-    #~ # sys.exit()
-    #~ sites_cart_uc.extend( (rotn * sites_cart) + tln)
-
-    r = op.r().as_double()
-    t = op.t().as_double()
-    sites_frac = cell.fractionalize(sites_cart)
-    sites_cart_uc.extend( cell.orthogonalize(r*sites_frac + t) )
-
-  return sites_cart_uc
-
-def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
-  cell = crystal_symmetry.unit_cell()
-  sg = crystal_symmetry.space_group()
-  n_symop = sg.n_smx()
-  n_asu_atoms = int(gradients_uc.size() / n_symop)
-  gradients = flex.vec3_double(n_asu_atoms)
-  for i, op in enumerate(sg.all_ops()):
-    inv_rotn = op.r().inverse().as_double()
-    tln = op.t().as_double()
-    start = i*n_asu_atoms
-    end = (i+1)*n_asu_atoms
-    g_frac = cell.fractionalize(gradients_uc[start:end])
-    gradients += inv_rotn * (g_frac-t)
-  gradients = gradients * (1.0/n_symop)
-  return gradients
-
-def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
-  from math import acos, pi, sqrt
-  if ignore_hd:
-    bonds = parm.bonds_without_h
-  else:
-    bonds = itertools.chain(parm.bonds_inc_h, parm.bonds_without_h)
-  bond_deltas = []
-  for i, bond in enumerate(bonds):
-    atom1= bond.atom1.idx
-    atom2= bond.atom2.idx
-    natoms=len(sites_cart)
-    # in non-P1 space groups, amber topology knows entire unit cell bonds
-    # only use bonds from 1st ASU
-    if atom1 >= natoms or atom2 >=natoms:
-      continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
-    dx = atom1[0] - atom2[0]
-    dy = atom1[1] - atom2[1]
-    dz = atom1[2] - atom2[2]
-    delta = bond.type.req - sqrt(dx*dx + dy*dy + dz*dz)
-    bond_deltas.append(delta)
-  bond_deltas = flex.double(bond_deltas)
-  b_sq  = bond_deltas * bond_deltas
-  b_ave = sqrt(flex.mean_default(b_sq, 0))
-  b_max = sqrt(flex.max_default(b_sq, 0))
-  b_min = sqrt(flex.min_default(b_sq, 0))
-  if not get_deltas:
-    return b_min, b_max, b_ave
-  else:
-    return (b_min, b_max, b_ave), bond_deltas
-
-def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
-  from math import acos, pi, sqrt
-  if ignore_hd:
-    bonds = parm.bonds_without_h
-  else:
-    bonds = itertools.chain(parm.bonds_inc_h, parm.bonds_without_h)
-  bond_Zs = []
-  for i, bond in enumerate(bonds):
-    atom1= bond.atom1.idx
-    atom2= bond.atom2.idx
-    natoms=len(sites_cart)
-    if atom1 >= natoms or atom2 >=natoms:
-      continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
-    dx = atom1[0] - atom2[0]
-    dy = atom1[1] - atom2[1]
-    dz = atom1[2] - atom2[2]
-    Z = sqrt(bond.type.k)*(bond.type.req - sqrt(dx*dx + dy*dy + dz*dz))
-    bond_Zs.append(Z)
-  bond_Zs = flex.double(bond_Zs)
-  b_sq  = bond_Zs * bond_Zs
-  b_ave = sqrt(flex.mean_default(b_sq, 0))
-  b_max = sqrt(flex.max_default(b_sq, 0))
-  b_min = sqrt(flex.min_default(b_sq, 0))
-  if not get_deltas:
-    return b_min, b_max, b_ave
-  else:
-    return (b_min, b_max, b_ave), bond_Zs
-
-def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
-  from math import acos, pi, sqrt
-  if ignore_hd:
-    angles = parm.angles_without_h
-  else:
-    angles = itertools.chain(parm.angles_inc_h, parm.angles_without_h)
-  angle_deltas = []
-  for i, angle in enumerate(angles):
-    # in non-P1 space groups, amber topology knows entire unit cell angles
-    # only use angles from 1st ASU
-    atom1= angle.atom1.idx
-    atom2= angle.atom2.idx
-    atom3= angle.atom3.idx
-    natoms=len(sites_cart)
-    if atom1 >= natoms or atom2 >=natoms or atom3 >=natoms:
-      continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
-    atom3 = sites_cart[atom3]
-    a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
-    b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
-    a = flex.double(a)
-    b = flex.double(b)
-    delta = angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))*180/pi
-    assert abs(delta)<360
-    angle_deltas.append(delta)
-  angle_deltas= flex.double(angle_deltas)
-  a_sq  = angle_deltas * angle_deltas
-  a_ave = sqrt(flex.mean_default(a_sq, 0))
-  a_max = sqrt(flex.max_default(a_sq, 0))
-  a_min = sqrt(flex.min_default(a_sq, 0))
-  if not get_deltas:
-    return (a_min, a_max, a_ave)
-  else:
-    return (a_min, a_max, a_ave), angle_deltas
-
-def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
-  from math import acos, pi, sqrt
-  if ignore_hd:
-    angles = parm.angles_without_h
-  else:
-    angles = itertools(parm.angles_inc_h, parm.angles_without_h)
-  angle_Zs = []
-  for i, angle in enumerate(angles):
-    atom1= angle.atom1.idx
-    atom2= angle.atom2.idx
-    atom3= angle.atom3.idx
-    natoms=len(sites_cart)
-    if atom1 >= natoms or atom2 >=natoms or atom3 >=natoms:
-      continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
-    atom3 = sites_cart[atom3]
-    a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
-    b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
-    a = flex.double(a)
-    b = flex.double(b)
-    Z = sqrt(angle.type.k)*(angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))*180/pi)
-    angle_Zs.append(Z)
-  angle_Zs= flex.double(angle_Zs)
-  a_sq  = angle_Zs * angle_Zs
-  a_ave = sqrt(flex.mean_default(a_sq, 0))
-  a_max = sqrt(flex.max_default(a_sq, 0))
-  a_min = sqrt(flex.min_default(a_sq, 0))
-  if not get_deltas:
-    return (a_min, a_max, a_ave)
-  else:
-    return (a_min, a_max, a_ave), angle_Zs
-

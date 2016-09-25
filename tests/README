@@ -1,6 +1,16 @@
-1. run all tests:
+1. If you do not want to read lots of stuff, just try
+
+- run all test (30-60 minutes)
 
     make
+
+- run shorter test (5-10 minutes)
+
+    make test.medium
+
+- run much shorter test (2-5 minutes)
+
+    make test.short
 
 2. Further info
 - Check Makefile
