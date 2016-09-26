@@ -1,1 +1,8 @@
-{}
+{
+  "amber_min_options/test_passing_amber_min_options.py": true, 
+  "geometry_minimization/test_geometry_minimization.py": true, 
+  "les/test_amber_phenix_reorder.py": true, 
+  "les/test_builder.py": true, 
+  "les/test_refinement.py": true, 
+  "normal/test_normal_build.py": true
+}

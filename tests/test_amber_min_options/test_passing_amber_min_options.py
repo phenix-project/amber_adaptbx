@@ -58,7 +58,7 @@ def test_default_min(pdb_file, minimization_type):
       line = 'maxcyc  =     500, ncyc    =     200, ntmin   =       1'
     assert_file_has_line(mdout_file_name, line)
 
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd.pdb')])
+@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['phenix_all'])
 @pytest.mark.parametrize('minimization_options', [
     'max_iterations=2',
@@ -79,7 +79,7 @@ def test_passing_minimization_options_phenix_all(pdb_file, minimization_type, mi
     print('line -->', line)
     assert line in output
 
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd.pdb')])
+@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h', 'phenix_all'])
 @pytest.mark.parametrize('LES', [False])
 @pytest.mark.medium
@@ -102,7 +102,7 @@ def test_file_exists_for_minized_pdb_4phenix_with_LES_False(pdb_file, minimizati
     output = subprocess.check_output(command_min)
     assert os.path.exists(get_minimized_pdb_filename(pdb_file, minimization_type=minimization_type, LES=LES))
 
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd.pdb')])
+@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h', 'phenix_all'])
 @pytest.mark.parametrize('LES', [True])
 @pytest.mark.medium
@@ -125,7 +125,7 @@ def test_file_exists_for_minized_pdb_4phenix_with_LES_True(pdb_file, minimizatio
     output = subprocess.check_output(command_min)
     assert os.path.exists(get_minimized_pdb_filename(pdb_file, minimization_type=minimization_type, LES=LES))
 
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd.pdb')])
+@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h'])
 @pytest.mark.parametrize('LES', [True, False])
 @pytest.mark.medium
@@ -148,10 +148,10 @@ def test_file_exists_for_minized_rst7_4amber(pdb_file, minimization_type, LES):
     output = subprocess.check_output(command_min)
     assert os.path.exists(get_minimized_rst7_filename(pdb_file, minimization_type=minimization_type, LES=LES))
 
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd.pdb')])
+@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h'])
 @pytest.mark.parametrize('LES', [True, False])
-@pytest.mark.parametrize('mtz_file', [get_fn('2igd.mtz')])
+@pytest.mark.parametrize('mtz_file', [get_fn('2igd/2igd.mtz')])
 @pytest.mark.slow
 def test_run_refinement_after_minimization_that_used_sander(pdb_file, minimization_type, LES, mtz_file):
   # TODO: assertion?

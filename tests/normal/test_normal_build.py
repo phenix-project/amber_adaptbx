@@ -12,7 +12,7 @@ from amber_adaptbx.tests.utils import (tempfolder, get_fn,
 @pytest.mark.slow
 @pytest.mark.minimization
 @pytest.mark.parametrize('pdb_file', [
-    get_fn('2igd.pdb'),
+    get_fn('2igd/2igd.pdb'),
     get_fn('4lzt/4lzt_no_BHOH.pdb'),
     get_fn('4lzt/4lzt.pdb'),
 ])
@@ -38,7 +38,7 @@ def test_geometry_minimization(pdb_file):
 @pytest.mark.slow
 @pytest.mark.no_assertion
 @pytest.mark.parametrize('pdb_file', [
-    get_fn('2igd.pdb'),
+    get_fn('2igd/2igd.pdb'),
     get_fn('4lzt/4lzt_no_BHOH.pdb'),
     get_fn('4lzt/4lzt.pdb'),
 ])
@@ -51,7 +51,7 @@ def test_geometry_minimization_command_line_with_amber_h_option(pdb_file):
 @pytest.mark.slow
 @pytest.mark.no_assertion
 @pytest.mark.parametrize('pdb_file', [
-    get_fn('2igd.pdb'),
+    get_fn('2igd/2igd.pdb'),
     get_fn('4lzt/4lzt_no_BHOH.pdb'),
     get_fn('4lzt/4lzt.pdb'),
 ])
@@ -67,7 +67,7 @@ def test_command_line_minimization_phenix_all(pdb_file):
 @pytest.mark.parametrize('pdb_file, mtz_file', [
     (get_fn('4lzt/4lzt.pdb'), get_fn('4lzt/4lzt.mtz')),
     (get_fn('4lzt/4lzt_no_BHOH.pdb'), get_fn('4lzt/4lzt.mtz')),
-    (get_fn('2igd.pdb'), get_fn('2igd.mtz')),
+    (get_fn('2igd/2igd.pdb'), get_fn('2igd/2igd.mtz')),
 ])
 def test_refinement_phenix(pdb_file, mtz_file):
   """ ensure there is no error, there is no assertion """

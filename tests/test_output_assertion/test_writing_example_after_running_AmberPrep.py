@@ -11,7 +11,7 @@ from amber_adaptbx.tests.config import (PDB_COLLECTION, saved_2igd_prmtop_file,
 )
 
 def test_writing_example_after_running_AmberPrep_non_LES_without_minimization():
-  pdb_file = get_fn('2igd.pdb')
+  pdb_file = get_fn('2igd/2igd.pdb')
   LES = False
 
   expected_line = """
@@ -33,7 +33,7 @@ Done.  Three new files have been made:
     assert expected_line in output_build
 
 def test_writing_example_after_running_AmberPrep_LES_without_minimization():
-  pdb_file = get_fn('2igd.pdb')
+  pdb_file = get_fn('2igd/2igd.pdb')
   LES = True
 
   expected_line = """
@@ -57,7 +57,7 @@ Done.  Three new files have been made:
 @pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
 @pytest.mark.medium
 def test_writing_example_after_running_AmberPrep_LES_with_minimization(minimization_type):
-  pdb_file = get_fn('2igd.pdb')
+  pdb_file = get_fn('2igd/2igd.pdb')
   LES = True
 
   expected_line_dict = {
@@ -104,7 +104,7 @@ Done.  Three new files have been made:
 @pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
 @pytest.mark.medium
 def test_writing_example_after_running_AmberPrep_not_LES_with_minimization(minimization_type):
-  pdb_file = get_fn('2igd.pdb')
+  pdb_file = get_fn('2igd/2igd.pdb')
 
   expected_line_dict = {
           'amber_h': """

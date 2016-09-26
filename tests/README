@@ -4,7 +4,7 @@
 
     make
 
-- run shorter test (5-10 minutes)
+- run shorter test (5-10 minutes): highly recommend to run this first
 
     make test.medium
 

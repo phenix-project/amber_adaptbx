@@ -57,7 +57,7 @@ def test_geometry_minimization_from_AmberPrep_with_amber_h_option(pdb_file):
 
 @pytest.mark.parametrize('pdb_file', [
     get_fn('4lzt/4lzt_no_BHOH.pdb'),
-    get_fn('2igd.pdb')
+    get_fn('2igd/2igd.pdb')
 ])
 def test_geometry_minimization_from_AmberPrep_with_amber_all_option(pdb_file):
   """ ensure there is no error, there is no assertion """
@@ -75,7 +75,7 @@ def test_command_line_minimization_phenix_all(pdb_file):
     subprocess.check_output(command.split())
 
 @pytest.mark.parametrize('pdb_file', [
-    get_fn('2igd.pdb'),
+    get_fn('2igd/2igd.pdb'),
 ])
 def test_geometry_minimization_from_AmberPrep_with_amber_all_option_with_assertion_and_larger_maxcyc(pdb_file):
   """ ensure there is no error, there is no assertion """
