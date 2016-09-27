@@ -147,17 +147,38 @@ class geometry_manager(object):
     if log==None: log=sys.stdout
     # following forces printing of Amber energies; placeholder until
     #    this can become an input keyword
-    print_amber_energies=True
-    if print_amber_energies:
-      print >>log, "    Amber total energy: %0.2f" %(result.residual_sum)
-      print >>log, "      bonds (n=%d): %0.2f" %(result.energy_components[6],
-                                           result.energy_components[1])
-      print >>log, "      angles (n=%d): %0.2f" %(result.energy_components[7],
-                                           result.energy_components[2])
-      print>>log,  "      dihedrals (n=%d): %0.2f" %(result.energy_components[8],
-                                           result.energy_components[3])
-      print>>log,  "      electrostatics: %0.2f" %(result.energy_components[4])
-      print>>log,  "      van der Waals: %0.2f" %(result.energy_components[5])
+    if print_amber_energies or 1:
+      if 1:
+        print >>log, """  Amber total: %0.2f bonds (n=%d): %0.2f angles (n=%d): %0.2f diheds (n=%d): %0.2f elec.: %0.2f vdW: %0.2f""" %(
+          result.residual_sum,
+          result.energy_components[6],
+          result.energy_components[1],
+          result.energy_components[7],
+          result.energy_components[2],
+          result.energy_components[8],
+          result.energy_components[3],
+          result.energy_components[4],
+          result.energy_components[5])
+      else:
+        print >>log, """  Amber total energy: %0.2f
+    bonds (n=%d): %0.2f
+    angles (n=%d): %0.2f
+    dihedrals (n=%d): %0.2f
+    electrostatics: %0.2f
+    van der Waals: %0.2f""" %(result.residual_sum,
+                              result.energy_components[6],
+                              result.energy_components[1],
+                              result.energy_components[7],
+                              result.energy_components[2],
+                              result.energy_components[8],
+                              result.energy_components[3],
+                              result.energy_components[4],
+                              result.energy_components[5])
+    #  assert 0
+    #else:
+    #  from libtbx.introspection import show_stack
+    #  show_stack()
+    #  assert 0
 
     return result
 
@@ -170,6 +191,7 @@ class energies(scitbx.restraints.energies) :
     # sys.exit()
 
   def show(self):
+    assert 0 # not writing to log...
     print "    Amber total energy: %0.2f" %(self.residual_sum)
     print "      bonds (n=%d): %0.2f" %(self.energy_components[6],
                                              self.energy_components[1])
