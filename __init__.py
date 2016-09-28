@@ -114,12 +114,8 @@ class geometry_manager(object):
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
     sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
-    if self.amber_structs.is_LES:
-      sanderles.set_positions(sander_coords)
-      ene, frc = sanderles.energy_forces()
-    else:
-      sander.set_positions(sander_coords)
-      ene, frc = sander.energy_forces()
+    self.amber_structs.sander_engine.set_positions(sander_coords)
+    ene, frc = self.amber_structs.sander_engine.energy_forces()
     frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
     if (compute_gradients) :
       gradients_uc=flex.vec3_double(flex.double(frc)) * -1
@@ -245,11 +241,8 @@ class sander_structs(object):
     self.rst = Rst7.open(rst_file_name)
     self.ridingH = ridingH
     self.is_LES = is_prmtop_LES(parm_file_name)
+    self.sander_engine = sanderles if self.is_LES else sander
 
     self.order_converter = None
     self.order_map_file_name = None
-
-    if self.is_LES:
-      self.inp = sanderles.pme_input()
-    else:
-      self.inp = sander.pme_input()
+    self.inp = self.sander_engine.pme_input()
