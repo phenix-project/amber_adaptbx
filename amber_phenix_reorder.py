@@ -151,7 +151,11 @@ def round3(a):
   >>> round3(1.235)
   1.2
   """
-  return round(round(round(a, 3), 2), 1)
+  x = round(round(round(a, 3), 2), 1)
+  if x == -0.0:
+    # avoid '-0.0' and '0.0' key
+    x = 0.0
+  return x
 
 def make_dict(big_arr):
   """
