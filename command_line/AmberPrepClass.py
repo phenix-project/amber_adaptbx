@@ -961,7 +961,8 @@ def run(rargs):
   amber_prep_runner.write_remark_290()
   amber_prep_runner.curate_model(remove_alt_confs=(not actions.LES))
   # need to write PDB for some of the other methods
-  current_pdb_file_name = inputs.pdb_file_name.replace(
+  basename = os.path.basename(inputs.pdb_file_name)
+  current_pdb_file_name = basename.replace(
     '.pdb',
     '_curated.pdb',
     )
