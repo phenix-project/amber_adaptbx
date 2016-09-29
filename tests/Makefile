@@ -34,6 +34,11 @@ test.medium:
 	# about 6 - 10 minutes
 	./run_tests.py -v -m "medium"
 
+test.medium.parallel:
+	# about 6 - 10 minutes
+	# need xdist (pip install xdist)
+	./run_tests.py -v -m "medium" -n 4
+
 test.medium.verbose:
 	./run_tests.py -vs -m "medium"
 

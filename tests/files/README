@@ -1,0 +1,8 @@
+1gdu, 2g3i, 3kug 
+    - dir: casegroup: /home/pjanowsk/Phenix/test_100/test100
+    - why adding?
+        - first, I took all pdb codes (23 pdbs) having alternative conformations.
+        - run:
+            phenix.AmberPrep dir_to_pdb_file LES=True minimise=phenix_all
+        - got all pdb codes that caused failure
+        - add them (pdb files) to test folder

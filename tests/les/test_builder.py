@@ -37,6 +37,20 @@ def test_run_sander_LES_minimization_from_LES_build(pdb_file):
               rst7_file=rst7_file,
               maxcyc=10)
     assert 'FINAL RESULTS' in output, 'minimization must be finished'
+
+@pytest.mark.parametrize('pdb_file', [
+    get_fn('3kug/3kug.pdb'),
+    get_fn('2g3i/2g3i.pdb'),
+    get_fn('1gdu/1gdu.pdb')
+])
+def test_minus_0_coordinates(pdb_file):
+  """ ensure there is no error if having -0.0 coordinates """
+  command = "phenix.AmberPrep {} LES=True minimise=phenix_all minimization_options='max_iterations=2'".format(pdb_file)
+  with tempfolder():
+    # use minimization_type='phenix_all' to trigger computing reorder map
+    minimimized_pdb = get_minimized_pdb_filename(pdb_file, LES=True, minimization_type='phenix_all')
+    subprocess.check_call(command.split())
+    assert os.path.exists(minimimized_pdb)
     
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
 def test_command_line_build(pdb_file):
