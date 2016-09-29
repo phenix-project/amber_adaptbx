@@ -84,17 +84,10 @@ class run(object):
     amber_structs = amber_adaptbx.sander_structs(
       parm_file_name=prmtop,
       rst_file_name=ambcrd)
-    if amber_structs.is_LES:
-      sanderles.setup(amber_structs.parm,
+    amber_structs.sander_engine.setup(amber_structs.parm,
              amber_structs.rst.coordinates,
              amber_structs.rst.box,
              amber_structs.inp)
-    else:
-      sander.setup(amber_structs.parm,
-             amber_structs.rst.coordinates,
-             amber_structs.rst.box,
-             amber_structs.inp)
-
     self.show(amber_structs, log=log)
 
     for i_macro_cycle in xrange(number_of_macro_cycles):
