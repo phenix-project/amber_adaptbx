@@ -187,7 +187,7 @@ class energies(scitbx.restraints.energies) :
     # sys.exit()
 
   def show(self):
-    assert 0 # not writing to log...
+    # assert 0 # not writing to log...
     print "    Amber total energy: %0.2f" %(self.residual_sum)
     print "      bonds (n=%d): %0.2f" %(self.energy_components[6],
                                              self.energy_components[1])
