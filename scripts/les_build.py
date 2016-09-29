@@ -6,6 +6,8 @@ from libtbx import easy_run
 from amber_adaptbx.scripts import reduce_to_les
 import argparse
 
+__all__ = ['LESBuilder']
+
 """
 Command line
 ------------
