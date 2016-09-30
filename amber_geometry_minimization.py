@@ -1,12 +1,7 @@
 from __future__ import division
-import iotbx.phil
 from cctbx import geometry_restraints
-import cctbx.geometry_restraints.lbfgs
-import scitbx.lbfgs
 import sys
 import amber_adaptbx.lbfgs
-from amber_adaptbx import get_amber_structs
-from libtbx.utils import Sorry
 
 class lbfgs(amber_adaptbx.lbfgs.lbfgs):
   def __init__(self,

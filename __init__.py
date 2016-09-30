@@ -1,10 +1,6 @@
 from __future__ import division
 from math import sqrt
-from libtbx import group_args
-import sys, os
-import itertools
-import iotbx.pdb
-import argparse
+import sys
 from scitbx.array_family import flex
 import scitbx.restraints
 from libtbx.utils import Sorry
@@ -15,16 +11,15 @@ except:
 
 # require the most updated ParmEd version
 # AmberTools >= 16
-from parmed.amber.readparm import AmberParm, Rst7
+from parmed.amber.readparm import Rst7
 import parmed
 
 from amber_adaptbx.amber_phenix_reorder import (
     initialize_order_converter, reorder_coords_phenix_to_amber,
-    reorder_force_amber_to_phenix, get_indices_convert_dict_from_array
+    reorder_force_amber_to_phenix
 )
 
 from amber_adaptbx.utils import (
-        tempfolder,
         expand_coord_to_unit_cell,
         get_amber_structs,
         bond_rmsd,
@@ -67,9 +62,6 @@ master_phil_str = """
   print_amber_energies = False
     .type = bool
     .help = Print details of Amber energies during refinement
-  md_engine = *sander
-    .type = choice
-    .help = TODO: Place holder. Will remove this option later. @Dave: do not remove for now.
 """
 
 

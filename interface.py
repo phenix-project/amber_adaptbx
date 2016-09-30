@@ -1,6 +1,6 @@
-import os, sys
 import amber_adaptbx
 import numpy as np
+from libtbx.utils import Sorry
 
 def get_amber_struct_object(params):
   amber_params = params.amber

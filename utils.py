@@ -223,13 +223,14 @@ def write_rst7_from_geometry_manager(geom, crystal_symmetry, filename):
   --------
   >>> write_rst7_from_geometry_manager(geom, '4amber_minimized.rst7')
   """
-  old_coords = parm.coordinates
   parm = geom.amber_structs.parm
+  old_coords = parm.coordinates
   sites_cart_uc = expand_coord_to_unit_cell(geom.sites_cart, crystal_symmetry)
   sites_cart_uc_arr = np.asarray(sites_cart_uc, dtype='f8')
   indices_p2a = geom.order_converter['p2a']
   # reorder
-  parm.coordinates = sites_cart_arr[indices_p2a]
+  parm.coordinates = sites_cart_uc_arr[indices_p2a]
+  # filename should have .rst7 ext if not specifying format
   parm.save(filename, format='restrt')
   # restore
   parm.coordinates = old_coords

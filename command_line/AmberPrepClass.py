@@ -1,7 +1,6 @@
 # LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep
 
 import os, sys
-import shutil
 import iotbx.pdb
 from libtbx import phil
 import libtbx.phil.command_line
@@ -399,7 +398,7 @@ class amber_prep_run_class:
       ero.show_stdout()
       ero.show_stderr()
     # check output
-    fatals = _parse_tleap_logfile(logfile)
+    # fatals = _parse_tleap_logfile(logfile)
     check_required_output_filenames(["%s_%s.prmtop" % (self.base, output_base),
                                      "%s_%s.rst7" % (self.base, output_base),
                                      ],
@@ -973,7 +972,7 @@ def run(rargs):
   print "=================================================="
 
   tleap_input_pdb = "%s_4tleap.pdb" % base
-  log = []
+  # log = []
   ns_names,gaplist,sslist=pdb4amber.run(tleap_input_pdb,
                                         current_pdb_file_name,
                                         arg_elbow=True,
@@ -1077,4 +1076,4 @@ if __name__=="__main__":
                         "intermediate files", action='True', default=False )
     args = parser.parse_args()
     run(args.pdb_file_name, minimize=args.min, clean=args.no_clean)
-    amber_prep_runner.run_minimise(actions.minimise, minimization_options=args.minimization_options)
+    amber_prep_run_class.run_minimise(args.minimise, minimization_options=args.minimization_options)

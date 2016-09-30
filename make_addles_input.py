@@ -43,8 +43,7 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   n_asu = len(crystal_symmetry.space_group().all_ops()) 
   
   n_asu_residues = len(parm.residues)
-  n_uc_residues = n_asu * n_asu_residues
-  
+  # n_uc_residues = n_asu * n_asu_residues
   # print('n_asu', n_asu, 'n_asu_residues', n_asu_residues)
   # print('n_uc_residues', n_uc_residues)
   
