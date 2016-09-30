@@ -3,6 +3,9 @@
 
 test.all: test.long
 
+test.all.parallel:
+	./run_tests.py -v -n 4
+
 test.long:
 	# about > 80 minutes
 	# :D

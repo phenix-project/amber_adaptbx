@@ -38,6 +38,7 @@ def test_run_sander_LES_minimization_from_LES_build(pdb_file):
               maxcyc=10)
     assert 'FINAL RESULTS' in output, 'minimization must be finished'
 
+@pytest.mark.medium
 @pytest.mark.parametrize('pdb_file', [
     get_fn('3kug/3kug.pdb'),
     get_fn('2g3i/2g3i.pdb'),
