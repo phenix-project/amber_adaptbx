@@ -14,8 +14,8 @@ from amber_adaptbx.tests import utils
     # 2igd, LES=False/True, minimization_type=amber_all/amber_h
     (get_fn('2igd/2igd.pdb'), False,'amber_h', 0.1171),
     (get_fn('2igd/2igd.pdb'), False,'amber_all', 0.1287),
-    (get_fn('2igd/2igd.pdb'), True, 'amber_all', 0.1263),
-    (get_fn('2igd/2igd.pdb'), True, 'amber_h', 0.1154),
+    (get_fn('2igd/2igd.pdb'), True, 'amber_all', 1.6647),
+    (get_fn('2igd/2igd.pdb'), True, 'amber_h', 1.5841),
     # 4lzt, LES=False/True, minimization_type=amber_h
     (get_fn('4lzt/4lzt_no_BHOH.pdb'), False,'amber_h', 0.1043),
     (get_fn('4lzt/4lzt_no_BHOH.pdb'), True,'amber_h', 0.1033),

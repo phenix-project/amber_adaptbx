@@ -11,6 +11,7 @@ from libtbx import easy_run
 import StringIO
 from amber_adaptbx import amber_library_server
 from amber_adaptbx.scripts.les_build import LESBuilder
+from amber_adaptbx.utils import build_unitcell
 from libtbx.utils import Sorry
 import libtbx.load_env
 
@@ -364,7 +365,11 @@ class amber_prep_run_class:
     # input PDB file
     #
     f.write('x = loadpdb %s\n' % input_pdb)
-    f.write('set x box {20.000   20.000   20.000}\n')
+
+    assert self.cryst1
+    uc = self.cryst1.unit_cell().parameters()
+    f.write('set x box { %s  %s  %s }\n' % (uc[0], uc[1], uc[2]))
+
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
     #
@@ -556,7 +561,7 @@ class amber_prep_run_class:
 
     # temporary file: will be output from UnitCell, input to pdb4amber:
     tleap_pdb_file1 = "%s_4tleap_uc1.pdb" % self.base
-    run_UnitCell(uc_pdb_file, tleap_pdb_file1)
+    build_unitcell(uc_pdb_file, tleap_pdb_file1)
 
     #run back through pdb4amber to get new CONECT records for SS bonds:
     ns_names,gaplist,sslist=pdb4amber.run(
@@ -942,13 +947,6 @@ def _run_elbow_antechamber(pdb_hierarchy,
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
 
-def run_UnitCell(input_file,output_file):
-  cmd='UnitCell -p %s -o %s' %(input_file, output_file)
-  print_cmd(cmd)
-  ero=easy_run.fully_buffered(cmd)
-  ero.show_stdout()
-  ero.show_stderr()
-
 def run(rargs):
   working_params = setup_options_args(rargs)
   inputs = working_params.amber_prep.input
@@ -958,7 +956,7 @@ def run(rargs):
   amber_prep_runner.initializePdb(inputs.pdb_file_name)
   invalid = amber_prep_runner.validatePdb()
   if invalid: raise Sorry( 'PDB input is not "valid"' )
-  amber_prep_runner.write_remark_290()
+  # amber_prep_runner.write_remark_290()
   amber_prep_runner.curate_model(remove_alt_confs=(not actions.LES))
   # need to write PDB for some of the other methods
   basename = os.path.basename(inputs.pdb_file_name)

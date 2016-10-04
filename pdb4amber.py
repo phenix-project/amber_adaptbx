@@ -538,7 +538,7 @@ def non_standard_elbow(recordlist):
         'U3', 'U5', 'UN', 'V2+',
         'VAL', 'WAT', 'YB2', 'ZN',
         )
-  RES_SUGAR = ( 'HYP', 'NLN', 'OLP', 'OLS', 'OLT', 
+  RES_SUGAR = ( 'HYP', 'NLN', 'OLP', 'OLS', 'OLT',
  '0AA', '0AB', '0AD', '0AU', '0BA', '0BB', '0BC', '0BD', '0BU', '0CA',
  '0CB', '0CD', '0CU', '0DA', '0DB', '0DD', '0DU', '0EA', '0EB', '0FA',
  '0FB', '0GA', '0GB', '0GL', '0HA', '0HB', '0JA', '0JB', '0JD', '0JU',

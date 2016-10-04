@@ -20,6 +20,7 @@ __all__ = [
         'collapse_grad_to_asu',
         'check_file',
         'print_sites_cart',
+        'build_unitcell',
 ]
 
 
@@ -234,3 +235,32 @@ def write_rst7_from_geometry_manager(geom, crystal_symmetry, filename):
   parm.save(filename, format='restrt')
   # restore
   parm.coordinates = old_coords
+
+def build_unitcell(asu_pdb_file, output_file):
+  '''build unitcell from asu pdb file
+  '''
+  import parmed as pmd
+  from iotbx import pdb
+
+  asu_pdb = pdb.input(asu_pdb_file)
+  parm = pmd.load_file(asu_pdb_file)
+  asu_n_residues = len(parm.residues)
+  symmetry = asu_pdb.crystal_symmetry()
+  asu_site_carts = asu_pdb.atoms().extract_xyz()
+  uc_site_carts = expand_coord_to_unit_cell(asu_site_carts, symmetry)
+  space_group = asu_pdb.crystal_symmetry().space_group()
+  n_ops = len(space_group.all_ops())
+  parm = parm * n_ops
+
+  # add TER
+  for index in range(n_ops):
+     res_ter = parm.residues[asu_n_residues*(index+1) - 1]
+     res_ter.ter = True
+  # TODO: write to StringIO
+  # Does iotbx.pdb can read file handler?
+  with tempfolder():
+    fn = 'tmp.pdb'
+    parm.save(fn, overwrite=True)
+    uc_pdb = pdb.input(fn)
+    uc_pdb.atoms().set_xyz(uc_site_carts)
+  uc_pdb.write_pdb_file(output_file)

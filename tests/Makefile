@@ -29,6 +29,10 @@ test.fast:
 	# about 2-3 minutes
 	./run_tests.py -v -m "not slow and not medium"
 
+test.fast.parallel:
+	# require pytest-xdist
+	./run_tests.py -v -m "not slow and not medium" -n 4
+
 test.short:
 	# about 2-3 minutes
 	./run_tests.py -v -m "not slow and not medium"

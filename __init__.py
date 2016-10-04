@@ -101,8 +101,8 @@ class geometry_manager(object):
         log=None,
         print_amber_energies=False,
         compute_gradients=False):
-    # if log==None: assert 0
-    #Expand sites_cart to unit cell
+    # if log is None: assert 0
+    # Expand sites_cart to unit cell
     sites_cart_uc=expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
 
     sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
@@ -132,7 +132,7 @@ class geometry_manager(object):
                                 ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
-    if log==None: log=sys.stdout
+    if log is None: log = sys.stdout
     # following forces printing of Amber energies; placeholder until
     #    this can become an input keyword
     if print_amber_energies or 1:
