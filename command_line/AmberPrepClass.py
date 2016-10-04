@@ -347,6 +347,7 @@ class amber_prep_run_class:
     f.write('source leaprc.protein.ff14SB\n')
     f.write('source leaprc.DNA.OL15\n')
     f.write('source leaprc.RNA.OL3\n')
+    #f.write('source leaprc.GLYCAM_06j-1\n') #un-comment for glycoproteins
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
     #  (for the future: have some mechanism for modifying the above list)
