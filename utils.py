@@ -244,37 +244,13 @@ def build_unitcell(asu_pdb_file, output_file):
   asu_pdb_file : str, ASU pdb file name
   output_file : str, unitcell pdb file name
   '''
-  import parmed as pmd
-  from iotbx import pdb
+  import iotbx.pdb
+  import cctbx
 
-  asu_pdb = pdb.input(asu_pdb_file)
-  symmetry = asu_pdb.crystal_symmetry()
-  asu_site_carts = asu_pdb.atoms().extract_xyz()
-
-  # compute unitcell's coordinates from asu's coordinates
-  uc_site_carts = expand_coord_to_unit_cell(asu_site_carts, symmetry)
-  space_group = asu_pdb.crystal_symmetry().space_group()
-
-  # number of ASU in unitcell
-  n_asu_pdb = len(space_group.all_ops())
-
-  asu_structure = pmd.load_file(asu_pdb_file)
-  asu_n_residues = len(asu_structure.residues)
-  # build residue template from parmed's Structure
-  # Note: all ASUs have the same coordinates, we will update later
-  uc_structure = asu_structure * n_asu_pdb
-
-  # add TER to seperate each asu
-  for index in range(n_asu_pdb):
-     res_ter = uc_structure.residues[asu_n_residues*(index+1) - 1]
-     res_ter.ter = True
-
-  # TODO: write to StringIO
-  # Does iotbx.pdb can read file handler?
-  with tempfolder():
-    fn = 'tmp.pdb'
-    uc_structure.save(fn, overwrite=True)
-    uc_pdb = pdb.input(fn)
-    # update expanded coordinates
-    uc_pdb.atoms().set_xyz(uc_site_carts)
-  uc_pdb.write_pdb_file(output_file)
+  pdb_inp = iotbx.pdb.input(asu_pdb_file)
+  cs = pdb_inp.crystal_symmetry()
+  ph = pdb_inp.construct_hierarchy()
+  ph_p1 = ph.expand_to_p1(crystal_symmetry=cs)
+  abc = cs.unit_cell().parameters()[:3]
+  cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
+  ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)

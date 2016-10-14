@@ -222,8 +222,6 @@ class amber_prep_run_class:
     self.non_les_prmtop_file_name = '4amber_%s.prmtop' % self.base
     self.non_les_rst7_file_name = '4amber_%s.rst7' % self.base
 
-    self.remark_290_smtry = ''
-
   def __repr__(self):
     outl = "AmberPrepRunner"
     outl += "\n  Base : %s" % self.base
@@ -778,9 +776,9 @@ class amber_prep_run_class:
       4antechamber
       amber_all.in
       mdinfo
-      remark_290.txt
       addles.in
       reduce_info.log
+      reduce_lesbuilder.log
       """
     import glob
 
@@ -968,7 +966,6 @@ def run(rargs):
   invalid = amber_prep_runner.validate_pdb()
   if invalid:
     raise Sorry('PDB input is not "valid"')
-  # amber_prep_runner.write_remark_290()
   amber_prep_runner.curate_model(remove_alt_confs=(not actions.LES))
   # need to write PDB for some of the other methods
   basename = os.path.basename(inputs.pdb_file_name)

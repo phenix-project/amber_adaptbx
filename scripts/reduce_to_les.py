@@ -24,7 +24,7 @@ def main():
   # for command line
   parser = argparse.ArgumentParser(description='fix LES parm7 and rst7 files')
   parser.add_argument('--asu-pdb', help='original ASU pdb')
-  parser.add_argument('--uc-pdb', help='UnitCell pdb that have added hydrogens (by reduce)')
+  parser.add_argument('--uc-pdb', help='unitcell pdb that have added hydrogens (by reduce)')
   parser.add_argument('--prmtop', help='prmtop for LES')
   parser.add_argument('--rst7', help='rst7 file for LES (need to be fixed)')
   args = parser.parse_args()

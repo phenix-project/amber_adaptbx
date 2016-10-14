@@ -4,6 +4,8 @@ import parmed as pmd
 from amber_adaptbx.make_addles_input import addles_input
 from libtbx import easy_run
 from amber_adaptbx.scripts import reduce_to_les
+from amber_adaptbx.utils import build_unitcell
+
 import argparse
 
 __all__ = ['LESBuilder']
@@ -39,12 +41,15 @@ class LESBuilder(object):
   ----------
   original_pdb_file : str, ASU pdb (e.g downloaded from rcsb)
   prmtop : str, prmtop of the single conformation unitcell pdb, default None (optional)
-      if not provided, LESBuilder will use `build_parm_single_conformation` to build prmtop.
-      It's better to specify prmtop since `build_parm_single_conformation` does not handle ligand.
-      DAC note: should we not make the single conformer versions mandatory?
-      You can use AmberPrep to prepare this prmtop file
+    if not provided, LESBuilder will use `build_parm_single_conformation` to build prmtop.
+    It's better to specify prmtop since `build_parm_single_conformation` does not handle ligand.
+    DAC note: should we not make the single conformer versions mandatory?
+    You can use AmberPrep to prepare this prmtop file
   rst7_file : str, corresponding rst7 filename, default None (optional)
-     only needed if `prmtop` is given
+    only needed if `prmtop` is given
+  unitcell_pdb_file : str or None, default None
+    fully atom unitcell pdb filename. If given, LESBuilder will use it. If not, it will call
+    build_unitcell method.
 
   Examples
   --------
@@ -58,7 +63,7 @@ class LESBuilder(object):
   >>> builder.build()
   """
 
-  def __init__(self, original_pdb_file, prmtop=None, rst7_file=None):
+  def __init__(self, original_pdb_file, prmtop=None, rst7_file=None, unitcell_pdb_file=None):
     self.original_pdb_file = original_pdb_file
     self.new_pdb_with_H = None
 
@@ -75,13 +80,15 @@ class LESBuilder(object):
     self.symmetry = asu_pdb_parm.symmetry
     self.box = asu_pdb_parm.box
     self.n_asu_residues = len(asu_pdb_parm.residues)
+    self.unitcell_pdb_file = unitcell_pdb_file
 
   def run(self):
     # main driver
     # use UnitCell to build unitcell from asu pdb
-    self.build_unitcell()
-    # use reduce to add hydrogens to unitcell pdb
-    self.add_hydrogens()
+    if self.unitcell_pdb_file is None:
+      self.build_unitcell()
+      # use reduce to add hydrogens to unitcell pdb
+      self.add_hydrogens()
     # use tleap to build parm7 and rst7 files for single conformation
     self.build_parm_single_conformation()
     # use addles to construct LES parm7 and rst7 files
@@ -95,16 +102,16 @@ class LESBuilder(object):
     self.rename_4amber_4phenix()
 
   def build_unitcell(self):
-    new_pdb = self.root_name + '_uc.pdb'
-    command_build_unitcell = 'UnitCell -p {} -o {}'.format(
-        self.original_pdb_file, new_pdb)
-    # print(command_build_unitcell)
-    easy_run.fully_buffered(command_build_unitcell)
+    # only need this if self.unitcell_pdb_file is None
+    new_pdb_file = self.root_name + '_uc.pdb'
+    build_unitcell(self.original_pdb_file, new_pdb_file)
+    self.unitcell_pdb_file = new_pdb_file
 
   def add_hydrogens(self):
+    # only need this if self.unitcell_pdb_file is None
     new_pdb = self.root_name + '_uc.pdb'
     new_pdb_with_H = self.root_name + '_uc_H.pdb'
-    command_add_hydrogens = 'reduce -build -nuclear {} > {} 2>reduce.log'.format(
+    command_add_hydrogens = 'reduce -build -nuclear {} > {} 2>reduce_lesbuilder.log'.format(
         new_pdb, new_pdb_with_H)
     # print(command_add_hydrogens)
     easy_run.fully_buffered(command_add_hydrogens)

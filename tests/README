@@ -12,6 +12,10 @@
 
     make test.short
 
+- To debug, you can run simple test
+
+    phenix.AmberPrep 2igd.pdb LES=True clean=False
+
 2. Further info
 - Check Makefile
 - Check __doc__ in ./run_tests.py
