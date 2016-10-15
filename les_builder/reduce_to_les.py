@@ -1,5 +1,4 @@
 import os
-import sys
 import argparse
 from collections import defaultdict
 import parmed as pmd
@@ -125,8 +124,6 @@ def update_rst7_and_pdb_coordinates_LES(template_parm, target_parm, rst7_fn):
         atom.xz = template_atom.xz
         atom.bfactor = template_atom.bfactor
         atom.occupancy = template_atom.occupancy
-
-  pdb_fn = rst7_fn.split('.')[0] + '.pdb'
 
   # TODO: already updated for ParmEd, will remove
   label_alternates(target_parm)

@@ -1,8 +1,6 @@
 import os
 import math
 from contextlib import contextmanager
-import libtbx.load_env
-import libtbx
 import tempfile
 from shutil import rmtree
 import subprocess

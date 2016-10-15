@@ -209,20 +209,20 @@ def print_sites_cart(sites_cart):
   for atom in sites_cart:
      print("%8.3f%8.3f%8.3f"%(atom[0], atom[1], atom[2]))
 
-def write_rst7_from_geometry_manager(geom, crystal_symmetry, filename):
+def write_rst7_from_GeometryManager(geom, crystal_symmetry, filename):
   # @Nigel: Please use this to write phenix pdb file to rst7 file after doing
   # phenix.refine or phenix.geometry_minimization minimise=phenix_all
   """
   Parameters
   ----------
-  geom : amber_adaptbx.geometry_manager object 
+  geom : amber_adaptbx.GeometryManager object 
   crystal_symmetry : ?
   filename : str
     output rst7 filename
 
   Examples
   --------
-  >>> write_rst7_from_geometry_manager(geom, '4amber_minimized.rst7')
+  >>> write_rst7_from_GeometryManager(geom, '4amber_minimized.rst7')
   """
   parm = geom.amber_structs.parm
   old_coords = parm.coordinates

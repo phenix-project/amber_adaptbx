@@ -9,9 +9,9 @@ from iotbx import pdb
 from scitbx.array_family import flex
 
 import parmed as pmd
-from amber_adaptbx.amber_phenix_reorder import (reorder_coords_phenix_to_amber,
+from amber_adaptbx.les_builder.amber_phenix_reorder import (reorder_coords_phenix_to_amber,
         get_indices_convert_dict, get_indices_convert_dict_from_array)
-from amber_adaptbx import expand_coord_to_unit_cell, sander_structs
+from amber_adaptbx import expand_coord_to_unit_cell, SanderStruct
 from amber_adaptbx.tests.utils import get_fn
 
 def test_normal_pdb():
@@ -112,6 +112,6 @@ def test_sander_struct():
   fn = get_fn('4lzt_pawel/4lztabH.pdb')
   tn = get_fn('4lzt_pawel/4lztab.parm7')
   rst7 = get_fn('4lzt_pawel/4lztabH.rst7')
-  s_struct = sander_structs(tn, rst7)
+  s_struct = SanderStruct(tn, rst7)
   parm = pmd.load_file(tn, rst7)
   aa_eq(parm.coordinates, s_struct.parm.coordinates)

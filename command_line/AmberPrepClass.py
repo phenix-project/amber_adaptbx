@@ -11,7 +11,7 @@ from elbow.command_line import builder
 from libtbx import easy_run
 import StringIO
 from amber_adaptbx import amber_library_server
-from amber_adaptbx.scripts.les_build import LESBuilder
+from amber_adaptbx.les_builder.build import LESBuilder
 from amber_adaptbx.utils import build_unitcell
 from libtbx.utils import Sorry
 import libtbx.load_env

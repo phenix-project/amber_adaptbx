@@ -76,7 +76,7 @@ class run(object):
       bond_similarity    = True)
 
     import sander, sanderles
-    amber_structs = amber_adaptbx.sander_structs(
+    amber_structs = amber_adaptbx.SanderStruct(
       parm_file_name=prmtop,
       rst_file_name=ambcrd)
     amber_structs.sander_engine.setup(amber_structs.parm,

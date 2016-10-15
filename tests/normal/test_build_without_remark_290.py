@@ -9,18 +9,28 @@ from amber_adaptbx.tests.utils import (tempfolder, get_fn,
 import sander
 import parmed as pmd
 
-@pytest.mark.parametrize('pdb_file, expected_energy', [
-    (get_fn('2igd/2igd_simplified.pdb'), -1664.0907),
+@pytest.mark.parametrize('pdb_file', [
+    get_fn('2igd/2igd_simplified.pdb')
 ])
-def test_build_from_pdb_that_does_not_have_remark_290(pdb_file, expected_energy):
+def test_build_from_pdb_that_does_not_have_remark_290(pdb_file):
     command_build = [
             'phenix.AmberPrep',
             pdb_file
     ]
+
+    decimal = 4
+
     with tempfolder():
         subprocess.check_call(command_build)
         prmtop_file, rst7_file, _ = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file, LES=False)
         box = pmd.load_file(rst7_file).box
         with sander.setup(prmtop_file, rst7_file, box=box, mm_options=sander.pme_input()):
             ene, _ = sander.energy_forces()
-        aa_eq([ene.tot], [expected_energy], decimal=4)
+        aa_eq([ene.tot], [-1664.0907], decimal=decimal)
+        aa_eq([ene.vdw], [745.7346], decimal=decimal)
+        aa_eq([ene.vdw_14], [1007.42564139], decimal=decimal)
+        aa_eq([ene.elec], [-20855.24034], decimal=decimal)
+        aa_eq([ene.elec_14], [13547.4730171], decimal=decimal)
+        aa_eq([ene.bond], [526.415862513], decimal=decimal)
+        aa_eq([ene.angle], [513.222418473], decimal=decimal)
+        aa_eq([ene.dihedral], [2850.87808467], decimal=decimal)

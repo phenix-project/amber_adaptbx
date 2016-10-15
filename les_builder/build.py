@@ -1,9 +1,8 @@
 import os
-import sys
 import parmed as pmd
-from amber_adaptbx.make_addles_input import addles_input
+from amber_adaptbx.les_builder.make_addles_input import addles_input
 from libtbx import easy_run
-from amber_adaptbx.scripts import reduce_to_les
+from amber_adaptbx.les_builder import reduce_to_les
 from amber_adaptbx.utils import build_unitcell
 
 import argparse
