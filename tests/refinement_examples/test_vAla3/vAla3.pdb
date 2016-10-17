@@ -1,0 +1,195 @@
+REMARK Date 2015-03-12 Time 15:54:52 EDT -0400 (1426190092.66 s)
+REMARK PHENIX refinement
+REMARK 
+REMARK ****************** INPUT FILES AND LABELS ******************************
+REMARK Reflections:
+REMARK   file name      : vAla3.mtz
+REMARK   labels         : ['F']
+REMARK R-free flags:
+REMARK   file name      : vAla3.mtz
+REMARK   label          : R-free-flags
+REMARK   test_flag_value: 1
+REMARK Model file name(s): 
+REMARK   /net/casegroup2/u2/pjanowsk/bin/phenix_svn/source/amber_adaptbx/vAla3_shaken_refine_001.pdb
+REMARK 
+REMARK ******************** REFINEMENT SUMMARY: QUICK FACTS *******************
+REMARK Start: r_work = 0.0159 r_free = 0.0159 bonds = 0.077 angles = 1.627
+REMARK Final: r_work = 0.0159 r_free = 0.0158 bonds = 0.077 angles = 1.616
+REMARK ************************************************************************
+REMARK 
+REMARK ****************** REFINEMENT STATISTICS STEP BY STEP ******************
+REMARK leading digit, like 1_, means number of macro-cycle                     
+REMARK 0    : statistics at the very beginning when nothing is done yet        
+REMARK 1_bss: bulk solvent correction and/or (anisotropic) scaling             
+REMARK 1_xyz: refinement of coordinates                                        
+REMARK 1_adp: refinement of ADPs (Atomic Displacement Parameters)              
+REMARK 1_occ: refinement of occupancies                                        
+REMARK ------------------------------------------------------------------------
+REMARK  stage       r-work r-free bonds angles b_min b_max b_ave n_water shift
+REMARK       0    : 0.0167 0.0168 0.077  1.63   0.0   0.7   0.2   0      0.000
+REMARK       1_bss: 0.0159 0.0159 0.077  1.63   0.0   0.7   0.2   0      0.000
+REMARK 1_settarget: 0.0159 0.0159 0.077  1.63   0.0   0.7   0.2   0      0.000
+REMARK    1_weight: 0.0159 0.0159 0.077  1.63   0.0   0.7   0.2   0      0.000
+REMARK       1_nqh: 0.0159 0.0159 0.077  1.63   0.0   0.7   0.2   0      0.000
+REMARK    1_checkH: 0.0159 0.0159 0.077  1.63   0.0   0.7   0.2   0      0.000
+REMARK    1_xyzrec: 0.0123 0.0128 0.008  1.04   0.0   0.7   0.2   0      0.060
+REMARK    1_checkH: 0.0123 0.0128 0.008  1.04   0.0   0.7   0.2   0      0.060
+REMARK   1_regHxyz: 0.0187 0.0187 0.077  1.56   0.0   0.7   0.2   0      0.014
+REMARK       1_adp: 0.0196 0.0195 0.077  1.56   0.1   0.5   0.2   0      0.014
+REMARK   1_regHadp: 0.0195 0.0195 0.077  1.56   0.1   0.5   0.2   0      0.014
+REMARK       2_bss: 0.0192 0.0193 0.077  1.56   0.0   0.4   0.1   0      0.014
+REMARK 2_settarget: 0.0192 0.0193 0.077  1.56   0.0   0.4   0.1   0      0.014
+REMARK    2_weight: 0.0192 0.0193 0.077  1.56   0.0   0.4   0.1   0      0.014
+REMARK       2_nqh: 0.0192 0.0193 0.077  1.56   0.0   0.4   0.1   0      0.014
+REMARK    2_checkH: 0.0192 0.0193 0.077  1.56   0.0   0.4   0.1   0      0.014
+REMARK    2_xyzrec: 0.0055 0.0055 0.009  1.16   0.0   0.4   0.1   0      0.061
+REMARK    2_checkH: 0.0055 0.0055 0.009  1.16   0.0   0.4   0.1   0      0.061
+REMARK   2_regHxyz: 0.0167 0.0165 0.077  1.61   0.0   0.4   0.1   0      0.019
+REMARK       2_adp: 0.0160 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK   2_regHadp: 0.0161 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK       3_bss: 0.0160 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK 3_settarget: 0.0160 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK    3_weight: 0.0160 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK       3_nqh: 0.0160 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK    3_checkH: 0.0160 0.0159 0.077  1.61   0.0   0.6   0.1   0      0.019
+REMARK    3_xyzrec: 0.0076 0.0080 0.011  1.07   0.0   0.6   0.1   0      0.061
+REMARK    3_checkH: 0.0076 0.0080 0.011  1.07   0.0   0.6   0.1   0      0.061
+REMARK   3_regHxyz: 0.0160 0.0159 0.077  1.62   0.0   0.6   0.1   0      0.024
+REMARK       3_adp: 0.0159 0.0158 0.077  1.62   0.0   0.7   0.2   0      0.024
+REMARK   3_regHadp: 0.0159 0.0158 0.077  1.62   0.0   0.7   0.2   0      0.024
+REMARK         end: 0.0159 0.0158 0.077  1.62   0.0   0.7   0.2   0      0.024
+REMARK ------------------------------------------------------------------------
+REMARK MODEL CONTENT.
+REMARK  ELEMENT        ATOM RECORD COUNT   OCCUPANCY SUM
+REMARK        H                       22           22.00
+REMARK        C                       12           12.00
+REMARK        O                        4            4.00
+REMARK        N                        4            4.00
+REMARK    TOTAL                       42           42.00
+REMARK -----------------------------------------------------------------------
+REMARK 
+REMARK IF THIS FILE IS FOR PDB DEPOSITION: REMOVE ALL FROM THIS LINE UP.
+REMARK   3
+REMARK   3 REFINEMENT.
+REMARK   3   PROGRAM     : PHENIX (phenix.refine)
+REMARK   3   AUTHORS     : Adams,Afonine,Burnley,Chen,Davis,Echols,Gildea,
+REMARK   3               : Gopal,Gros,Grosse-Kunstleve,Headd,Hung,Immormino,
+REMARK   3               : Ioerger,McCoy,McKee,Moriarty,Pai,Read,Richardson,
+REMARK   3               : Richardson,Romo,Sacchettini,Sauter,Smith,Storoni,
+REMARK   3               : Terwilliger,Zwart
+REMARK   3
+REMARK   3  REFINEMENT TARGET : ML
+REMARK   3  
+REMARK   3  DATA USED IN REFINEMENT.
+REMARK   3   RESOLUTION RANGE HIGH (ANGSTROMS) : 1.500   
+REMARK   3   RESOLUTION RANGE LOW  (ANGSTROMS) : 30.000  
+REMARK   3   MIN(FOBS/SIGMA_FOBS)              :   None
+REMARK   3   COMPLETENESS FOR RANGE        (%) : 99.96 
+REMARK   3   NUMBER OF REFLECTIONS             : 16694     
+REMARK   3   NUMBER OF REFLECTIONS (NON-ANOMALOUS) : 16694     
+REMARK   3  
+REMARK   3  FIT TO DATA USED IN REFINEMENT.
+REMARK   3   R VALUE     (WORKING + TEST SET) : 0.0159
+REMARK   3   R VALUE            (WORKING SET) : 0.0159
+REMARK   3   FREE R VALUE                     : 0.0158
+REMARK   3   FREE R VALUE TEST SET SIZE   (%) : 10.00 
+REMARK   3   FREE R VALUE TEST SET COUNT      : 1670      
+REMARK   3  
+REMARK   3  FIT TO DATA USED IN REFINEMENT (IN BINS).
+REMARK   3   BIN  RESOLUTION RANGE  COMPL.    NWORK NFREE   RWORK  RFREE  CCWORK CCFREE
+REMARK   3     1 30.0060 -  3.4326    1.00     1260   140  0.0067 0.0070   1.000  1.000
+REMARK   3     2  3.4326 -  2.7251    1.00     1248   139  0.0139 0.0128   0.999  0.999
+REMARK   3     3  2.7251 -  2.3808    1.00     1265   140  0.0136 0.0127   1.000  1.000
+REMARK   3     4  2.3808 -  2.1632    1.00     1210   135  0.0144 0.0169   1.000  0.999
+REMARK   3     5  2.1632 -  2.0082    1.00     1293   144  0.0172 0.0197   0.999  0.999
+REMARK   3     6  2.0082 -  1.8898    1.00     1297   144  0.0202 0.0196   0.999  0.999
+REMARK   3     7  1.8898 -  1.7952    1.00     1223   136  0.0202 0.0178   0.999  0.999
+REMARK   3     8  1.7952 -  1.7170    1.00     1254   139  0.0198 0.0188   0.999  0.999
+REMARK   3     9  1.7170 -  1.6509    1.00     1320   147  0.0203 0.0200   0.999  0.999
+REMARK   3    10  1.6509 -  1.5940    1.00     1237   137  0.0211 0.0203   0.999  0.999
+REMARK   3    11  1.5940 -  1.5441    1.00     1270   141  0.0211 0.0215   0.999  0.999
+REMARK   3    12  1.5441 -  1.5000    1.00     1147   128  0.0219 0.0222   0.999  0.998
+REMARK   3  
+REMARK   3  BULK SOLVENT MODELLING.
+REMARK   3   METHOD USED        : FLAT BULK SOLVENT MODEL
+REMARK   3   SOLVENT RADIUS     : 1.11    
+REMARK   3   SHRINKAGE RADIUS   : 0.90    
+REMARK   3   GRID STEP FACTOR   : 4.00    
+REMARK   3  
+REMARK   3  ERROR ESTIMATES.
+REMARK   3   COORDINATE ERROR (MAXIMUM-LIKELIHOOD BASED)     : 0.02    
+REMARK   3   PHASE ERROR (DEGREES, MAXIMUM-LIKELIHOOD BASED) : 0.30    
+REMARK   3  
+REMARK   3  STRUCTURE FACTORS CALCULATION ALGORITHM : FFT
+REMARK   3  
+REMARK   3  RESTRAINTS LIBRARY
+REMARK   3    GEOSTD + MON.LIB.
+REMARK   3  
+REMARK   3  MOLPROBITY STATISTICS.
+REMARK   3   ALL-ATOM CLASHSCORE : 0.00
+REMARK   3   RAMACHANDRAN PLOT:
+REMARK   3     OUTLIERS : 0.00  %
+REMARK   3     ALLOWED  : 100.00 %
+REMARK   3     FAVORED  : 0.00  %
+REMARK   3   ROTAMER OUTLIERS : 0.00 %
+REMARK   3   CBETA DEVIATIONS : 0
+REMARK   3  
+REMARK   3  ATOMIC DISPLACEMENT PARAMETERS.
+REMARK   3   WILSON B : 2.91
+REMARK   3   RMS(B_ISO_OR_EQUIVALENT_BONDED) : 0.19
+REMARK   3   ATOMS          NUMBER OF ATOMS
+REMARK   3                    ISO.  ANISO. 
+REMARK   3    ALL         :     42       0
+REMARK   3    ALL (NO H)  :     20       0
+REMARK   3    SOLVENT     :      0       0
+REMARK   3    NON-SOLVENT :     20       0
+REMARK   3    HYDROGENS   :     22       0
+REMARK   3
+CRYST1   30.000   30.000   30.000  90.00  90.00  90.00 P 1
+SCALE1      0.033333  0.000000  0.000000        0.00000
+SCALE2      0.000000  0.033333  0.000000        0.00000
+SCALE3      0.000000  0.000000  0.033333        0.00000
+ATOM      1 HH31 ACE     1      20.582   7.038  -4.547  1.00  0.00           H
+ATOM      2  CH3 ACE     1      21.182   6.412  -3.887  1.00  0.00           C
+ATOM      3 HH32 ACE     1      21.571   5.562  -4.448  1.00  0.00           H
+ATOM      4 HH33 ACE     1      20.563   6.052  -3.065  1.00  0.00           H
+ATOM      5  C   ACE     1      22.332   7.220  -3.335  1.00  0.04           C
+ATOM      6  O   ACE     1      23.482   6.873  -3.549  1.00  0.01           O
+ATOM      7  N   ALA     2      22.011   8.315  -2.649  1.00  0.19           N
+ATOM      8  H   ALA     2      21.202   8.499  -2.422  1.00  0.23           H
+ATOM      9  CA  ALA     2      22.990   9.047  -1.850  1.00  0.12           C
+ATOM     10  HA  ALA     2      23.717   9.343  -2.420  1.00  0.14           H
+ATOM     11  CB  ALA     2      22.301  10.284  -1.254  1.00  0.70           C
+ATOM     12  HB1 ALA     2      22.944  10.777  -0.722  1.00  0.83           H
+ATOM     13  HB2 ALA     2      21.973  10.841  -1.978  1.00  0.83           H
+ATOM     14  HB3 ALA     2      21.561   9.995  -0.697  1.00  0.83           H
+ATOM     15  C   ALA     2      23.578   8.179  -0.716  1.00  0.08           C
+ATOM     16  O   ALA     2      22.903   7.307  -0.178  1.00  0.00           O
+ATOM     17  N   ALA     3      24.821   8.471  -0.316  1.00  0.28           N
+ATOM     18  H   ALA     3      25.334   9.016  -0.740  1.00  0.33           H
+ATOM     19  CA  ALA     3      25.458   7.908   0.879  1.00  0.23           C
+ATOM     20  HA  ALA     3      25.135   7.000   0.986  1.00  0.27           H
+ATOM     21  CB  ALA     3      26.975   7.812   0.647  1.00  0.54           C
+ATOM     22  HB1 ALA     3      27.392   7.439   1.440  1.00  0.65           H
+ATOM     23  HB2 ALA     3      27.142   7.237  -0.116  1.00  0.65           H
+ATOM     24  HB3 ALA     3      27.325   8.700   0.476  1.00  0.65           H
+ATOM     25  C   ALA     3      25.041   8.679   2.150  1.00  0.04           C
+ATOM     26  O   ALA     3      24.105   8.295   2.840  1.00  0.00           O
+ATOM     27  N   ALA     4      25.738   9.772   2.461  1.00  0.14           N
+ATOM     28  H   ALA     4      26.502   9.968   2.119  1.00  0.17           H
+ATOM     29  CA  ALA     4      25.259  10.756   3.430  1.00  0.29           C
+ATOM     30  HA  ALA     4      24.866  10.294   4.187  1.00  0.35           H
+ATOM     31  CB  ALA     4      26.462  11.568   3.935  1.00  0.53           C
+ATOM     32  HB1 ALA     4      26.152  12.224   4.579  1.00  0.64           H
+ATOM     33  HB2 ALA     4      27.095  10.965   4.355  1.00  0.64           H
+ATOM     34  HB3 ALA     4      26.880  12.015   3.182  1.00  0.64           H
+ATOM     35  C   ALA     4      24.177  11.666   2.807  1.00  0.04           C
+ATOM     36  O   ALA     4      24.144  11.854   1.593  1.00  0.00           O
+ATOM     37  N   NME     5      23.335  12.267   3.652  1.00  0.02           N
+ATOM     38  H   NME     5      23.424  12.046   4.634  1.00  0.03           H
+ATOM     39  CH3 NME     5      22.261  13.164   3.234  1.00  0.00           C
+ATOM     40 HH31 NME     5      21.556  12.620   2.605  1.00  0.00           H
+ATOM     41 HH32 NME     5      21.743  13.546   4.114  1.00  0.00           H
+ATOM     42 HH33 NME     5      22.682  13.997   2.671  1.00  0.00           H
+TER
+END
