@@ -75,7 +75,7 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
       commands.append(line_template.format(numc=n_conformers,
                                            resid=resid+chain_id*n_asu_residues))
   
-  commands.append("*EOD")
+  commands.append("*EOD\n")
   return commands
 
 def main(pdb_fn='2igd.pdb'):
