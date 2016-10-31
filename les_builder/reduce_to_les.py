@@ -33,9 +33,7 @@ def main():
   base_name = os.path.basename(args.prmtop).split('.')[0]
   rst7_fn = base_name + '_fix.rst7'
 
-  parm = update_rst7_and_pdb_coordinates_LES(template_parm=uc_parm,
-                          target_parm=parm,
-                          rst7_fn=rst7_fn)
+  parm = update_rst7_and_pdb_coordinates_LES(template_parm=uc_parm, target_parm=parm)
 
   # update symmetry and space group info
   asu_parm = pmd.load_file(args.asu_pdb)
@@ -62,44 +60,44 @@ def get_atom_dict_for_uc(uc_parm):
   ----------
   uc_parm : parmed's Structure, read from unitcell pdb file
       the pdb file must have alternatve conformations
+
+  Returns
+  -------
+  Dict[resid, Dict[atom_name, List[parmed.Atom]]
+      For each residue, create a list of parmed.Atom (including alt atom) for each
+      atom name
   """
   atom_dict = defaultdict(list)
-  
-  resids = range(len(uc_parm.residues))
-
-  for resid in set(resids):
+  for resid, residue in enumerate(uc_parm.residues):
     # include atom in conformation A
     atom_dict[resid] = defaultdict(list)
-    for atom in uc_parm.residues[resid].atoms:
+    for atom in residue.atoms:
       atom_dict[resid][atom.name].append(atom)
-
       if atom.other_locations:
         for alt, alt_atom in atom.other_locations.items():
           atom_dict[resid][atom.name].append(alt_atom)
-
   return atom_dict
 
-def get_atom_dict_for_amber_parm(parm, resids):
+def get_atom_dict_for_amber_parm(parm):
   """
 
   Parameters
   ----------
   parm : parmed's Structure, read from AMBER's prmtop
-  resids: list of residues having alternate atoms
-      keys can be computed from get_atom_dict_for_uc method
+
+  Returns
+  -------
+  Dict[resid, Dict[atom_name, List[parmed.Atom]]
   """
   atom_dict = defaultdict(list)
 
-  for resid in resids:
+  for resid, residue in enumerate(parm.residues):
     atom_dict[resid] = defaultdict(list)
-    residue = parm.residues[resid]
-
     for atom in residue.atoms:
       atom_dict[resid][atom.name].append(atom)
-
   return atom_dict
 
-def update_rst7_and_pdb_coordinates_LES(template_parm, target_parm, rst7_fn):
+def update_rst7_and_pdb_coordinates_LES(template_parm, target_parm):
   '''
 
   Parameters
@@ -110,10 +108,10 @@ def update_rst7_and_pdb_coordinates_LES(template_parm, target_parm, rst7_fn):
   '''
   # dict of residue and alt atoms
   atom_dict_template = get_atom_dict_for_uc(template_parm)
-  alt_resids = atom_dict_template.keys()
-  atom_dict_amber_parm = get_atom_dict_for_amber_parm(target_parm, alt_resids)
+  all_resids = atom_dict_template.keys()
+  atom_dict_amber_parm = get_atom_dict_for_amber_parm(target_parm)
 
-  for resid in alt_resids:
+  for resid in all_resids:
     for atom_name in atom_dict_template[resid].keys():
       template_atoms = atom_dict_template[resid][atom_name]
       target_atoms = atom_dict_amber_parm[resid][atom_name]
@@ -124,8 +122,7 @@ def update_rst7_and_pdb_coordinates_LES(template_parm, target_parm, rst7_fn):
         atom.xz = template_atom.xz
         atom.bfactor = template_atom.bfactor
         atom.occupancy = template_atom.occupancy
-
-  # TODO: already updated for ParmEd, will remove
+  # TODO: already updated for ParmEd, will remove?
   label_alternates(target_parm)
   return target_parm
 
@@ -147,9 +144,7 @@ def label_alternates(parm):
   >>> parm = label_alternates(parm)
   >>> parm.write_pdb("corrected_label.pdb", altlocs='all', standard_resnames=True)
   """
-  resids = range(len(parm.residues))
-  atom_with_residue_dict = get_atom_dict_for_amber_parm(parm, resids=resids)
-
+  atom_with_residue_dict = get_atom_dict_for_amber_parm(parm)
   possible_labels = list('ABCDEF')
 
   for _, adict in atom_with_residue_dict.items():
@@ -158,7 +153,6 @@ def label_alternates(parm):
         # if there is alternate atom
         for atom, label in zip(atom_list, possible_labels):
           atom.altloc = label
-
   return parm
 
 if __name__ == '__main__':

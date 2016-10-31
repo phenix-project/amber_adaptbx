@@ -182,8 +182,7 @@ class LESBuilder(object):
     parm.box = self.box
     self.rst7_fn_fix = '4amber_' + self.root_name + '.LES.rst7'
     reduce_to_les.update_rst7_and_pdb_coordinates_LES(template_parm=uc_parm,
-                                                      target_parm=parm,
-                                                      rst7_fn=self.rst7_fn_fix)
+                                                      target_parm=parm)
     parm.write_pdb('4amber_{}.pdb'.format(self.root_name), standard_resnames=True)
     parm.save(self.rst7_fn_fix, overwrite=True)
 

@@ -54,6 +54,7 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   file rcbd name=({uc_rst7}) read
   file wprm name=({uc_les_parm}) wovr
   file wcrd name=({uc_les_rst7}) wovr
+  a1st
   action
   omas
   """.format(uc_parm=uc_parm,
