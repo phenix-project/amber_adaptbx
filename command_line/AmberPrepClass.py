@@ -544,8 +544,11 @@ class amber_prep_run_class:
     return 0
 
   def build_unitcell_prmtop_and_rst7_files(self, redq=False):
-    # add SMTRY/CRYST1 to 4tleap.pdb -> 4UnitCell.pdb
-    # should we rename this method? build_unitcell?
+
+    #-----------------------------------------------------------------
+    # Step 1: add SMTRY/CRYST1 to 4tleap.pdb -> 4UnitCell.pdb
+    #-----------------------------------------------------------------
+
     assert self.base, 'must provide base name'
     uc_pdb_file = "%s_4UnitCell.pdb" % self.base
     with open(uc_pdb_file, "wb") as fout:
@@ -559,16 +562,30 @@ class amber_prep_run_class:
         for line in fin:
           if not "CRYST1" in line:
             fout.write(line)
-    tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
 
-    # temporary file: will be output from UnitCell, input to pdb4amber:
+    #-----------------------------------------------------------------
+    # Step 2: invoke the phenix build_unitcell() method to convert
+    #         4UnitCell.pdb to 4tleap_uc1.pdb
+    #-----------------------------------------------------------------
+
     tleap_pdb_file1 = "%s_4tleap_uc1.pdb" % self.base
     build_unitcell(uc_pdb_file, tleap_pdb_file1)
 
-    # run back through pdb4amber to get new CONECT records for SS bonds:
+    #-----------------------------------------------------------------
+    # Step 3: run 4leap_uc1.pdb back through pdb4amber to get new 
+    #         CONECT records for SS bonds.  Output will be
+    #         4tleap_uc.pdb
+    #-----------------------------------------------------------------
+
+    tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
     ns_names, gaplist, sslist = pdb4amber.run(
         tleap_pdb_file, tleap_pdb_file1, arg_elbow=True,
     )
+
+    #-----------------------------------------------------------------
+    # Step 4:  feed 4tleap_uc.pdb to tleap
+    #-----------------------------------------------------------------
+
     self.run_tleap(tleap_pdb_file,
                    output_base='uc',
                    ns_names=ns_names,
@@ -579,6 +596,11 @@ class amber_prep_run_class:
                    redq=redq,
                    )
     self.update_rst7_box('uc')
+
+    #-----------------------------------------------------------------
+    #  Step 5:  rename files to "4amber_xxxx.{prmtop,rst7}
+    #-----------------------------------------------------------------
+
     os.rename('%s_uc.rst7' % self.base, '4amber_%s.rst7' % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
@@ -618,7 +640,7 @@ class amber_prep_run_class:
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
        imin   = 1, maxcyc = 50, ncyc   = 200, ntmin  = 1, ntxo = 1,
-       ntpr=50, ntr=1, restraint_wt=2.0, restraintmask='!@H=',
+       ntpr=10, ntr=1, restraint_wt=2.0, restraintmask='!@H=',
       /
       """
               }
