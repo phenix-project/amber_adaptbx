@@ -4,7 +4,6 @@ import pytest
 import libtbx.load_env
 from amber_adaptbx.tests.utils import tempfolder, get_fn
 
-@pytest.mark.medium
 @pytest.mark.parametrize('use_amber', [True])
 def test_non_LES_refinement_vAla3(use_amber):
   command_refine = [

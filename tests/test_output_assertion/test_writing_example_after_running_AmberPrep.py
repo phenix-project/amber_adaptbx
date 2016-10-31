@@ -55,7 +55,6 @@ Done.  Three new files have been made:
     assert expected_line in output_build
 
 @pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
-@pytest.mark.medium
 def test_writing_example_after_running_AmberPrep_LES_with_minimization(minimization_type):
   pdb_file = get_fn('2igd/2igd.pdb')
   LES = True
@@ -102,7 +101,6 @@ Done.  Three new files have been made:
     assert expected_line_dict[minimization_type] in output_build
 
 @pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
-@pytest.mark.medium
 def test_writing_example_after_running_AmberPrep_not_LES_with_minimization(minimization_type):
   pdb_file = get_fn('2igd/2igd.pdb')
 

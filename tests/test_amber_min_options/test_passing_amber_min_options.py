@@ -8,7 +8,6 @@ from amber_adaptbx.tests.utils import (get_fn, tempfolder, assert_file_has_line,
 )
 from amber_adaptbx.tests.config import PDB_COLLECTION
 
-@pytest.mark.medium
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
 @pytest.mark.parametrize('minimization_type', ['amber_h', 'amber_all'])
 @pytest.mark.parametrize('minimization_options', [
@@ -63,7 +62,6 @@ def test_default_min(pdb_file, minimization_type):
 @pytest.mark.parametrize('minimization_options', [
     'max_iterations=2',
 ])
-@pytest.mark.medium
 def test_passing_minimization_options_phenix_all(pdb_file, minimization_type, minimization_options):
   command_min = [
           'phenix.AmberPrep',
@@ -82,7 +80,6 @@ def test_passing_minimization_options_phenix_all(pdb_file, minimization_type, mi
 @pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h', 'phenix_all'])
 @pytest.mark.parametrize('LES', [False])
-@pytest.mark.medium
 def test_file_exists_for_minized_pdb_4phenix_with_LES_False(pdb_file, minimization_type, LES):
   if minimization_type in ['amber_h', 'amber_all']:
     minimization_options = "maxcyc=1"
@@ -105,7 +102,6 @@ def test_file_exists_for_minized_pdb_4phenix_with_LES_False(pdb_file, minimizati
 @pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h', 'phenix_all'])
 @pytest.mark.parametrize('LES', [True])
-@pytest.mark.medium
 def test_file_exists_for_minized_pdb_4phenix_with_LES_True(pdb_file, minimization_type, LES):
   if minimization_type in ['amber_h', 'amber_all']:
     minimization_options = "maxcyc=1"
@@ -128,7 +124,6 @@ def test_file_exists_for_minized_pdb_4phenix_with_LES_True(pdb_file, minimizatio
 @pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
 @pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h'])
 @pytest.mark.parametrize('LES', [True, False])
-@pytest.mark.medium
 def test_file_exists_for_minized_rst7_4amber(pdb_file, minimization_type, LES):
   if minimization_type in ['amber_h', 'amber_all']:
     minimization_options = "maxcyc=2"

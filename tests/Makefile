@@ -1,6 +1,9 @@
 # run some most common tests.
 # Please see the doc in run_tests.py too
 
+test.medium:
+	./run_tests.py -v -m 'not slow'
+
 test.all: test.long
 
 test.all.parallel:
@@ -21,33 +24,6 @@ test.all.coverage:
 # tests that are slow (e.g energy minimization with maxcyc=1000)
 test.slow:
 	./run_tests.py -vs -m slow
-
-test.fast.verbose:
-	./run_tests.py -vs -m "not slow and not medium"
-
-test.fast:
-	# about 2-3 minutes
-	./run_tests.py -v -m "not slow and not medium"
-
-test.fast.parallel:
-	# require pytest-xdist
-	./run_tests.py -v -m "not slow and not medium" -n 4
-
-test.short:
-	# about 2-3 minutes
-	./run_tests.py -v -m "not slow and not medium"
-
-test.medium:
-	# about 6 - 10 minutes
-	./run_tests.py -v -m "medium"
-
-test.medium.parallel:
-	# about 6 - 10 minutes
-	# need xdist (pip install xdist)
-	./run_tests.py -v -m "medium" -n 4
-
-test.medium.verbose:
-	./run_tests.py -vs -m "medium"
 
 test.collect:
 	# only collect test names

@@ -1,21 +1,32 @@
-1. If you do not want to read lots of stuff, just try
+1. How to run?
 
-- run all test (30-60 minutes)
+Note: add "-s" if you want to see more verbose
+
+- Run test from anywhere
+    phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/ -m 'medium' -v
+
+- Run a given test
+    phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/ -k name_of_the_method -v
+    e.g: phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/ -k test_build_from_pdb_that_does_not_have_remark_290 -v
+
+- Run test for a given file
+    phenix.python -m pytest /path/to/that/file -v
+    e.g: phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/les/test_builder.py -v
+
+2. If you do not want to read lots of stuff, just try
+
+- run most of the tests (recommended):
 
     make
 
-- run shorter test (5-10 minutes): highly recommend to run this first
+- run full ong tests (hours):
 
-    make test.medium
-
-- run much shorter test (2-5 minutes)
-
-    make test.short
+    make test.all
 
 - To debug, you can run simple test
 
     phenix.AmberPrep 2igd.pdb LES=True clean=False
 
-2. Further info
+3. Further info
 - Check Makefile
 - Check __doc__ in ./run_tests.py

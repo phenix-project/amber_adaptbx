@@ -10,7 +10,6 @@ from amber_adaptbx.tests.utils import (tempfolder,
 )
 from amber_adaptbx.tests.config import PDB_COLLECTION
 
-@pytest.mark.medium
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
 @pytest.mark.parametrize('LES', [True, False])
 @pytest.mark.parametrize('use_amber', [True, False])

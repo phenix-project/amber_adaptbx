@@ -26,11 +26,4 @@ def test_build_from_pdb_that_does_not_have_remark_290(pdb_file):
         box = pmd.load_file(rst7_file).box
         with sander.setup(prmtop_file, rst7_file, box=box, mm_options=sander.pme_input()):
             ene, _ = sander.energy_forces()
-        aa_eq([ene.tot], [-1664.0907], decimal=decimal)
-        aa_eq([ene.vdw], [745.7346], decimal=decimal)
-        aa_eq([ene.vdw_14], [1007.42564139], decimal=decimal)
-        aa_eq([ene.elec], [-20855.24034], decimal=decimal)
-        aa_eq([ene.elec_14], [13547.4730171], decimal=decimal)
-        aa_eq([ene.bond], [526.415862513], decimal=decimal)
-        aa_eq([ene.angle], [513.222418473], decimal=decimal)
-        aa_eq([ene.dihedral], [2850.87808467], decimal=decimal)
+        aa_eq([ene.tot], [-1645.6199], decimal=decimal)
