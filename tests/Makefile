@@ -43,7 +43,7 @@ test.les.refinement:
 	./run_tests.py -vs les/test_refinement.py
 
 test.non_les.refinement:
-	./run_tests.py -vs normal/test_refinement.py
+	./run_tests.py -vs non_les/test_refinement.py
 
 test.min:
 	./run_tests.py -vs -k minimization
@@ -55,13 +55,13 @@ test.amber_phenix_converter:
 	./run_tests.py -vs ./les/test_amber_phenix_reorder.py
 
 test.non_les:
-	./run_tests.py -vs ./normal/
+	./run_tests.py -vs ./non_les/
 
 test.non_les_fast:
-	./run_tests.py -vs ./normal/ -m "not slow"
+	./run_tests.py -vs ./non_les/ -m "not slow"
 
 test.non_les_refine_phenix:
-	./run_tests.py -vs ./normal/ -m "phenix"
+	./run_tests.py -vs ./non_les/ -m "phenix"
 
 test.vAla3:
 	./run_tests.py -v -k 'vAla3'
