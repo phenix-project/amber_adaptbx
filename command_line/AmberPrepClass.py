@@ -447,7 +447,7 @@ class amber_prep_run_class:
 
   def _pdb_hierarchy_and_rename_wat(self, filename):
     pdb_inp = iotbx.pdb.input(file_name=filename)
-    pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=False)
+    pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=True)
     # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
     for atom_group in pdb_hierarchy.atom_groups():
       if atom_group.resname in ["WAT"]:
@@ -469,8 +469,34 @@ class amber_prep_run_class:
         for atom_post in resi_post.atoms():
           for chain_pre in hierachy1.chains():
             for resi_pre in chain_pre.conformers()[0].residues():
+
+              # TODO: put this into a function?:
+              # convert Amber residue names to Brookhaven standards:
+              #  (only needed here for the "pre" hierarchy)
+              pre_resname = resi_pre.resname.strip()
+              if pre_resname == "CYX": pre_resname = "CYS"
+              if pre_resname == "HID": pre_resname = "HIS"
+              if pre_resname == "HIE": pre_resname = "HIS"
+              if pre_resname == "HIP": pre_resname = "HIS"
+              if pre_resname == "C3":  pre_resname = "C"
+              if pre_resname == "U3":  pre_resname = "U"
+              if pre_resname == "G3":  pre_resname = "G"
+              if pre_resname == "A3":  pre_resname = "A"
+              if pre_resname == "C5":  pre_resname = "C"
+              if pre_resname == "U5":  pre_resname = "U"
+              if pre_resname == "G5":  pre_resname = "G"
+              if pre_resname == "A5":  pre_resname = "A"
+              if pre_resname == "DC3":  pre_resname = "DC"
+              if pre_resname == "DT3":  pre_resname = "DT"
+              if pre_resname == "DG3":  pre_resname = "DG"
+              if pre_resname == "DA3":  pre_resname = "DA"
+              if pre_resname == "DC5":  pre_resname = "DC"
+              if pre_resname == "DT5":  pre_resname = "DT"
+              if pre_resname == "DG5":  pre_resname = "DG"
+              if pre_resname == "DA5":  pre_resname = "DA"
+
               if (resi_pre.resseq == resi_post.resseq and
-                      resi_pre.resname.strip() == resi_post.resname.strip()
+                      pre_resname == resi_post.resname.strip()
                   ):
                 for atom_pre in resi_pre.atoms():
                   if atom_pre.name == atom_post.name:
@@ -485,8 +511,13 @@ class amber_prep_run_class:
                                        atom_pre.xyz[1],
                                        atom_pre.xyz[2])
 
-  # make pdb
-  def run_ambpdb(self):
+  #--------------------------------------------------------------------------
+  # make an Amber-compatible asu-only pdb file, and transfer occupancies,
+  #    b-factors and chain-ids to it
+  # (Only called once: takes xxxx_asu.{prmtop,rst7} as inputs, writes
+  #    xxxx_new2.pdb.  Also creates intermediate file xxxx_new.pdb
+  #--------------------------------------------------------------------------
+  def run_ambpdb_and_transfer(self):
     assert self.base
     cmd = 'ambpdb -bres -p %s_asu.prmtop < %s_asu.rst7 > %s_new.pdb' % tuple(
         [self.base] * 3
@@ -546,7 +577,7 @@ class amber_prep_run_class:
   def build_unitcell_prmtop_and_rst7_files(self, redq=False):
 
     #-----------------------------------------------------------------
-    # Step 1: add SMTRY/CRYST1 to 4tleap.pdb -> 4UnitCell.pdb
+    # Step 1: add SMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
     #-----------------------------------------------------------------
 
     assert self.base, 'must provide base name'
@@ -556,7 +587,7 @@ class amber_prep_run_class:
         lines = fin.readlines()
         cryst1card = [line for line in lines if "CRYST1" in line]
         if len(cryst1card) < 1:
-          raise Sorry("CRYST1 record required")
+          raise Sorry("CRYST1 record required in input pdb file")
         fout.write(cryst1card[0])
       with open("4phenix_%s.pdb" % self.base) as fin:
         for line in fin:
@@ -565,16 +596,16 @@ class amber_prep_run_class:
 
     #-----------------------------------------------------------------
     # Step 2: invoke the phenix build_unitcell() method to convert
-    #         4UnitCell.pdb to 4tleap_uc1.pdb
+    #         xxxx_4UnitCell.pdb to xxxx_4tleap_uc1.pdb
     #-----------------------------------------------------------------
 
     tleap_pdb_file1 = "%s_4tleap_uc1.pdb" % self.base
     build_unitcell(uc_pdb_file, tleap_pdb_file1)
 
     #-----------------------------------------------------------------
-    # Step 3: run 4leap_uc1.pdb back through pdb4amber to get new 
-    #         CONECT records for SS bonds.  Output will be
-    #         4tleap_uc.pdb
+    # Step 3: run xxxx_4leap_uc1.pdb back through pdb4amber to get new 
+    #         sslist that describes SS bonds.  Output will be
+    #         xxxx_4tleap_uc.pdb
     #-----------------------------------------------------------------
 
     tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
@@ -583,7 +614,7 @@ class amber_prep_run_class:
     )
 
     #-----------------------------------------------------------------
-    # Step 4:  feed 4tleap_uc.pdb to tleap
+    # Step 4:  feed xxxx_4tleap_uc.pdb to tleap
     #-----------------------------------------------------------------
 
     self.run_tleap(tleap_pdb_file,
@@ -704,6 +735,7 @@ class amber_prep_run_class:
 
       if self.is_LES:
         # TODO: remove this and use Nigel's version.
+        #    dac: what do you mean by "Nigel's version"???
         # Why using this right now? Seems too me that the output pdb from Nigel's code
         # does is not a reordered version of minimized rst7 file. Or may be I made a bug.
         # we should avoid writing too many files to disk.
@@ -727,7 +759,7 @@ class amber_prep_run_class:
 
         type_ = '.min.%s' % minimization_type
         self.finalize_pdb(pdb_filename='%s_new2.pdb' % self.base,
-                          sort_atoms=False, type=type_)
+                          sort_atoms=True, type=type_)
     elif minimization_type == "phenix_all":
       if self.is_LES:
         cmd = 'phenix.geometry_minimization 4phenix_%s.LES.pdb amber.use_amber=True \
@@ -1032,7 +1064,7 @@ def run(rargs):
   #   4amber_base.prmtop file.
   #
   # N.B.: this means that the base_asu.prmtop file should never be used!
-  #   we might want to make user that this file is always removed.
+  #   we might want to make sure that this file is always removed.
 
   dummy_gaplist = []
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
@@ -1045,9 +1077,9 @@ def run(rargs):
                               redq=actions.redq,
                               )
   amber_prep_runner.update_rst7_box("asu")
-  amber_prep_runner.run_ambpdb()   # (note: only called once)
+  amber_prep_runner.run_ambpdb_and_transfer()   # (note: only called once)
   amber_prep_runner.finalize_pdb(
-      pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=False)
+      pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=True)
 
   print "\n============================================================"
   print "Preparing unit cell files: 4amber_%s.prmtop and 4amber_%s.rst7" % (base, base)
