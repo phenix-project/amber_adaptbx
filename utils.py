@@ -127,7 +127,10 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
     b = flex.double(b)
-    delta = angle.type.theteq - acos(a.dot(b)/(a.norm()*b.norm()))*180/pi
+    acosarg = a.dot(b)/(a.norm()*b.norm())
+    if acosarg >= 1.0: acosarg = 0.9999999
+    if acosarg <= -1.0: acosarg = -0.9999999
+    delta = angle.type.theteq - acos(acosarg)*180/pi
     assert abs(delta)<360
     angle_deltas.append(delta)
   angle_deltas= flex.double(angle_deltas)
