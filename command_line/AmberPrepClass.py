@@ -53,6 +53,10 @@ master_phil_string = """
         .type = bool
         .caption = Run reduce on the input pdb file to place hydrogens
         .help = Run reduce on the input pdb file to place hydrogens
+      addles_input = ''
+        .type = str
+        .caption = User specify addles input filename. Optional.
+        .help = User specify addles input filename. Optional.
     }
     output
     {
@@ -1091,7 +1095,8 @@ def run(rargs):
     les_builder = LESBuilder(
         pdb_file_name,
         prmtop=amber_prep_runner.non_les_prmtop_file_name,
-        rst7_file=amber_prep_runner.non_les_rst7_file_name)
+        rst7_file=amber_prep_runner.non_les_rst7_file_name,
+        addles_input_file=actions.addles_input)
     les_builder.run()
 
   if actions.minimise == "off":
