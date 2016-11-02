@@ -127,13 +127,13 @@ def run_sander_minimization(prmtop_file, rst7_file, maxcyc=2):
     return fh.read()
 
 if __name__ == '__main__':
-  assert(get_minimized_pdb_filename('2igd.pdb', minimization_type='amber_h') ==
-         '4phenix_2igd.min.amber_h.pdb')
-  assert(get_minimized_pdb_filename('2igd.pdb', LES=True, minimization_type='amber_h') ==
-         '4phenix_2igd.LES.min.amber_h.pdb')
-  assert(get_minimized_rst7_filename('2igd.pdb', minimization_type='amber_h') ==
-         '4amber_2igd.min.amber_h.rst7')
-  assert(get_minimized_rst7_filename('2igd.pdb', LES=True, minimization_type='amber_h') ==
+  assert (get_minimized_pdb_filename('2igd.pdb', minimization_type='amber_h') ==
+          '4phenix_2igd.min.amber_h.pdb')
+  assert (get_minimized_pdb_filename('2igd.pdb', LES=True, minimization_type='amber_h') ==
+          '4phenix_2igd.LES.min.amber_h.pdb')
+  assert (get_minimized_rst7_filename('2igd.pdb', minimization_type='amber_h') ==
+          '4amber_2igd.min.amber_h.rst7')
+  assert (get_minimized_rst7_filename('2igd.pdb', LES=True, minimization_type='amber_h') ==
          '4amber_2igd.LES.min.amber_h.rst7')
   assert (get_prmtop_and_rst7_and_pdb_filenames_from_pdb('fake_dir/my.pdb') ==
           ('4amber_my.prmtop', '4amber_my.rst7', '4phenix_my.pdb'))

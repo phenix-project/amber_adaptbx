@@ -1,8 +1,12 @@
 # run some most common tests.
 # Please see the doc in run_tests.py too
-
+#
 test.medium:
 	./run_tests.py -v -m 'not slow'
+
+test.medium.parallel:
+	# require pytest-xdist
+	./run_tests.py -v -m 'not slow' -n 4
 
 test.all: test.long
 

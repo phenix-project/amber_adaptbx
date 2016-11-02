@@ -1,0 +1,2 @@
+- addles.orig.in: original output from phenix.AmberPrep 2igd.pdb LES=True clean=off
+- addles.in: exclude some residues so the output prmtop will be different (to make sure we do use addles.in from command line)

@@ -43,7 +43,7 @@ def test_run_sander_LES_minimization_from_LES_build(pdb_file):
     get_fn('2g3i/2g3i.pdb'),
     get_fn('1gdu/1gdu.pdb')
 ])
-def test_minus_0_coordinates(pdb_file):
+def test_minus_0_coordinates_use_phenix_all_for_minimise(pdb_file):
   """ ensure there is no error if having -0.0 coordinates """
   command = "phenix.AmberPrep {} LES=True minimise=phenix_all minimization_options='max_iterations=2'".format(pdb_file)
   with tempfolder():

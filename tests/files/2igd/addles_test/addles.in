@@ -1,0 +1,32 @@
+file rprm name=(4amber_2igd.prmtop) read
+file rcbd name=(4amber_2igd.rst7) read
+file wprm name=(4amber_2igd.LES.prmtop) wovr
+file wcrd name=(4amber_2igd.LES.rst7) wovr
+a1st
+action
+omas
+~ protein chain: 0
+spac numc=2 pick #sid 20 20 done
+spac numc=2 pick #sid 26 26 done
+spac numc=2 pick #sid 32 32 done
+spac numc=2 pick #sid 40 40 done
+spac numc=2 pick #sid 51 51 done
+~ protein chain: 1
+spac numc=2 pick #sid 187 187 done
+spac numc=2 pick #sid 193 193 done
+spac numc=2 pick #sid 199 199 done
+spac numc=2 pick #sid 207 207 done
+spac numc=2 pick #sid 218 218 done
+~ protein chain: 2
+spac numc=2 pick #sid 354 354 done
+spac numc=2 pick #sid 360 360 done
+spac numc=2 pick #sid 366 366 done
+spac numc=2 pick #sid 374 374 done
+spac numc=2 pick #sid 385 385 done
+~ protein chain: 3
+spac numc=2 pick #sid 521 521 done
+spac numc=2 pick #sid 527 527 done
+spac numc=2 pick #sid 533 533 done
+spac numc=2 pick #sid 541 541 done
+spac numc=2 pick #sid 552 552 done
+*EOD
