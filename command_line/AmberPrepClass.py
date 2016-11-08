@@ -3,18 +3,19 @@
 import os
 import sys
 import iotbx.pdb
-from libtbx import phil
-import libtbx.phil.command_line
-from iotbx import pdb
-from amber_adaptbx import pdb4amber
-from elbow.command_line import builder
-from libtbx import easy_run
 import StringIO
-from amber_adaptbx import amber_library_server
-from amber_adaptbx.les_builder.build import LESBuilder
-from amber_adaptbx.utils import build_unitcell
+from iotbx import pdb
+from libtbx import phil
 from libtbx.utils import Sorry
 import libtbx.load_env
+import libtbx.phil.command_line
+from libtbx import easy_run
+from elbow.command_line import builder
+from amber_adaptbx import pdb4amber
+from amber_adaptbx import amber_library_server
+from amber_adaptbx.utils import build_unitcell
+from amber_adaptbx.les_builder.build import LESBuilder
+import parmed as pmd
 
 master_phil_string = """
   amber_prep
@@ -210,16 +211,16 @@ def get_chemical_components_file_name(code):
   return None
 
 
-class amber_prep_run_class:
+class AmberPrepRunner:
 
   def __init__(self, base_name, LES=False):
     # TODO: remove unused variables
     self.base = base_name
-    self.is_LES = LES
+    self.LES = LES
     self.final_prmtop_file = '4amber_%s.prmtop' % self.base
     self.final_rst7_file = '4amber_%s.rst7' % self.base
     self.final_pdb_file_4phenix = '4phenix_%s.pdb' % self.base
-    if self.is_LES:
+    if self.LES:
       self.final_prmtop_file = self.final_prmtop_file.replace('.prmtop', '.LES.prmtop')
       self.final_rst7_file = self.final_rst7_file.replace('.rst7', '.LES.rst7')
       self.final_pdb_file_4phenix = self.final_pdb_file_4phenix.replace('.pdb', '.LES.pdb')
@@ -640,7 +641,6 @@ class amber_prep_run_class:
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
   def _write_LES_pdb_4phenix(self):
-    import parmed as pmd
     # TODO: update ocupancy
     asu_parm = pmd.load_file(self.pdb_filename)
     n_asu_residue = len(asu_parm.residues)
@@ -683,7 +683,7 @@ class amber_prep_run_class:
       inputs['amber_h'] = inputs['amber_h'].replace('/', minimization_options + '\n /')
       inputs['amber_all'] = inputs['amber_all'].replace('/', minimization_options + '\n /')
     output_rst7_file_name = ' %s_%s.rst7' % (self.base, minimization_type)
-    if self.is_LES:
+    if self.LES:
       output_rst7_file_name = output_rst7_file_name.replace('.rst7', '.LES.rst7')
 
     if minimization_type in ["amber_h", "amber_all"]:
@@ -702,7 +702,7 @@ class amber_prep_run_class:
           self.final_rst7_file,
           output_rst7_file_name
       )
-      if self.is_LES:
+      if self.LES:
         cmd = cmd.replace('sander', 'sander.LES')
       print_cmd(cmd)
       # test function that may be useful...
@@ -729,7 +729,7 @@ class amber_prep_run_class:
       ero.show_stderr()
 
       # rename
-      if self.is_LES:
+      if self.LES:
         self.final_rst7_file = '4amber_' + self.base + '.LES.min.{}.rst7'.format(minimization_type)
       else:
         self.final_rst7_file = '4amber_' + self.base + '.min.{}.rst7'.format(minimization_type)
@@ -737,7 +737,7 @@ class amber_prep_run_class:
       # save minimized rst7
       easy_run.fully_buffered('cp {} {}'.format(output_rst7_file_name, self.final_rst7_file))
 
-      if self.is_LES:
+      if self.LES:
         # TODO: remove this and use Nigel's version.
         #    dac: what do you mean by "Nigel's version"???
         # Why using this right now? Seems too me that the output pdb from Nigel's code
@@ -765,7 +765,7 @@ class amber_prep_run_class:
         self.finalize_pdb(pdb_filename='%s_new2.pdb' % self.base,
                           sort_atoms=True, type=type_)
     elif minimization_type == "phenix_all":
-      if self.is_LES:
+      if self.LES:
         cmd = 'phenix.geometry_minimization 4phenix_%s.LES.pdb amber.use_amber=True \
              amber.topology_file_name=%s \
              amber.coordinate_file_name=%s  \
@@ -785,7 +785,7 @@ class amber_prep_run_class:
       assert (ero.return_code == 0)
       ero.show_stdout()
       ero.show_stderr()
-      if self.is_LES:
+      if self.LES:
         self.final_pdb_file_4phenix = '4phenix_%s.LES.min.%s.pdb' % (self.base, minimization_type)
       else:
         self.final_pdb_file_4phenix = '4phenix_%s.min.%s.pdb' % (self.base, minimization_type)
@@ -794,7 +794,7 @@ class amber_prep_run_class:
     return 0
 
   def check_special_positions(self):
-    if self.is_LES:
+    if self.LES:
       pdb_file = '4phenix_%s.LES.pdb' % self.base
     else:
       pdb_file = '4phenix_%s.pdb' % self.base
@@ -819,6 +819,8 @@ class amber_prep_run_class:
       4tleap_uc_sslink
       4tleap_sslink
       4tleap_uc.pdb
+      asu.prmtop
+      asu.rst7
       uc_tleap_input_run
       asu_tleap_input_run
       4UnitCell.pdb
@@ -837,6 +839,8 @@ class amber_prep_run_class:
       addles.in
       reduce_info.log
       reduce_lesbuilder.log
+      reduce.log
+      addles.log
       """
     import glob
 
@@ -852,6 +856,7 @@ class amber_prep_run_class:
               '%s_uc_H.pdb',
               '%sab.rst7',
               '4amber_%s.pdb',
+              '4amber_%s.LES.pdb',
               ]:
       if os.path.isfile(s % self.base):
         os.remove(s % self.base)
@@ -1019,12 +1024,12 @@ def run(rargs):
   inputs = working_params.amber_prep.input
   actions = working_params.amber_prep.actions
   base = get_output_preamble(working_params)
-  amber_prep_runner = amber_prep_run_class(base, LES=actions.LES)
+  amber_prep_runner = AmberPrepRunner(base, LES=actions.LES)
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
   invalid = amber_prep_runner.validate_pdb()
   if invalid:
     raise Sorry('PDB input is not "valid"')
-  amber_prep_runner.curate_model(remove_alt_confs=(not actions.LES))
+  amber_prep_runner.curate_model(remove_alt_confs=True)
   # need to write PDB for some of the other methods
   basename = os.path.basename(inputs.pdb_file_name)
   current_pdb_file_name = basename.replace(
@@ -1144,4 +1149,4 @@ if __name__ == "__main__":
                         "intermediate files", action='True', default=False)
     args = parser.parse_args()
     run(args.pdb_file_name, minimize=args.min, clean=args.no_clean)
-    amber_prep_run_class.run_minimise(args.minimise, minimization_options=args.minimization_options)
+    AmberPrepRunner.run_minimise(args.minimise, minimization_options=args.minimization_options)
