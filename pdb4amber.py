@@ -741,6 +741,7 @@ def non_standard_elbow(recordlist):
       if record[5].strip() not in ns_resname:
         ns_resname.append(record[5].strip())
         try:
+          # what is "f" in this case? Should it be after next section?
           f.close()
         except:
           pass

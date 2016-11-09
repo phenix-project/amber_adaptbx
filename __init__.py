@@ -45,6 +45,10 @@ master_phil_str = """
     .style = hidden
     .help = Use the ratio of the restraints gradident norm and the Amber \
             gradient norm to set wxc_scale
+  bellymask = ''
+    .type = str
+    .style = hidden
+    .help = If given, turn on belly in sander
   print_amber_energies = False
     .type = bool
     .help = Print details of Amber energies during refinement

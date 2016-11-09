@@ -186,7 +186,7 @@ def check_required_output_filenames(filenames=None,
       s = "  Output file is empty : %s" % filename
       if error_display_file:
         s += '\n  Check contents of "%s"' % error_display_file
-      raise Sorry("  Output file is empty : %s" % filename)
+      raise Sorry(s)
 
 
 def print_cmd(cmd, verbose=False):
@@ -639,6 +639,20 @@ class AmberPrepRunner:
 
     os.rename('%s_uc.rst7' % self.base, '4amber_%s.rst7' % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
+
+  @classmethod
+  def _correct_resid(cls, template_pdb_file, output_file):
+    ''' ensure output_file has the same resnum as `template_pdb_file`
+
+    `output_file` will be overwriten. Make sure that two pdb files
+    have the same residue order
+    '''
+    template_parm = pmd.load_file(template_pdb_file)
+    target_parm = pmd.load_file(output_file)
+
+    for template_residue, target_residue in zip(template_parm.residues, target_parm.residues):
+      target_residue.number = template_residue.number
+    target_parm.save(output_file, overwrite=True, renumber=False)
 
   def _write_LES_pdb_4phenix(self):
     # TODO: update ocupancy
@@ -1095,6 +1109,7 @@ def run(rargs):
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq)
+  amber_prep_runner._correct_resid(amber_prep_runner.pdb_filename, '4phenix_%s.pdb' % amber_prep_runner.base)
   if actions.LES:
     pdb_file_name = working_params.amber_prep.input.pdb_file_name
     les_builder = LESBuilder(

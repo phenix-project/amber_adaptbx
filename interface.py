@@ -1,5 +1,6 @@
-import amber_adaptbx
+import sys
 import numpy as np
+import amber_adaptbx
 from libtbx.utils import Sorry
 
 
@@ -20,10 +21,17 @@ def get_amber_struct_object(params):
       ridingH=ridingH,
   )
 
+  if amber_params.bellymask:
+      try:
+        amber_structs.inp.ibelly = 1
+        amber_structs.inp.bellymask = amber_params.bellymask
+      except AttributeError:
+        raise AttributeError('Setting bellymask for pysander does not work with AmberTools <= 16')
+
   amber_structs.sander_engine.setup(
       amber_structs.parm,
-      amber_structs.rst.coordinates,
-      amber_structs.rst.box,
+      amber_structs.parm.coordinates,
+      amber_structs.parm.box,
       amber_structs.inp
   )
 

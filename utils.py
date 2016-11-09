@@ -187,6 +187,7 @@ def collapse_grad_to_asu(gradients_uc, crystal_symmetry):
     start = i*n_asu_atoms
     end = (i+1)*n_asu_atoms
     g_frac = cell.fractionalize(gradients_uc[start:end])
+    # Hai: where is "t"?
     gradients += inv_rotn * (g_frac-t)
   gradients = gradients * (1.0/n_symop)
   return gradients

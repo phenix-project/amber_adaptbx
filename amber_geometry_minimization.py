@@ -80,8 +80,8 @@ class run(object):
       parm_file_name=prmtop,
       rst_file_name=ambcrd)
     amber_structs.sander_engine.setup(amber_structs.parm,
-             amber_structs.rst.coordinates,
-             amber_structs.rst.box,
+             amber_structs.parm.coordinates,
+             amber_structs.parm.box,
              amber_structs.inp)
     self.show(amber_structs, log=log)
 
@@ -106,10 +106,7 @@ class run(object):
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
           max_iterations = max_number_of_iterations)
 
-    if amber_structs.is_LES:
-      sanderles.cleanup()
-    else:
-      sander.cleanup()
+    amber_structs.sander_engine.cleanup()
 
   def show(self, amber_structs, log=None):
     import amber_adaptbx as amber

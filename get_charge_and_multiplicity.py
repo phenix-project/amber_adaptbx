@@ -1,7 +1,5 @@
-import os, sys
-
+import sys
 from iotbx import pdb
-
 from elbow.command_line import builder
 
 def generate_unknown_residue_names(pdb_filename):

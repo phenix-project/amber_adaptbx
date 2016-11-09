@@ -2,17 +2,9 @@ from __future__ import division
 from math import sqrt
 import scitbx.restraints
 from libtbx.utils import Sorry
-try:
-  import sander
-  import sanderles
-except:
-  raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
-
-# require the most updated ParmEd version
-# AmberTools >= 16
-from parmed.amber.readparm import Rst7
-import parmed
-
+import sander
+import sanderles
+import parmed # require version in AmberTools >= 16
 from amber_adaptbx.utils import (
     bond_rmsd,
     angle_rmsd,
@@ -86,7 +78,6 @@ class SanderStruct(object):
     self.md_engine = 'sander'
     self.parm = parmed.load_file(parm_file_name, xyz=rst_file_name)
     # where do we need this self.rst?
-    self.rst = Rst7.open(rst_file_name)
     self.ridingH = ridingH
     self.is_LES = is_prmtop_LES(parm_file_name)
     self.sander_engine = sanderles if self.is_LES else sander

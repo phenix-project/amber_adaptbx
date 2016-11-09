@@ -29,11 +29,15 @@ Check the example below.
 
 Notes
 -----
-the *_fix.pdb output does not have REMARK 290 yet. I (Hai) introdued to ParmEd and waiting for Jason
-to merge back to amber git repo.
 
 """
 
+EXPECTED_HEADER_TEMPLATE = """
+file rprm name=(4amber_{root_name}.prmtop) read
+file rcbd name=(4amber_{root_name}.rst7) read
+file wprm name=(4amber_{root_name}.LES.prmtop) wovr
+file wcrd name=(4amber_{root_name}.LES.rst7) wovr
+""".strip()
 
 class LESBuilder(object):
   """Class to build LES parm, rst7 and pdb file.
@@ -55,7 +59,7 @@ class LESBuilder(object):
   >>> # build LES for pdb that have ligands
   >>> # use phenix.AmberPrep to build 2igda.parm7, 2igda.rst7
   >>> builder = LESBuilder('./2igd.pdb', prmtop='./2igda.parm7', rst7_file='./2igda.rst7')
-  >>> builder.build()
+  >>> builder.run()
   """
 
   def __init__(self, original_pdb_file, prmtop=None, rst7_file=None, unitcell_pdb_file=None, addles_input_file=''):
@@ -80,11 +84,13 @@ class LESBuilder(object):
     # main driver
 
     # build unitcell from asu pdb============================================
+    #    (input is usually original pdb file; creates xxxx_uc.pdb)
     if self.unitcell_pdb_file is None:
       self.unitcell_pdb_file = self.root_name + '_uc.pdb'
       build_unitcell(self.original_pdb_file, self.unitcell_pdb_file)
 
       # use reduce to add hydrogens to unitcell pdb==========================
+      #   (input is xxxx_uc.pdb; creates xxxx_uc_H.pdb)
       self.new_pdb_with_H = self.root_name + '_uc_H.pdb'
       command_add_hydrogens = 'reduce -build -nuclear {} > {} 2>reduce_lesbuilder.log'.format(
           self.unitcell_pdb_file, self.new_pdb_with_H)
@@ -92,15 +98,20 @@ class LESBuilder(object):
       easy_run.fully_buffered(command_add_hydrogens)
 
     # use addles to construct LES parm7 and rst7 files========================
+    #   (input is 4amber_xxxx.{prmtop,rst7};  output is
+    #             4amber_xxxx.LES.{prmtop,rst7}
     self.build_LES_parm()
 
     # fix previous step: need to update rst7 coordinates since addles
     # uses the same coordinates for alternative atoms.
     # Also correctly label atom and residue names.============================
+    #   (updates 4amber_xxxx.LES.rst7 in place; also creates 
+    #    4amber_xxxx.LES.pdb for use in the next step)
     self.update_LES_coordinates_from_uc()
 
-    # generate final ASU pdb for phenix (with unitcell, symmetry)=============
-    self.write_asu_LES()
+    # generate final ASU LES pdb for phenix (with unitcell, symmetry)========
+    #   (input is 4amber_xxxx.LES.pdb; creates 4phenix_xxxx.LES.pdb )
+    self.write_LES_asu_pdb()
 
   def build_LES_parm(self):
     # create addles.in, then run addles with this input.
@@ -135,14 +146,14 @@ class LESBuilder(object):
     parm.box = self.box
     reduce_to_les.update_rst7_and_pdb_coordinates_LES(template_parm=uc_parm,
                                                       target_parm=parm)
-    parm.write_pdb('4amber_{}.pdb'.format(self.root_name), standard_resnames=True)
+    parm.write_pdb('4amber_{}.LES.pdb'.format(self.root_name), standard_resnames=True)
     parm.save('4amber_' + self.root_name + '.LES.rst7', overwrite=True)
 
-  def write_asu_LES(self):
-    """write LES ASU pdb for phenix: 4phenix_{code}.LES.pdb
+  def write_LES_asu_pdb(self):
+    """write LES asu pdb for phenix: 4phenix_{code}.LES.pdb
     """
-    # print('write_asu_LES')
-    les_parm = pmd.load_file('4amber_{}.pdb'.format(self.root_name))
+    les_parm = pmd.load_file('4amber_{}.LES.pdb'.format(self.root_name))
+    orig_pdb_parm = pmd.load_file(self.original_pdb_file)
 
     selection = ':1-{}'.format(self.n_asu_residues)
 
@@ -151,7 +162,18 @@ class LESBuilder(object):
     final_parm.symmetry = self.symmetry
     final_parm.box = self.box
     final_parm.space_group = self.space_group
-    final_parm.write_pdb(final_pdb_asu_file, standard_resnames=True)
+    # rename WAT and update H (HOH) occupancy
+    for residue in final_parm.residues:
+      if residue.name.startswith('WAT'):
+        residue.name = 'HOH'
+        oxygen_atom = [atom for atom in residue.atoms if atom.atomic_number == 8][0]
+        for atom in residue.atoms:
+          if atom.atomic_number == 1:
+            atom.occupancy = oxygen_atom.occupancy
+    # update original resnum
+    for residue, residue_template in zip(final_parm.residues, orig_pdb_parm.residues):
+      residue.number = residue_template.number
+    final_parm.write_pdb(final_pdb_asu_file, standard_resnames=True, renumber=False)
     self._construct_hierarchy(final_pdb_asu_file)
 
   def _construct_hierarchy(self, filename, sort_atoms=True):
@@ -182,12 +204,7 @@ class LESBuilder(object):
   def _check_valid_addles_input(self, fn):
     assert os.path.exists(fn), 'make sure {} exists'.format(fn)
     input = open(fn).read()
-    expected_header = """
-file rprm name=(4amber_{root_name}.prmtop) read
-file rcbd name=(4amber_{root_name}.rst7) read
-file wprm name=(4amber_{root_name}.LES.prmtop) wovr
-file wcrd name=(4amber_{root_name}.LES.rst7) wovr
-""".format(root_name=self.root_name).strip()
+    expected_header = EXPECTED_HEADER_TEMPLATE.format(root_name=self.root_name)
     assert expected_header in input, 'addles input must have header\n\n{}\n'.format(expected_header)
 
 if __name__ == '__main__':
