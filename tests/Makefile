@@ -8,6 +8,8 @@ test.medium.parallel:
 	# require pytest-xdist
 	./run_tests.py -v -m 'not slow' -n 4
 
+mp: test.medium.parallel
+
 test.all: test.long
 
 test.all.parallel:
@@ -21,9 +23,9 @@ test.long:
 test.all.verbose:
 	./run_tests.py -vs
 
-# run with code coverage, require pytest-cov
-test.all.coverage:
-	./run_tests.py -vs --cov=amber_adaptbx --cov-report=html
+mpc:
+	# code coverage, parallel
+	./run_tests.py -v --cov=amber_adaptbx --cov-report=html -m 'not slow' -n 4
 
 # tests that are slow (e.g energy minimization with maxcyc=1000)
 test.slow:

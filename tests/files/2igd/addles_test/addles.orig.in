@@ -1,7 +1,7 @@
 file rprm name=(4amber_2igd.prmtop) read
 file rcbd name=(4amber_2igd.rst7) read
-file wprm name=(4amber_2igd.LES.prmtop) wovr
-file wcrd name=(4amber_2igd.LES.rst7) wovr
+file wprm name=(2igdab.prmtop) wovr
+file wcrd name=(2igdab.rst7) wovr
 action
 omas
 ~ protein chain: 0

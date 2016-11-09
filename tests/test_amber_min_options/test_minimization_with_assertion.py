@@ -18,7 +18,7 @@ from amber_adaptbx.tests import utils
     (get_fn('2igd/2igd.pdb'), True, 'amber_h', 0.1155),
     # 4lzt, LES=False/True, minimization_type=amber_h
     (get_fn('4lzt/4lzt_no_BHOH.pdb'), False,'amber_h', 0.1043),
-    (get_fn('4lzt/4lzt_no_BHOH.pdb'), True,'amber_h', 0.1033),
+    (get_fn('4lzt/4lzt_no_BHOH.pdb'), True,'amber_h', 0.1038),
 ])
 def test_minimization_with_amber_h_LES(pdb_file, LES, minimization_type, expected_rmsd):
   command_build = [
