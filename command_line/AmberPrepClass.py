@@ -4,7 +4,6 @@ import os
 import sys
 import iotbx.pdb
 import StringIO
-from iotbx import pdb
 from libtbx import phil
 from libtbx.utils import Sorry
 import libtbx.load_env
@@ -13,7 +12,7 @@ from libtbx import easy_run
 from elbow.command_line import builder
 from amber_adaptbx import pdb4amber
 from amber_adaptbx import amber_library_server
-from amber_adaptbx.utils import build_unitcell
+from amber_adaptbx.utils import build_unitcell, write_standard_pdb
 from amber_adaptbx.les_builder.build import LESBuilder
 import parmed as pmd
 
@@ -235,7 +234,7 @@ class AmberPrepRunner:
   # get box info & space group info
   def initialize_pdb(self, pdb_filename):
     self.pdb_filename = pdb_filename
-    self.pdb_inp = pdb.input(pdb_filename)
+    self.pdb_inp = iotbx.pdb.input(pdb_filename)
     self.cryst1 = self.pdb_inp.crystal_symmetry_from_cryst1()
     self.pdb_hierarchy = self.pdb_inp.construct_hierarchy()
 
@@ -247,6 +246,56 @@ class AmberPrepRunner:
       pdbtools.remove_alt_confs(self.pdb_hierarchy,
                                 always_keep_one_conformer=True,
                                 )
+  def correct_atom_occupancy_and_bfactor(self, pdb_filename):
+    # from Dave:
+    # Here's the goal: We want each atom in the 4phenix_xxxx.pdb file to have an
+    # occupancy that is the sum of the occupancies of the all the alternate
+    # conformers in the original pdb file.
+    # 
+    # If there was only one conformer in the original, we should keep that
+    # occupancy, whatever it is.  If there was more than one conformer, sum the
+    # occupancies of the various conformers.  We should do this on an atom-by-atom
+    # basis.  This should make the total number of electrons in the 4phenix_xxxx.pdb
+    # file the same as in the original pdb file.
+    # 
+    # I think/hope(?) parmed keeps information about the occupancies of multiple
+    # conformers, so all one needs to do is to sum them up.
+    # end Dave commend
+
+    # reduce program does not add H for water
+    # tleap will do that, so we need to update this information.
+    # also update H-occupancy for other residues too.
+    # b-factor will be also updated
+    # this is used for non-LES case
+    # load very original pdb file as info source
+
+    template_parm = pmd.load_file(self.pdb_filename)
+    parm = pmd.load_file(pdb_filename)
+
+    # update occupancy for alt-atom of template_parm
+    # so we can copy to parm
+    for atom in template_parm.atoms:
+      if atom.other_locations:
+        # if atom has alternative locations, ParmEd save them to other_locations (dict)
+        atom.occupancy += sum(a.occupancy for _, a in atom.other_locations.items())
+    # copy occupancy and bfactor for heavy atoms (original pdb file does not have H)
+    for template_residue, residue in zip(template_parm.residues, parm.residues):
+      # for each residue, sort atom by name to make sure we get the same atom order between
+      # two parms
+      template_heay_atoms = sorted((atom for atom in template_residue.atoms if atom.atomic_number > 1),
+                                   key=lambda x : x.name)
+      heay_atoms = sorted((atom for atom in residue.atoms if atom.atomic_number > 1),
+                                   key=lambda x : x.name)
+      for template_atom, atom in zip(template_heay_atoms, heay_atoms):
+        atom.occupancy = template_atom.occupancy
+        atom.bfactor = template_atom.bfactor
+
+    # now updating hydrogens by copying number from its bond partner
+    for atom in parm.atoms:
+      if atom.atomic_number == 1:
+        atom.occupancy = atom.bond_partners[0].occupancy
+        atom.bfactor = atom.bond_partners[0].bfactor
+    write_standard_pdb(parm, pdb_filename)
 
   def validate_pdb(self):
     assert self.pdb_hierarchy
@@ -558,7 +607,7 @@ class AmberPrepRunner:
     assert self.cryst1
     assert self.base
     if pdb_filename:
-      pdb_inp = pdb.input(pdb_filename)
+      pdb_inp = iotbx.pdb.input(pdb_filename)
       pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=sort_atoms)
     else:
       # this returns the altloc to the model so not good!!!
@@ -582,18 +631,24 @@ class AmberPrepRunner:
   def build_unitcell_prmtop_and_rst7_files(self, redq=False):
 
     #-----------------------------------------------------------------
-    # Step 1: add SMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
+    # Step 1: add SYMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
     #-----------------------------------------------------------------
 
     assert self.base, 'must provide base name'
     uc_pdb_file = "%s_4UnitCell.pdb" % self.base
     with open(uc_pdb_file, "wb") as fout:
       with open(self.pdb_filename) as fin:
-        lines = fin.readlines()
-        cryst1card = [line for line in lines if "CRYST1" in line]
-        if len(cryst1card) < 1:
-          raise Sorry("CRYST1 record required in input pdb file")
-        fout.write(cryst1card[0])
+
+        # lines = fin.readlines()
+        # cryst1card = [line for line in lines if "CRYST1" in line or "SMTRY" in line]
+        # if len(cryst1card) < 1:
+        #   raise Sorry("CRYST1 record required in input pdb file")
+        # fout.write(cryst1card)
+
+        for line in fin:
+          if "CRYST1" in line or "SMTRY" in line:
+            fout.write(line)
+
       with open("4phenix_%s.pdb" % self.base) as fin:
         for line in fin:
           if not "CRYST1" in line:
@@ -641,8 +696,8 @@ class AmberPrepRunner:
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
   @classmethod
-  def _correct_resid(cls, template_pdb_file, output_file):
-    ''' ensure output_file has the same resnum as `template_pdb_file`
+  def correct_resid(cls, template_pdb_file, output_file):
+    ''' ensure output_file has the same resnum, chain as `template_pdb_file`
 
     `output_file` will be overwriten. Make sure that two pdb files
     have the same residue order
@@ -652,7 +707,8 @@ class AmberPrepRunner:
 
     for template_residue, target_residue in zip(template_parm.residues, target_parm.residues):
       target_residue.number = template_residue.number
-    target_parm.save(output_file, overwrite=True, renumber=False)
+      target_residue.chain = template_residue.chain
+    write_standard_pdb(target_parm, output_file)
 
   def _write_LES_pdb_4phenix(self):
     # TODO: update ocupancy
@@ -671,7 +727,7 @@ class AmberPrepRunner:
     for atom in asu_new_parm.atoms:
       atom.occupancy = 1.0
     print('--> final_pdb_file_4phenix', self.final_pdb_file_4phenix)
-    asu_new_parm.write_pdb(self.final_pdb_file_4phenix, standard_resnames=True)
+    write_standard_pdb(asu_new_parm, self.final_pdb_file_4phenix)
 
   def run_minimise(self, minimization_type=None, minimization_options=''):
     assert self.base
@@ -1043,7 +1099,7 @@ def run(rargs):
   invalid = amber_prep_runner.validate_pdb()
   if invalid:
     raise Sorry('PDB input is not "valid"')
-  amber_prep_runner.curate_model(remove_alt_confs=True)
+  # amber_prep_runner.curate_model(remove_alt_confs=True)
   # need to write PDB for some of the other methods
   basename = os.path.basename(inputs.pdb_file_name)
   current_pdb_file_name = basename.replace(
@@ -1109,7 +1165,9 @@ def run(rargs):
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq)
-  amber_prep_runner._correct_resid(amber_prep_runner.pdb_filename, '4phenix_%s.pdb' % amber_prep_runner.base)
+  inout = '4phenix_%s.pdb' % amber_prep_runner.base
+  amber_prep_runner.correct_resid(amber_prep_runner.pdb_filename, inout)
+  amber_prep_runner.correct_atom_occupancy_and_bfactor(inout)
   if actions.LES:
     pdb_file_name = working_params.amber_prep.input.pdb_file_name
     les_builder = LESBuilder(
