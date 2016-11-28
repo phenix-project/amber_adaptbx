@@ -33,6 +33,44 @@ def tempfolder():
     os.chdir(cwd)
     rmtree(my_temp)
 
+class extreme(dict):
+  def __init__(self, size=5):
+    self.size=size
+    self[-1e9]=None
+
+  def __repr__(self):
+    keys = self.keys()
+    keys.sort()
+    keys.reverse()
+    outl = getattr(self, 'header', '')
+    for key in keys:
+      item = self[key]
+      for i in range(4):
+        atom = getattr(item, 'atom%d' % i, None)
+        if atom:
+          outl += ' %4s %3s %7s %1s %1s -' % (atom.name,
+                                              atom.residue.name,
+                                              atom.idx,
+                                              atom.residue.chain,
+                                              atom.altloc,
+            )
+      outl = outl[:-1]
+      eq = getattr(item.type, 'theteq', None)
+      if eq is None:
+        eq = getattr(item.type, 'req', None)
+      if eq: outl += ' %7.3f' % eq
+      outl += ' %7.3f' % item.model 
+      outl += ' %7.3f' % key
+      outl += '\n'
+    return outl
+
+  def process(self, value, item):
+    if value>min(self.keys()):
+      self[value]=item
+    if min(self.keys())==-1e9: del self[-1e9]
+    if len(self)>self.size:
+      del self[min(self.keys())]
+
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()
   cell = crystal_symmetry.unit_cell()
@@ -45,12 +83,15 @@ def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
 
   return sites_cart_uc
 
-def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
+def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False):
   if ignore_hd:
     bonds = parm.bonds_without_h
   else:
     bonds = itertools.chain(parm.bonds_inc_h, parm.bonds_without_h)
   bond_deltas = []
+  bond_extremes = extreme()
+  bond_extremes.header  = '  Bond deltas from Amber ideals\n'
+  bond_extremes.header += '    Atoms %s ideal   model   delta\n' % (' '*36)
   for i, bond in enumerate(bonds):
     atom1= bond.atom1.idx
     atom2= bond.atom2.idx
@@ -65,6 +106,9 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
     delta = bond.type.req - sqrt(dx*dx + dy*dy + dz*dz)
+    if get_extremes:
+      bond.model = sqrt(dx*dx + dy*dy + dz*dz)
+      bond_extremes.process(delta, bond)
     bond_deltas.append(delta)
   bond_deltas = flex.double(bond_deltas)
   b_sq  = bond_deltas * bond_deltas
@@ -74,7 +118,7 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
   if not get_deltas:
     return b_min, b_max, b_ave
   else:
-    return (b_min, b_max, b_ave), bond_deltas
+    return (b_min, b_max, b_ave), bond_deltas, bond_extremes
 
 def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   if ignore_hd:
@@ -105,12 +149,15 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   else:
     return (b_min, b_max, b_ave), bond_Zs
 
-def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
+def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False):
   if ignore_hd:
     angles = parm.angles_without_h
   else:
     angles = itertools.chain(parm.angles_inc_h, parm.angles_without_h)
   angle_deltas = []
+  angle_extremes = extreme()
+  angle_extremes.header  = '  Angle deltas from Amber ideals\n'
+  angle_extremes.header += '    Atoms %s ideal   model   delta\n' % (' '*59)
   for i, angle in enumerate(angles):
     # in non-P1 space groups, amber topology knows entire unit cell angles
     # only use angles from 1st ASU
@@ -132,6 +179,9 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
     if acosarg <= -1.0: acosarg = -0.9999999
     delta = angle.type.theteq - acos(acosarg)*180/pi
     assert abs(delta)<360
+    if get_extremes:
+      angle.model = acos(acosarg)*180/pi
+      angle_extremes.process(delta, angle)
     angle_deltas.append(delta)
   angle_deltas= flex.double(angle_deltas)
   a_sq  = angle_deltas * angle_deltas
@@ -141,7 +191,7 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False):
   if not get_deltas:
     return (a_min, a_max, a_ave)
   else:
-    return (a_min, a_max, a_ave), angle_deltas
+    return (a_min, a_max, a_ave), angle_deltas, angle_extremes
 
 def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   if ignore_hd:

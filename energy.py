@@ -51,11 +51,23 @@ class energies(scitbx.restraints.energies):
     return grms
 
   # this calculates both bond and angle rms but is called
-  def angle_deviations(self, sites_cart, parm, ignore_hd=False, get_deltas=False):
-    return angle_rmsd(parm, sites_cart, ignore_hd, get_deltas)
+  def angle_deviations(self,
+                       sites_cart,
+                       parm,
+                       ignore_hd=False,
+                       get_deltas=False,
+                       get_extremes=False,
+                       ):
+    return angle_rmsd(parm, sites_cart, ignore_hd, get_deltas, get_extremes)
 
-  def bond_deviations(self, sites_cart, parm, ignore_hd=False, get_deltas=False):
-    return bond_rmsd(parm, sites_cart, ignore_hd, get_deltas)
+  def bond_deviations(self,
+                      sites_cart,
+                      parm,
+                      ignore_hd=False,
+                      get_deltas=False,
+                      get_extremes=False,
+                      ):
+    return bond_rmsd(parm, sites_cart, ignore_hd, get_deltas, get_extremes)
 
   def n_angle_proxies(self, parm, ignore_hd=False):
     if not ignore_hd:
