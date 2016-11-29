@@ -87,36 +87,15 @@ class geometry_manager(object):
     # following forces printing of Amber energies; placeholder until
     #    this can become an input keyword
     if print_amber_energies or 1:
-      if 1:
-        print >>log, """  Amber total: %0.2f bonds (n=%d): %0.2f angles (n=%d): %0.2f diheds (n=%d): %0.2f elec.: %0.2f vdW: %0.2f""" % (
-            result.residual_sum,
-            result.energy_components[6],
-            result.energy_components[1],
-            result.energy_components[7],
-            result.energy_components[2],
-            result.energy_components[8],
-            result.energy_components[3],
-            result.energy_components[4],
-            result.energy_components[5])
-      else:
-        print >>log, """  Amber total energy: %0.2f
-    bonds (n=%d): %0.2f
-    angles (n=%d): %0.2f
-    dihedrals (n=%d): %0.2f
-    electrostatics: %0.2f
-    van der Waals: %0.2f""" % (result.residual_sum,
-                               result.energy_components[6],
-                               result.energy_components[1],
-                               result.energy_components[7],
-                               result.energy_components[2],
-                               result.energy_components[8],
-                               result.energy_components[3],
-                               result.energy_components[4],
-                               result.energy_components[5])
-    #  assert 0
-    # else:
-    #  from libtbx.introspection import show_stack
-    #  show_stack()
-    #  assert 0
+      print >>log, """  Amber total: %0.2f bonds (n=%d): %0.2f angles (n=%d): %0.2f diheds (n=%d): %0.2f elec.: %0.2f vdW: %0.2f""" % (
+          result.residual_sum,
+          result.energy_components[6],
+          result.energy_components[1],
+          result.energy_components[7],
+          result.energy_components[2],
+          result.energy_components[8],
+          result.energy_components[3],
+          result.energy_components[4],
+          result.energy_components[5])
 
     return result

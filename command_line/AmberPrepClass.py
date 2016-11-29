@@ -419,6 +419,8 @@ class AmberPrepRunner:
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
     #  (for the future: have some mechanism for modifying the above list)
+    f.write('set default nocenter on\n')
+    f.write('set default reorder_residues %s\n' % reorder_residues)
 
     for res in ns_names:
       if amber_library_server.is_in_components_lib(res):
@@ -437,8 +439,6 @@ class AmberPrepRunner:
     uc = self.cryst1.unit_cell().parameters()
     f.write('set x box { %s  %s  %s }\n' % (uc[0], uc[1], uc[2]))
 
-    f.write('set default nocenter on\n')
-    f.write('set default reorder_residues %s\n' % reorder_residues)
     #
     #  process gaplist
     #
@@ -1151,7 +1151,7 @@ def run(rargs):
                               ns_names,
                               dummy_gaplist,
                               sslist,
-                              reorder_residues='on',
+                              reorder_residues='off',
                               # logfile='tleap_asu.log',
                               redq=actions.redq,
                               )

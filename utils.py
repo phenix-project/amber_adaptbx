@@ -7,6 +7,7 @@ import tempfile
 from shutil import rmtree
 from scitbx.array_family import flex
 from libtbx.utils import Sorry
+from libtbx import easy_run
 
 __all__ = [
         'tempfolder',
@@ -70,6 +71,14 @@ class extreme(dict):
     if min(self.keys())==-1e9: del self[-1e9]
     if len(self)>self.size:
       del self[min(self.keys())]
+
+def print_cmd(cmd, verbose=False):
+  print "\n~> %s\n" % cmd
+  if verbose:
+    print '\nAMBERHOME: %s' % os.environ.get("AMBERHOME", None)
+    path = os.environ.get("PATH", None)
+    print '\nPATH: %s' % ('\n    : '.join(path.split(":")))
+
 
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()
@@ -301,10 +310,34 @@ def build_unitcell(asu_pdb_file, output_file):
   import iotbx.pdb
   import cctbx
 
-  pdb_inp = iotbx.pdb.input(asu_pdb_file)
-  cs = pdb_inp.crystal_symmetry()
-  ph = pdb_inp.construct_hierarchy()
-  ph_p1 = ph.expand_to_p1(crystal_symmetry=cs)
-  abc = cs.unit_cell().parameters()[:3]
-  cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
-  ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
+  use_UnitCell = False
+  if use_UnitCell:
+    cmd = "UnitCell -p %s -o %s" % (asu_pdb_file, output_file)
+    print_cmd(cmd)
+    ero = easy_run.fully_buffered(cmd)
+    ero.show_stdout()
+    ero.show_stderr()
+  else:
+    pdb_inp = iotbx.pdb.input(asu_pdb_file)
+    cs = pdb_inp.crystal_symmetry()
+    ph = pdb_inp.construct_hierarchy()
+    ph_p1 = ph.expand_to_p1(crystal_symmetry=cs)
+    abc = cs.unit_cell().parameters()[:3]
+    cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
+    ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
+
+def write_standard_pdb(parm, pdb_filename, **kwargs):
+  ''' Using standard_resnames, keep original resnum
+  
+  Parameters
+  ----------
+  parm : parmed.Structure
+  pdb_filename : str
+    output pdb
+  kwargs : dict
+      additional ParmEd keyword arguments.
+  '''
+  parm.write_pdb(pdb_filename,
+                 standard_resnames=True,
+                 renumber=False,
+                 **kwargs)

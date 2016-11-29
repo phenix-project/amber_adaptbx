@@ -22,11 +22,25 @@ def get_amber_struct_object(params):
   )
 
   if amber_params.bellymask:
-      try:
-        amber_structs.inp.ibelly = 1
-        amber_structs.inp.bellymask = amber_params.bellymask
-      except AttributeError:
-        raise AttributeError('Setting bellymask for pysander does not work with AmberTools <= 16')
+    try:
+      amber_structs.inp.ibelly = 1
+      amber_structs.inp.bellymask = amber_params.bellymask
+    except AttributeError:
+      raise AttributeError(
+          'Setting bellymask for pysander does not work with AmberTools <= 16')
+
+  if amber_params.restraint_wt > 0.:
+    try:
+      amber_structs.inp.ntr = 1
+      amber_structs.inp.restraint_wt = amber_params.restraint_wt
+      amber_structs.inp.restraintmask = amber_params.restraintmask
+      if amber_params.reference_file_name:
+        amber_structs.inp.refc = amber_params.reference_file_name
+      else:
+        amber_structs.inp.refc = amber_params.coordinate_file_name
+    except AttributeError as e:
+      raise AttributeError(
+          'Setting amber restraint for pysander does not work with AmberTools <= 16')
 
   amber_structs.sander_engine.setup(
       amber_structs.parm,

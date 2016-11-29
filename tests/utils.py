@@ -126,6 +126,13 @@ def run_sander_minimization(prmtop_file, rst7_file, maxcyc=2):
   with open('mdout') as fh:
     return fh.read()
 
+def equal_files(fn1, fn2):
+  with open(fn1) as fh1:
+    with open(fn2) as fh2:
+      for line0, line1 in zip(fh1.readlines(), fh2.readlines()):
+        assert line0 == line1
+
+
 if __name__ == '__main__':
   assert (get_minimized_pdb_filename('2igd.pdb', minimization_type='amber_h') ==
           '4phenix_2igd.min.amber_h.pdb')

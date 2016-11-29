@@ -19,8 +19,6 @@ def test_cleaning_unused_files(code):
          '4phenix_{}.pdb'.format(code),
          '4amber_{}.prmtop'.format(code),
          '4amber_{}.rst7'.format(code),
-         '{}_asu.prmtop'.format(code),
-         '{}_asu.rst7'.format(code),
  ])
 
  command_les = [

@@ -45,6 +45,15 @@ master_phil_str = """
     .style = hidden
     .help = Use the ratio of the restraints gradident norm and the Amber \
             gradient norm to set wxc_scale
+  restraint_wt = 0.
+    .type = float
+    .style = hidden
+  restraintmask = ''
+    .type = str
+    .style = hidden
+  reference_file_name = ''
+    .type = str
+    .style = hidden
   bellymask = ''
     .type = str
     .style = hidden

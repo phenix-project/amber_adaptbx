@@ -4,7 +4,7 @@ import parmed as pmd
 from amber_adaptbx.les_builder import make_addles_input
 from libtbx import easy_run
 from amber_adaptbx.les_builder import reduce_to_les
-from amber_adaptbx.utils import build_unitcell
+from amber_adaptbx.utils import build_unitcell, write_standard_pdb
 from parmed.utils.six.moves import StringIO
 
 import argparse
@@ -163,17 +163,18 @@ class LESBuilder(object):
     final_parm.box = self.box
     final_parm.space_group = self.space_group
     # rename WAT and update H (HOH) occupancy
+    for atom in final_parm.atoms:
+      if atom.atomic_number == 1:
+        atom.occupancy = atom.bond_partners[0].occupancy
+        atom.bfactor = atom.bond_partners[0].bfactor
+    # update HOH
     for residue in final_parm.residues:
       if residue.name.startswith('WAT'):
         residue.name = 'HOH'
-        oxygen_atom = [atom for atom in residue.atoms if atom.atomic_number == 8][0]
-        for atom in residue.atoms:
-          if atom.atomic_number == 1:
-            atom.occupancy = oxygen_atom.occupancy
     # update original resnum
     for residue, residue_template in zip(final_parm.residues, orig_pdb_parm.residues):
       residue.number = residue_template.number
-    final_parm.write_pdb(final_pdb_asu_file, standard_resnames=True, renumber=False)
+    write_standard_pdb(final_parm, final_pdb_asu_file)
     self._construct_hierarchy(final_pdb_asu_file)
 
   def _construct_hierarchy(self, filename, sort_atoms=True):
