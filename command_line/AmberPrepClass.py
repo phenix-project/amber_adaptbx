@@ -387,7 +387,7 @@ class AmberPrepRunner:
         print "Fatal errors in tleap"
         for line in fatals:
           print line
-        raise Sorry("Fatal errors in tleap")
+        raise Sorry("Fatal errors in tleap: %s" % os.path.abspath(logfile))
       return fatals
 
     def _check_tleap_output(lines):
@@ -403,6 +403,12 @@ class AmberPrepRunner:
 
     # Following should be true in AmberTools14/15:
     amber_dir = libtbx.env.dist_path("amber")
+    if os.environ["AMBERHOME"]!=amber_dir:
+      raise Sorry("$AMBERHOME %s\nnot pointing to Phenix module %s" % (
+        os.environ["AMBERHOME"],
+        amber_dir,
+        ))
+    amber_dir = os.environ["AMBERHOME"]
     if(os.path.isfile(os.path.join(amber_dir,
                                    'dat',
                                    'leap',
@@ -797,7 +803,6 @@ class AmberPrepRunner:
       assert (ero.return_code == 0)
       ero.show_stdout()
       ero.show_stderr()
-
       # rename
       if self.LES:
         self.final_rst7_file = '4amber_' + self.base + '.LES.min.{}.rst7'.format(minimization_type)
