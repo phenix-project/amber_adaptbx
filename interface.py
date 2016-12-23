@@ -3,6 +3,9 @@ import numpy as np
 import amber_adaptbx
 from libtbx.utils import Sorry
 
+# TODO: create writer in another place? where?
+from parmed.amber.netcdffiles import NetCDFTraj
+
 
 def get_amber_struct_object(params):
   amber_params = params.amber
@@ -55,4 +58,8 @@ def get_amber_struct_object(params):
     mapped_arr = np.loadtxt(order_map_file_name, dtype='i4').transpose()
     amber_structs.order_converter = dict(a2p=mapped_arr[0], p2a=mapped_arr[1])
 
+  if amber_params.netcdf_trajectory_file_name:
+    n_atoms = len(amber_structs.parm.atoms)
+    amber_structs.writer = NetCDFTraj.open_new(amber_params.netcdf_trajectory_file_name,
+             n_atoms, box=True, crds=True, frcs=False)
   return amber_structs, amber_structs.sander_engine

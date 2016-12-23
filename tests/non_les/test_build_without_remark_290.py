@@ -18,12 +18,6 @@ def test_build_from_pdb_that_does_not_have_remark_290(pdb_file):
             pdb_file
     ]
 
-    decimal = 4
-
     with tempfolder():
+        # just make sure no error
         subprocess.check_call(command_build)
-        prmtop_file, rst7_file, _ = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file, LES=False)
-        box = pmd.load_file(rst7_file).box
-        with sander.setup(prmtop_file, rst7_file, box=box, mm_options=sander.pme_input()):
-            ene, _ = sander.energy_forces()
-        aa_eq([ene.tot], [-1645.6199], decimal=decimal)

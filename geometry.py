@@ -59,6 +59,9 @@ class geometry_manager(object):
     sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc, self.order_converter['p2a'])
     self.amber_structs.sander_engine.set_positions(sander_coords)
     ene, frc = self.amber_structs.sander_engine.energy_forces()
+    if self.amber_structs.writer is not None:
+      self.amber_structs.writer.add_coordinates(sander_coords)
+      self.amber_structs.writer.add_box(self.amber_structs.parm.box)
     frc = reorder_force_amber_to_phenix(frc, self.order_converter['a2p'])
     if (compute_gradients):
       gradients_uc = flex.vec3_double(flex.double(frc)) * -1

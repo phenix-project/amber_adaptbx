@@ -2,6 +2,7 @@ import os
 import subprocess
 import pytest
 import libtbx.load_env
+from numpy.testing import assert_almost_equal as aa_eq
 from amber_adaptbx.tests.utils import tempfolder, get_fn
 
 @pytest.mark.parametrize('use_amber', [True])
@@ -19,12 +20,17 @@ def test_non_LES_refinement_vAla3(use_amber):
     'refinement.main.number_of_macro_cycles=1'
   ]
 
-  expected_lines = """
-Start R-work = 0.0150, R-free = 0.0149
-Final R-work = 0.0061, R-free = 0.0060
-"""
+  expected_r = {
+          # 'Start R-work': 0.0154, 'Start R-free': 0.0154,
+          'Final R-work': 0.0066, 'Final R-free': 0.0065
+  }
 
   with tempfolder():
     output = subprocess.check_output(command_refine)
-    assert expected_lines in output 
-    print(output[:-100])
+    for line in output.split('\n'):
+        if 'Final R-work' in line:
+            break
+    final_r_work = float(line.split()[3].strip(','))
+    final_r_free = float(line.split()[6])
+    aa_eq([final_r_work,], [expected_r['Final R-work'],], decimal=3)
+    aa_eq([final_r_free,], [expected_r['Final R-free'],], decimal=3)

@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import itertools
+import time
 from math import acos, pi, sqrt
 from contextlib import contextmanager
 import tempfile
@@ -35,7 +36,7 @@ def tempfolder():
     rmtree(my_temp)
 
 class extreme(dict):
-  def __init__(self, size=5):
+  def __init__(self, size=10):
     self.size=size
     self[-1e9]=None
 
@@ -46,7 +47,7 @@ class extreme(dict):
     outl = getattr(self, 'header', '')
     for key in keys:
       item = self[key]
-      for i in range(4):
+      for i in range(9):
         atom = getattr(item, 'atom%d' % i, None)
         if atom:
           outl += ' %4s %3s %7s %1s %1s -' % (atom.name,
@@ -93,6 +94,8 @@ def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   return sites_cart_uc
 
 def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False):
+  print "starting bond_rmsd: %s" % time.strftime("%H:%M:%S")
+  ignore_hd=True   # dac timing test
   if ignore_hd:
     bonds = parm.bonds_without_h
   else:
@@ -102,19 +105,20 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False)
   bond_extremes.header  = '  Bond deltas from Amber ideals\n'
   bond_extremes.header += '    Atoms %s ideal   model   delta\n' % (' '*36)
   for i, bond in enumerate(bonds):
-    atom1= bond.atom1.idx
-    atom2= bond.atom2.idx
+    atom1_idx= bond.atom1.idx
+    atom2_idx= bond.atom2.idx
     natoms=len(sites_cart)
     # in non-P1 space groups, amber topology knows entire unit cell bonds
     # only use bonds from 1st ASU
-    if atom1 >= natoms or atom2 >=natoms:
+    if atom1_idx >= natoms or atom2_idx >=natoms:
       continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
+    atom1 = parm.coordinates[atom1_idx]
+    atom2 = parm.coordinates[atom2_idx]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
     delta = bond.type.req - sqrt(dx*dx + dy*dy + dz*dz)
+    # print "bond deltas:  %6d %6d %6d  %7.2f" % ( i, atom1_idx, atom2_idx, delta )
     if get_extremes:
       bond.model = sqrt(dx*dx + dy*dy + dz*dz)
       bond_extremes.process(delta, bond)
@@ -124,6 +128,7 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False)
   b_ave = sqrt(flex.mean_default(b_sq, 0))
   b_max = sqrt(flex.max_default(b_sq, 0))
   b_min = sqrt(flex.min_default(b_sq, 0))
+  print "done with bond_rmsd: %s" % time.strftime("%H:%M:%S")
   if not get_deltas:
     return b_min, b_max, b_ave
   else:
@@ -136,13 +141,15 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     bonds = itertools.chain(parm.bonds_inc_h, parm.bonds_without_h)
   bond_Zs = []
   for i, bond in enumerate(bonds):
-    atom1= bond.atom1.idx
-    atom2= bond.atom2.idx
+    atom1_idx= bond.atom1.idx
+    atom2_idx= bond.atom2.idx
     natoms=len(sites_cart)
-    if atom1 >= natoms or atom2 >=natoms:
+    # in non-P1 space groups, amber topology knows entire unit cell bonds
+    # only use bonds from 1st ASU
+    if atom1_idx >= natoms or atom2_idx >=natoms:
       continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
+    atom1 = parm.coordinates[atom1_idx]
+    atom2 = parm.coordinates[atom2_idx]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
@@ -159,6 +166,8 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     return (b_min, b_max, b_ave), bond_Zs
 
 def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False):
+  print "starting angle_rmsd: %s" % time.strftime("%H:%M:%S")
+  ignore_hd=True   # dac timing test
   if ignore_hd:
     angles = parm.angles_without_h
   else:
@@ -170,15 +179,15 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False
   for i, angle in enumerate(angles):
     # in non-P1 space groups, amber topology knows entire unit cell angles
     # only use angles from 1st ASU
-    atom1= angle.atom1.idx
-    atom2= angle.atom2.idx
-    atom3= angle.atom3.idx
+    atom1_idx= angle.atom1.idx
+    atom2_idx= angle.atom2.idx
+    atom3_idx= angle.atom3.idx
     natoms=len(sites_cart)
-    if atom1 >= natoms or atom2 >=natoms or atom3 >=natoms:
+    if atom1_idx >= natoms or atom2_idx >=natoms or atom3_idx >=natoms:
       continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
-    atom3 = sites_cart[atom3]
+    atom1 = parm.coordinates[atom1_idx]
+    atom2 = parm.coordinates[atom2_idx]
+    atom3 = parm.coordinates[atom3_idx]
     a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
@@ -197,6 +206,7 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False
   a_ave = sqrt(flex.mean_default(a_sq, 0))
   a_max = sqrt(flex.max_default(a_sq, 0))
   a_min = sqrt(flex.min_default(a_sq, 0))
+  print "done with angle_rmsd: %s" % time.strftime("%H:%M:%S")
   if not get_deltas:
     return (a_min, a_max, a_ave)
   else:
@@ -209,15 +219,15 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     angles = itertools(parm.angles_inc_h, parm.angles_without_h)
   angle_Zs = []
   for i, angle in enumerate(angles):
-    atom1= angle.atom1.idx
-    atom2= angle.atom2.idx
-    atom3= angle.atom3.idx
+    atom1_idx= angle.atom1.idx
+    atom2_idx= angle.atom2.idx
+    atom3_idx= angle.atom3.idx
     natoms=len(sites_cart)
-    if atom1 >= natoms or atom2 >=natoms or atom3 >=natoms:
+    if atom1_idx >= natoms or atom2_idx >=natoms or atom3_idx >=natoms:
       continue
-    atom1 = sites_cart[atom1]
-    atom2 = sites_cart[atom2]
-    atom3 = sites_cart[atom3]
+    atom1 = parm.coordinates[atom1_idx]
+    atom2 = parm.coordinates[atom2_idx]
+    atom3 = parm.coordinates[atom3_idx]
     a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)

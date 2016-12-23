@@ -97,3 +97,4 @@ class SanderStruct(object):
     self.order_converter = None
     self.order_map_file_name = None
     self.inp = self.sander_engine.pme_input()
+    self.writer = None
