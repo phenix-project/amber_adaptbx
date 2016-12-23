@@ -2,7 +2,7 @@
 
 import os
 import sys
-from datetime import datetime
+# from datetime import datetime
 import iotbx.pdb
 import StringIO
 from libtbx import phil
@@ -599,7 +599,6 @@ class AmberPrepRunner:
     pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('%s_4tleap.pdb' % self.base)
     pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
 
-    print "starting match_hierarchies: %s\n" % str(datetime.now())
     self._match_hierarchies_and_transfer_to(pdb_h_pre,  # from
                                             pdb_h_post,  # to
                                             transfer_b=True,
@@ -607,7 +606,6 @@ class AmberPrepRunner:
                                             transfer_chain_id=True,
                                             )
 
-    print "starting write_pdb: %s\n" % str(datetime.now())
     pdb_h_post.write_pdb_file(file_name='%s_new2.pdb' % self.base,
                               append_end=True,
                               crystal_symmetry=pdb_pre.crystal_symmetry(),
