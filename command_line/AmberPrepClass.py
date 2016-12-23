@@ -2,6 +2,7 @@
 
 import os
 import sys
+from datetime import datetime
 import iotbx.pdb
 import StringIO
 from libtbx import phil
@@ -401,7 +402,6 @@ class AmberPrepRunner:
     f = file(tleap_input_file, "wb")
     f.write('logFile %s\n' % logfile)
 
-    # Following should be true in AmberTools14/15:
     #amber_dir = libtbx.env.dist_path("amber")
     #if os.environ["AMBERHOME"]!=amber_dir:
     #  raise Sorry("$AMBERHOME %s\nnot pointing to Phenix module %s" % (
@@ -409,6 +409,8 @@ class AmberPrepRunner:
     #    amber_dir,
     #    ))
     amber_dir = os.environ["AMBERHOME"]
+
+    # Following should be true in AmberTools14/15:
     if(os.path.isfile(os.path.join(amber_dir,
                                    'dat',
                                    'leap',
@@ -515,8 +517,8 @@ class AmberPrepRunner:
     return pdb_inp, pdb_hierarchy
 
   def _match_hierarchies_and_transfer_to(self,
-                                         hierachy1,
-                                         hierachy2,
+                                         hierachy1,  # pre
+                                         hierachy2,  # post
                                          transfer_b=False,
                                          transfer_occ=False,
                                          transfer_chain_id=False,
@@ -524,48 +526,55 @@ class AmberPrepRunner:
                                          ):
     # match residues based on resseq and resname
     # match atoms based on name an i_seq
-    for chain_post in hierachy2.chains():
-      for resi_post in chain_post.conformers()[0].residues():
-        for atom_post in resi_post.atoms():
-          for chain_pre in hierachy1.chains():
-            for resi_pre in chain_pre.conformers()[0].residues():
 
-              # TODO: put this into a function?:
-              # convert Amber residue names to Brookhaven standards:
-              #  (only needed here for the "pre" hierarchy)
-              pre_resname = resi_pre.resname.strip()
-              if pre_resname == "CYX": pre_resname = "CYS"
-              if pre_resname == "HID": pre_resname = "HIS"
-              if pre_resname == "HIE": pre_resname = "HIS"
-              if pre_resname == "HIP": pre_resname = "HIS"
-              if pre_resname == "C3":  pre_resname = "C"
-              if pre_resname == "U3":  pre_resname = "U"
-              if pre_resname == "G3":  pre_resname = "G"
-              if pre_resname == "A3":  pre_resname = "A"
-              if pre_resname == "C5":  pre_resname = "C"
-              if pre_resname == "U5":  pre_resname = "U"
-              if pre_resname == "G5":  pre_resname = "G"
-              if pre_resname == "A5":  pre_resname = "A"
-              if pre_resname == "DC3":  pre_resname = "DC"
-              if pre_resname == "DT3":  pre_resname = "DT"
-              if pre_resname == "DG3":  pre_resname = "DG"
-              if pre_resname == "DA3":  pre_resname = "DA"
-              if pre_resname == "DC5":  pre_resname = "DC"
-              if pre_resname == "DT5":  pre_resname = "DT"
-              if pre_resname == "DG5":  pre_resname = "DG"
-              if pre_resname == "DA5":  pre_resname = "DA"
+    # dac note, 12/16: this routine is impossibly slow!  I have re-ordered
+    #   the loops for some speedup, but we need to re-think this: I think
+    #   we can assume that the chains and residues (but not the atoms) are
+    #   in the same order in both hierarchies.
 
-              if (resi_pre.resseq == resi_post.resseq and
-                      pre_resname == resi_post.resname.strip()
-                  ):
-                for atom_pre in resi_pre.atoms():
+    for chain_pre in hierachy1.chains():
+      for chain_post in hierachy2.chains():
+        if transfer_chain_id:
+          chain_post.id = chain_pre.id
+
+        for resi_pre in chain_pre.conformers()[0].residues():
+
+          # TODO: put this into a function?:
+          # convert Amber residue names to Brookhaven standards:
+          #  (only needed here for the "pre" hierarchy)
+          pre_resname = resi_pre.resname.strip()
+          if pre_resname == "CYX": pre_resname = "CYS"
+          if pre_resname == "HID": pre_resname = "HIS"
+          if pre_resname == "HIE": pre_resname = "HIS"
+          if pre_resname == "HIP": pre_resname = "HIS"
+          if pre_resname == "C3":  pre_resname = "C"
+          if pre_resname == "U3":  pre_resname = "U"
+          if pre_resname == "G3":  pre_resname = "G"
+          if pre_resname == "A3":  pre_resname = "A"
+          if pre_resname == "C5":  pre_resname = "C"
+          if pre_resname == "U5":  pre_resname = "U"
+          if pre_resname == "G5":  pre_resname = "G"
+          if pre_resname == "A5":  pre_resname = "A"
+          if pre_resname == "DC3":  pre_resname = "DC"
+          if pre_resname == "DT3":  pre_resname = "DT"
+          if pre_resname == "DG3":  pre_resname = "DG"
+          if pre_resname == "DA3":  pre_resname = "DA"
+          if pre_resname == "DC5":  pre_resname = "DC"
+          if pre_resname == "DT5":  pre_resname = "DT"
+          if pre_resname == "DG5":  pre_resname = "DG"
+          if pre_resname == "DA5":  pre_resname = "DA"
+
+          for resi_post in chain_post.conformers()[0].residues():
+            if (resi_pre.resseq == resi_post.resseq and
+                    pre_resname == resi_post.resname.strip()
+                ):
+              for atom_pre in resi_pre.atoms():
+                for atom_post in resi_post.atoms():
                   if atom_pre.name == atom_post.name:
                     if transfer_b:
                       atom_post.b = atom_pre.b
                     if transfer_occ:
                       atom_post.occ = atom_pre.occ
-                    if transfer_chain_id:
-                      chain_post.id = chain_pre.id
                     if transfer_xyz:
                       atom_post.xyz = (atom_pre.xyz[0],
                                        atom_pre.xyz[1],
@@ -590,6 +599,7 @@ class AmberPrepRunner:
     pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('%s_4tleap.pdb' % self.base)
     pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
 
+    print "starting match_hierarchies: %s\n" % str(datetime.now())
     self._match_hierarchies_and_transfer_to(pdb_h_pre,  # from
                                             pdb_h_post,  # to
                                             transfer_b=True,
@@ -597,6 +607,7 @@ class AmberPrepRunner:
                                             transfer_chain_id=True,
                                             )
 
+    print "starting write_pdb: %s\n" % str(datetime.now())
     pdb_h_post.write_pdb_file(file_name='%s_new2.pdb' % self.base,
                               append_end=True,
                               crystal_symmetry=pdb_pre.crystal_symmetry(),
