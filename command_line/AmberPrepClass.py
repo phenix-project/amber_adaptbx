@@ -402,12 +402,12 @@ class AmberPrepRunner:
     f.write('logFile %s\n' % logfile)
 
     # Following should be true in AmberTools14/15:
-    amber_dir = libtbx.env.dist_path("amber")
-    if os.environ["AMBERHOME"]!=amber_dir:
-      raise Sorry("$AMBERHOME %s\nnot pointing to Phenix module %s" % (
-        os.environ["AMBERHOME"],
-        amber_dir,
-        ))
+    #amber_dir = libtbx.env.dist_path("amber")
+    #if os.environ["AMBERHOME"]!=amber_dir:
+    #  raise Sorry("$AMBERHOME %s\nnot pointing to Phenix module %s" % (
+    #    os.environ["AMBERHOME"],
+    #    amber_dir,
+    #    ))
     amber_dir = os.environ["AMBERHOME"]
     if(os.path.isfile(os.path.join(amber_dir,
                                    'dat',
