@@ -336,18 +336,3 @@ def build_unitcell(asu_pdb_file, output_file):
     cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
     ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
 
-def write_standard_pdb(parm, pdb_filename, **kwargs):
-  ''' Using standard_resnames, keep original resnum
-  
-  Parameters
-  ----------
-  parm : parmed.Structure
-  pdb_filename : str
-    output pdb
-  kwargs : dict
-      additional ParmEd keyword arguments.
-  '''
-  parm.write_pdb(pdb_filename,
-                 standard_resnames=True,
-                 renumber=False,
-                 **kwargs)

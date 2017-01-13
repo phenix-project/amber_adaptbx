@@ -1,0 +1,21 @@
+amber_prep {
+  input {
+    pdb_file_name = "1gdu/1gdu.pdb"
+    nproc = 1
+    antechamber {
+      prefer_input_method = chemical_component elbow *Auto
+    }
+  }
+  actions {
+    minimise = amber_all amber_h phenix_all *off
+    minimization_options = ""
+    clean = True
+    redq = False
+    LES = False
+    use_reduce = True
+    addles_input = ""
+  }
+  output {
+    file_name = None
+  }
+}

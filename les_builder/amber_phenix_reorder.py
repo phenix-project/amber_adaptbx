@@ -87,7 +87,7 @@ def initialize_order_converter(self):
     # 1st column: amber -> phenix
     # 2nd column: phenix -> amber
     filename = 'amber_phenix_atom_order_map.txt'
-    np.savetxt(filename, saved_arr.transpose())
+    np.savetxt(filename, saved_arr.transpose(), fmt='%5d')
     # end debugging
 
 def reorder_force_amber_to_phenix(frc, new_indices):

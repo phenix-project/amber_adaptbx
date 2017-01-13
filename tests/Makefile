@@ -10,6 +10,9 @@ test.medium.parallel:
 
 mp: test.medium.parallel
 
+collect:
+	./run_tests.py --collect-only
+
 test.all: test.long
 
 test.all.parallel:

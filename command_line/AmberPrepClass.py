@@ -13,9 +13,9 @@ from libtbx import easy_run
 from elbow.command_line import builder
 from amber_adaptbx import pdb4amber
 from amber_adaptbx import amber_library_server
-from amber_adaptbx.utils import build_unitcell, write_standard_pdb
+from amber_adaptbx.utils import build_unitcell
 from amber_adaptbx.les_builder.build import LESBuilder
-import parmed as pmd
+import parmed
 
 master_phil_string = """
   amber_prep
@@ -31,7 +31,7 @@ master_phil_string = """
       antechamber
         .caption = Options for Amber program antechamber
       {
-        prefer_input_method = chemical_component elbow *Auto
+        prefer_input_method = chemical_component *elbow Auto
           .type = choice
           .caption = Control to first input chosen for antechamber
       }
@@ -214,7 +214,6 @@ def get_chemical_components_file_name(code):
 class AmberPrepRunner:
 
   def __init__(self, base_name, LES=False):
-    # TODO: remove unused variables
     self.base = base_name
     self.LES = LES
     self.final_prmtop_file = '4amber_%s.prmtop' % self.base
@@ -239,64 +238,113 @@ class AmberPrepRunner:
     self.cryst1 = self.pdb_inp.crystal_symmetry_from_cryst1()
     self.pdb_hierarchy = self.pdb_inp.construct_hierarchy()
 
-  def curate_model(self, remove_alt_confs=False):
-    assert self.pdb_hierarchy
-    from mmtbx import pdbtools
-    if remove_alt_confs:
-      # performs removal in place
-      pdbtools.remove_alt_confs(self.pdb_hierarchy,
-                                always_keep_one_conformer=True,
-                                )
-  def correct_atom_occupancy_and_bfactor(self, pdb_filename):
-    # from Dave:
-    # Here's the goal: We want each atom in the 4phenix_xxxx.pdb file to have an
-    # occupancy that is the sum of the occupancies of the all the alternate
-    # conformers in the original pdb file.
-    # 
-    # If there was only one conformer in the original, we should keep that
-    # occupancy, whatever it is.  If there was more than one conformer, sum the
-    # occupancies of the various conformers.  We should do this on an atom-by-atom
-    # basis.  This should make the total number of electrons in the 4phenix_xxxx.pdb
-    # file the same as in the original pdb file.
-    # 
-    # I think/hope(?) parmed keeps information about the occupancies of multiple
-    # conformers, so all one needs to do is to sum them up.
-    # end Dave commend
+  def asu_parm7_to_4phenix_pdb(self, pdb_filename):
+    '''
+    Combine information in xxxx_asu.{prmtop,rst7} with that in the input
+       pdb file to create 4phenix_xxxx.pdb; (uses parmed)
 
-    # reduce program does not add H for water
-    # tleap will do that, so we need to update this information.
-    # also update H-occupancy for other residues too.
-    # b-factor will be also updated
-    # this is used for non-LES case
-    # load very original pdb file as info source
+    We want each atom in the 4phenix_xxxx.pdb file to have an occupancy
+    that is the sum of the occupancies of the all the alternate conformers
+    in the original pdb file.  This should make the total number of
+    electrons in the 4phenix_xxxx.pdb file the same as in the original pdb
+    file.
 
-    template_parm = pmd.load_file(self.pdb_filename)
-    parm = pmd.load_file(pdb_filename)
+    Note:  the atom order will be the "Amber" atom order; use phenix
+    routines after this to conver to phenix atom order.
+    '''
 
-    # update occupancy for alt-atom of template_parm
-    # so we can copy to parm
+    template_parm = parmed.load_file(self.pdb_filename)
+    parm = parmed.load_file("%s_asu.prmtop" % self.base, 
+                         xyz="%s_asu.rst7" % self.base )
+
+    # following kludge is needed to get got atom numbers; not needed if
+    #   conversion to phenix order is done right after this
+    #parm.write_pdb( pdb_filename )
+    #parm = parmed.load_file( pdb_filename )
+
+    # update occupancy to take into account alternate locations:
     for atom in template_parm.atoms:
       if atom.other_locations:
-        # if atom has alternative locations, ParmEd save them to other_locations (dict)
-        atom.occupancy += sum(a.occupancy for _, a in atom.other_locations.items())
-    # copy occupancy and bfactor for heavy atoms (original pdb file does not have H)
+        # if atom has alternative locations, ParmEd saves them to 
+        # other_locations (dict)
+        atom.occupancy += sum(a.occupancy for _, 
+                              a in atom.other_locations.items())
+
+    # transfer occupancy and bfactor for heavy atoms;
     for template_residue, residue in zip(template_parm.residues, parm.residues):
-      # for each residue, sort atom by name to make sure we get the same atom order between
-      # two parms
-      template_heay_atoms = sorted((atom for atom in template_residue.atoms if atom.atomic_number > 1),
+
+      # transfer residue numbers and chainId's:
+      residue.number = template_residue.number
+      residue.chain = template_residue.chain
+
+      # for each residue, sort atom by name to make sure we get the same 
+      #   atom order between the two parms
+      template_heavy_atoms = sorted((atom for atom in template_residue.atoms 
+                                   if atom.atomic_number > 1),
                                    key=lambda x : x.name)
-      heay_atoms = sorted((atom for atom in residue.atoms if atom.atomic_number > 1),
+      heavy_atoms = sorted((atom for atom in residue.atoms 
+                                   if atom.atomic_number > 1),
                                    key=lambda x : x.name)
-      for template_atom, atom in zip(template_heay_atoms, heay_atoms):
+      for template_atom, atom in zip(template_heavy_atoms, heavy_atoms):
         atom.occupancy = template_atom.occupancy
         atom.bfactor = template_atom.bfactor
 
-    # now updating hydrogens by copying number from its bond partner
+    # update hydrogens by copying occupancy and bfactor from its bond partner
     for atom in parm.atoms:
       if atom.atomic_number == 1:
         atom.occupancy = atom.bond_partners[0].occupancy
         atom.bfactor = atom.bond_partners[0].bfactor
-    write_standard_pdb(parm, pdb_filename)
+
+    parm.write_pdb( pdb_filename, standard_resnames=True, renumber=False )
+
+  def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file, 
+                              template_pdb, outpdb):
+    '''
+    Combine information in {parm7,rst7} with that in the template
+       pdb file to create 4phenix_xxxx.pdb; (uses parmed)
+    Original application was that parm7/rst7 came from initial minimization;
+       but they could come from any type of Amber run
+
+    Note:  the atom order in outpdb will be the "Amber" atom order; use phenix
+    routines after this to convert to phenix atom order.
+    '''
+
+    template_parm = parmed.load_file(template_pdb)
+    parm = parmed.load_file( parm7_file, xyz=rst7_file )
+
+    # truncate to unit cell:
+    n_asu_residue = len(template_parm.residues)
+    selection = ':1-{}'.format(n_asu_residue)
+    asu_parm = parm[selection]
+    asu_parm.box = parm.box
+    asu_parm.space_group = parm.space_group
+    asu_parm.symmetry = parm.symmetry
+
+    # following kludge is needed to get got atom numbers; not needed if
+    #   conversion to phenix order is done right after this
+    #asu_parm.write_pdb( pdb_filename )
+    #asu_parm = parmed.load_file( pdb_filename )
+
+    # transfer occupancy and bfactor for heavy atoms;
+    for template_residue, residue in zip(template_parm.residues, 
+                                         asu_parm.residues):
+
+      # transfer residue numbers and chainId's:
+      residue.number = template_residue.number
+      residue.chain = template_residue.chain
+
+      # for each residue, sort atom by name to make sure we get the same 
+      #   atom order between the two parms
+      #   TODO: handle extra atoms for LES (may not be needed?)
+      template_atoms = sorted((atom for atom in template_residue.atoms),
+                                   key=lambda x : x.name)
+      atoms = sorted((atom for atom in residue.atoms),
+                                   key=lambda x : x.name)
+      for template_atom, atom in zip(template_atoms, atoms):
+        atom.occupancy = template_atom.occupancy
+        atom.bfactor = template_atom.bfactor
+
+    asu_parm.write_pdb( outpdb, standard_resnames=True, renumber=False )
 
   def validate_pdb(self):
     assert self.pdb_hierarchy
@@ -314,11 +362,11 @@ class AmberPrepRunner:
       return gaps
     return False
 
-  def run_elbow_antechamber(self,
-                            ns_names=[],
-                            nproc=1,
-                            prefer_input_method=None,
-                            debug=False):
+  def process_ligands(self,
+                      ns_names=[],
+                      nproc=1,
+                      prefer_input_method=None,
+                      debug=False):
     assert self.pdb_hierarchy
     if nproc > 1:
       print "\n\tParallel processes not implemented\n"
@@ -507,149 +555,12 @@ class AmberPrepRunner:
     ero.show_stderr()
     return 0
 
-  def _pdb_hierarchy_and_rename_wat(self, filename):
-    pdb_inp = iotbx.pdb.input(file_name=filename)
-    pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=True)
-    # the -bres option in ambpdb does not (yet) change "WAT" to "HOH"
-    for atom_group in pdb_hierarchy.atom_groups():
-      if atom_group.resname in ["WAT"]:
-        atom_group.resname = "HOH"
-    return pdb_inp, pdb_hierarchy
-
-  def _match_hierarchies_and_transfer_to(self,
-                                         hierachy1,  # pre
-                                         hierachy2,  # post
-                                         transfer_b=False,
-                                         transfer_occ=False,
-                                         transfer_chain_id=False,
-                                         transfer_xyz=False,
-                                         ):
-    # match residues based on resseq and resname
-    # match atoms based on name an i_seq
-
-    # dac note, 12/16: this routine is impossibly slow!  I have re-ordered
-    #   the loops for some speedup, but we need to re-think this: I think
-    #   we can assume that the chains and residues (but not the atoms) are
-    #   in the same order in both hierarchies.
-
-    for chain_pre in hierachy1.chains():
-      for chain_post in hierachy2.chains():
-        if transfer_chain_id:
-          chain_post.id = chain_pre.id
-
-        for resi_pre in chain_pre.conformers()[0].residues():
-
-          # TODO: put this into a function?:
-          # convert Amber residue names to Brookhaven standards:
-          #  (only needed here for the "pre" hierarchy)
-          pre_resname = resi_pre.resname.strip()
-          if pre_resname == "CYX": pre_resname = "CYS"
-          if pre_resname == "HID": pre_resname = "HIS"
-          if pre_resname == "HIE": pre_resname = "HIS"
-          if pre_resname == "HIP": pre_resname = "HIS"
-          if pre_resname == "C3":  pre_resname = "C"
-          if pre_resname == "U3":  pre_resname = "U"
-          if pre_resname == "G3":  pre_resname = "G"
-          if pre_resname == "A3":  pre_resname = "A"
-          if pre_resname == "C5":  pre_resname = "C"
-          if pre_resname == "U5":  pre_resname = "U"
-          if pre_resname == "G5":  pre_resname = "G"
-          if pre_resname == "A5":  pre_resname = "A"
-          if pre_resname == "DC3":  pre_resname = "DC"
-          if pre_resname == "DT3":  pre_resname = "DT"
-          if pre_resname == "DG3":  pre_resname = "DG"
-          if pre_resname == "DA3":  pre_resname = "DA"
-          if pre_resname == "DC5":  pre_resname = "DC"
-          if pre_resname == "DT5":  pre_resname = "DT"
-          if pre_resname == "DG5":  pre_resname = "DG"
-          if pre_resname == "DA5":  pre_resname = "DA"
-
-          for resi_post in chain_post.conformers()[0].residues():
-            if (resi_pre.resseq == resi_post.resseq and
-                    pre_resname == resi_post.resname.strip()
-                ):
-              for atom_pre in resi_pre.atoms():
-                for atom_post in resi_post.atoms():
-                  if atom_pre.name == atom_post.name:
-                    if transfer_b:
-                      atom_post.b = atom_pre.b
-                    if transfer_occ:
-                      atom_post.occ = atom_pre.occ
-                    if transfer_xyz:
-                      atom_post.xyz = (atom_pre.xyz[0],
-                                       atom_pre.xyz[1],
-                                       atom_pre.xyz[2])
-
-  #--------------------------------------------------------------------------
-  # make an Amber-compatible asu-only pdb file, and transfer occupancies,
-  #    b-factors and chain-ids to it
-  # (Only called once: takes xxxx_asu.{prmtop,rst7} as inputs, writes
-  #    xxxx_new2.pdb.  Also creates intermediate file xxxx_new.pdb
-  #--------------------------------------------------------------------------
-  def run_ambpdb_and_transfer(self):
-    assert self.base
-    cmd = 'ambpdb -bres -p %s_asu.prmtop < %s_asu.rst7 > %s_new.pdb' % tuple(
-        [self.base] * 3
-    )
-    print_cmd(cmd)
-    ero = easy_run.fully_buffered(cmd)
-    ero.show_stdout()
-    ero.show_stderr()
-
-    pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('%s_4tleap.pdb' % self.base)
-    pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
-
-    self._match_hierarchies_and_transfer_to(pdb_h_pre,  # from
-                                            pdb_h_post,  # to
-                                            transfer_b=True,
-                                            transfer_occ=True,
-                                            transfer_chain_id=True,
-                                            )
-
-    pdb_h_post.write_pdb_file(file_name='%s_new2.pdb' % self.base,
-                              append_end=True,
-                              crystal_symmetry=pdb_pre.crystal_symmetry(),
-                              )
-    return 0
-
-  # add cryst1 and sscale; creates 4phenix_base_type_.pdb file
-  def finalize_pdb(self,
-                   pdb_filename=None, sort_atoms=True, type='',
-                   ):
-    # should we change 'type' to something else. This is Python keyword
-    # Please update doc for this method.
-    assert self.pdb_hierarchy
-    assert self.cryst1
-    assert self.base
-    if pdb_filename:
-      pdb_inp = iotbx.pdb.input(pdb_filename)
-      pdb_hierarchy = pdb_inp.construct_hierarchy(sort_atoms=sort_atoms)
-    else:
-      # this returns the altloc to the model so not good!!!
-      pdb_hierarchy = self.pdb_hierarchy
-      assert 0
-    pdbstring = pdb_hierarchy.as_pdb_string(crystal_symmetry=self.cryst1)
-    print('--> final_pdb_file_4phenix', self.final_pdb_file_4phenix)
-    print 'Writing 4phenix file', self.final_pdb_file_4phenix
-    output_filename = '4phenix_%s.pdb' % self.base
-    with open(output_filename, 'w') as f:
-      f.write(pdbstring)
-    if type:
-      # update filename after doing minimization
-      # need to make a copy after doing minimization
-      # TODO: should do this in another place?
-      self.final_pdb_file_4phenix = '4phenix_' + self.base + type + '.pdb'
-      easy_run.fully_buffered('cp %s %s' % (output_filename, self.final_pdb_file_4phenix))
-    #~ import code; code.interact(local=locals())
-    return 0
-
   def build_unitcell_prmtop_and_rst7_files(self, redq=False):
 
     #-----------------------------------------------------------------
     # Step 1: add SYMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
     #-----------------------------------------------------------------
 
-    assert self.base, 'must provide base name'
     uc_pdb_file = "%s_4UnitCell.pdb" % self.base
     with open(uc_pdb_file, "wb") as fout:
       with open(self.pdb_filename) as fin:
@@ -670,7 +581,8 @@ class AmberPrepRunner:
             fout.write(line)
 
     #-----------------------------------------------------------------
-    # Step 2: invoke the phenix build_unitcell() method to convert
+    # Step 2: invoke either the phenix build_unitcell() method,
+    #         or Amber's UnitCell program, to convert
     #         xxxx_4UnitCell.pdb to xxxx_4tleap_uc1.pdb
     #-----------------------------------------------------------------
 
@@ -679,7 +591,7 @@ class AmberPrepRunner:
 
     #-----------------------------------------------------------------
     # Step 3: run xxxx_4leap_uc1.pdb back through pdb4amber to get new 
-    #         sslist that describes SS bonds.  Output will be
+    #         sslist that describes gaps and SS bonds.  Output will be
     #         xxxx_4tleap_uc.pdb
     #-----------------------------------------------------------------
 
@@ -710,43 +622,9 @@ class AmberPrepRunner:
     os.rename('%s_uc.rst7' % self.base, '4amber_%s.rst7' % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
 
-  @classmethod
-  def correct_resid(cls, template_pdb_file, output_file):
-    ''' ensure output_file has the same resnum, chain as `template_pdb_file`
-
-    `output_file` will be overwriten. Make sure that two pdb files
-    have the same residue order
-    '''
-    template_parm = pmd.load_file(template_pdb_file)
-    target_parm = pmd.load_file(output_file)
-
-    for template_residue, target_residue in zip(template_parm.residues, target_parm.residues):
-      target_residue.number = template_residue.number
-      target_residue.chain = template_residue.chain
-    write_standard_pdb(target_parm, output_file)
-
-  def _write_LES_pdb_4phenix(self):
-    # TODO: update ocupancy
-    asu_parm = pmd.load_file(self.pdb_filename)
-    n_asu_residue = len(asu_parm.residues)
-    selection = ':1-{}'.format(n_asu_residue)
-
-    parm = pmd.load_file(self.final_prmtop_file, xyz=self.final_rst7_file)
-    # strip atoms
-    asu_new_parm = parm[selection]
-    asu_new_parm.box = parm.box
-    asu_new_parm.space_group = asu_parm.space_group
-    asu_new_parm.symmetry = asu_parm.symmetry
-    # update occupancy
-    # we can use original occupancy from ASU pdb file too.
-    for atom in asu_new_parm.atoms:
-      atom.occupancy = 1.0
-    print('--> final_pdb_file_4phenix', self.final_pdb_file_4phenix)
-    write_standard_pdb(asu_new_parm, self.final_pdb_file_4phenix)
-
-  def run_minimise(self, minimization_type=None, minimization_options=''):
+  def run_minimise(self, mintype=None, minimization_options=''):
     assert self.base
-    if minimization_type is None:
+    if mintype is None:
       return
 
     inputs = {"amber_h" : """Initial minimization
@@ -764,91 +642,58 @@ class AmberPrepRunner:
       /
       """
               }
-    if minimization_options and minimization_type in ["amber_h", "amber_all"]:
+
+    if self.LES:
+      LEStype=".LES"
+    else:
+      LEStype=""
+
+    if minimization_options and mintype in ["amber_h", "amber_all"]:
       inputs['amber_h'] = inputs['amber_h'].replace('/', minimization_options + '\n /')
       inputs['amber_all'] = inputs['amber_all'].replace('/', minimization_options + '\n /')
-    output_rst7_file_name = ' %s_%s.rst7' % (self.base, minimization_type)
-    if self.LES:
-      output_rst7_file_name = output_rst7_file_name.replace('.rst7', '.LES.rst7')
 
-    if minimization_type in ["amber_h", "amber_all"]:
+    output_rst7_file = '4amber_%s%s.min.%s.rst7' % (self.base, LEStype, mintype)
+    output_pdb_file = '4phenix_%s%s.min.%s.pdb' % (self.base, LEStype, mintype)
 
-      input_file = '%s_%s.in' % (self.base, minimization_type)
-      f = open('%s_%s.in' % (self.base, minimization_type), 'wb')
-      f.write(inputs[minimization_type])
+    if mintype in ["amber_h", "amber_all"]:
+
+      input_file = '%s_%s.in' % (self.base, mintype)
+      f = open('%s_%s.in' % (self.base, mintype), 'wb')
+      f.write(inputs[mintype])
       f.close()
-      cmd = 'sander -O -i %s -p %s -c %s -o %s_%s.out \
+      cmd = 'sander%s -O -i %s -p %s -c %s -o %s_%s%s.out \
            -ref %s -r %s' % (
+          LEStype,
           input_file,
           self.final_prmtop_file,
           self.final_rst7_file,
-          self.base,
-          minimization_type,
+          self.base, mintype, LEStype, 
           self.final_rst7_file,
-          output_rst7_file_name
+          output_rst7_file
       )
-      if self.LES:
-        cmd = cmd.replace('sander', 'sander.LES')
       print_cmd(cmd)
-      # test function that may be useful...
       test_files_exist([input_file,
                         self.final_prmtop_file,
                         self.final_rst7_file,
                         ])
       ero = easy_run.fully_buffered(cmd)
       assert (ero.return_code == 0)
-      test_files_exist([input_file,
-                        self.final_prmtop_file,
-                        self.final_rst7_file,
-                        ])
 
-      cmd = 'ambpdb -bres -p %s < %s > %s_new.pdb' % (
-          self.final_prmtop_file,
-          output_rst7_file_name,
-          self.base,
-      )
-      print_cmd(cmd)
-      ero = easy_run.fully_buffered(cmd)
-      assert (ero.return_code == 0)
-      ero.show_stdout()
-      ero.show_stderr()
-      # rename
-      if self.LES:
-        self.final_rst7_file = '4amber_' + self.base + '.LES.min.{}.rst7'.format(minimization_type)
-      else:
-        self.final_rst7_file = '4amber_' + self.base + '.min.{}.rst7'.format(minimization_type)
-      # TODO: Why I can not use os.rename? (Got OSError about file not found. Weird)
-      # save minimized rst7
-      easy_run.fully_buffered('cp {} {}'.format(output_rst7_file_name, self.final_rst7_file))
+      self.uc_parm7_to_4phenix_pdb( self.final_prmtop_file, output_rst7_file,
+                    "4phenix_%s%s.pdb" % (self.base, LEStype),
+                    output_pdb_file )
 
-      if self.LES:
-        # TODO: remove this and use Nigel's version.
-        #    dac: what do you mean by "Nigel's version"???
-        # Why using this right now? Seems too me that the output pdb from Nigel's code
-        # does is not a reordered version of minimized rst7 file. Or may be I made a bug.
-        # we should avoid writing too many files to disk.
-        self.final_pdb_file_4phenix = '4phenix_%s.LES.min.%s.pdb' % (self.base, minimization_type)
-        self._write_LES_pdb_4phenix()
-      else:
-        pdb_pre, pdb_h_pre = self._pdb_hierarchy_and_rename_wat('4phenix_%s.pdb' % self.base)
-        pdb_post, pdb_h_post = self._pdb_hierarchy_and_rename_wat('%s_new.pdb' % self.base)
+      pdb_inp = iotbx.pdb.input(file_name=output_pdb_file )
+      pdb_h = pdb_inp.construct_hierarchy(sort_atoms=True)
+      pdb_h.write_pdb_file(file_name=output_pdb_file,
+                           append_end=True,
+                           crystal_symmetry=self.pdb_inp.crystal_symmetry(),
+                           )
 
-        # there is a function that will transfer the coordinates from one PDB
-        # hierarchy to another but the atoms have to be the same number & order
-        self._match_hierarchies_and_transfer_to(pdb_h_post,  # from
-                                                pdb_h_pre,  # to
-                                                transfer_xyz=True,
-                                                )
+      self.final_pdb_file_4phenix = output_pdb_file
+      self.final_rst7_file = output_rst7_file
 
-        pdb_h_pre.write_pdb_file(file_name='%s_new2.pdb' % self.base,
-                                 append_end=True,
-                                 crystal_symmetry=pdb_pre.crystal_symmetry(),
-                                 )
-
-        type_ = '.min.%s' % minimization_type
-        self.finalize_pdb(pdb_filename='%s_new2.pdb' % self.base,
-                          sort_atoms=True, type=type_)
-    elif minimization_type == "phenix_all":
+    elif mintype == "phenix_all":
       if self.LES:
         cmd = 'phenix.geometry_minimization 4phenix_%s.LES.pdb amber.use_amber=True \
              amber.topology_file_name=%s \
@@ -870,9 +715,9 @@ class AmberPrepRunner:
       ero.show_stdout()
       ero.show_stderr()
       if self.LES:
-        self.final_pdb_file_4phenix = '4phenix_%s.LES.min.%s.pdb' % (self.base, minimization_type)
+        self.final_pdb_file_4phenix = '4phenix_%s.LES.min.%s.pdb' % (self.base, mintype)
       else:
-        self.final_pdb_file_4phenix = '4phenix_%s.min.%s.pdb' % (self.base, minimization_type)
+        self.final_pdb_file_4phenix = '4phenix_%s.min.%s.pdb' % (self.base, mintype)
       os.rename('4phenix_%s_minPhenix.pdb' % self.base,
                 self.final_pdb_file_4phenix)
     return 0
@@ -909,8 +754,6 @@ class AmberPrepRunner:
       asu_tleap_input_run
       4UnitCell.pdb
       leap.log
-      new2.pdb
-      new.pdb
       tleap_asu.log
       tleap.in
       tleap_uc.log
@@ -945,17 +788,11 @@ class AmberPrepRunner:
       if os.path.isfile(s % self.base):
         os.remove(s % self.base)
 
-  def write_pdb_hierarchy(self, pdb_file_name):
-    assert self.pdb_hierarchy
-    self.pdb_hierarchy.write_pdb_file(
-        file_name=pdb_file_name,
-        append_end=True,
-        crystal_symmetry=self.pdb_inp.crystal_symmetry(),
-    )
-
+#  end of the AmberPrepRunner class block
 
 def get_molecule_from_hierarchy(hierarchy, resname):
   # only works for non altloc files
+  # note: only called once
   from elbow.chemistry.MoleculeClass import MoleculeClass
   mol = MoleculeClass()
   for residue_group in hierarchy.residue_groups():
@@ -967,12 +804,12 @@ def get_molecule_from_hierarchy(hierarchy, resname):
         break
   return mol
 
-# run antechamber from a components.cif file:
-
-
 def _run_antechamber_ccif(residue_name,
                           use_am1_and_maxcyc_zero=True,
                           debug=False):
+  '''
+  run antechamber from a components.cif file:
+  '''
   print "\n=================================================="
   print "Running antechamber_ccif for %s " % residue_name
   print "=================================================="
@@ -1003,13 +840,13 @@ def _run_antechamber_ccif(residue_name,
 
   # should there be a check for output???
 
-# run elbow and antechamber
-
-
 def _run_elbow_antechamber(pdb_hierarchy,
                            residue_name,
                            use_am1_and_maxcyc_zero=True,
                            debug=False):
+  '''
+  run elbow and antechamber
+  '''
   pdb_mol = get_molecule_from_hierarchy(pdb_hierarchy, residue_name)
   names = []
   for atom in pdb_mol:
@@ -1102,7 +939,6 @@ def _run_elbow_antechamber(pdb_hierarchy,
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
 
-
 def run(rargs):
   working_params = setup_options_args(rargs)
   inputs = working_params.amber_prep.input
@@ -1113,14 +949,13 @@ def run(rargs):
   invalid = amber_prep_runner.validate_pdb()
   if invalid:
     raise Sorry('PDB input is not "valid"')
-  # amber_prep_runner.curate_model(remove_alt_confs=True)
-  # need to write PDB for some of the other methods
   basename = os.path.basename(inputs.pdb_file_name)
-  current_pdb_file_name = basename.replace(
-      '.pdb',
-      '_curated.pdb',
-  )
-  amber_prep_runner.write_pdb_hierarchy(current_pdb_file_name)
+  # amber_prep_runner.curate_model(remove_alt_confs=True)
+  #current_pdb_file_name = basename.replace(
+  #    '.pdb',
+  #    '_curated.pdb',
+  #)
+  #amber_prep_runner.write_pdb_hierarchy(current_pdb_file_name)
 
   print "\n=================================================="
   print "Running pdb4amber on %s" % inputs.pdb_file_name
@@ -1129,7 +964,7 @@ def run(rargs):
   tleap_input_pdb = "%s_4tleap.pdb" % base
   # log = []
   ns_names, gaplist, sslist = pdb4amber.run(tleap_input_pdb,
-                                            current_pdb_file_name,
+                                            inputs.pdb_file_name,
                                             arg_elbow=True,
                                             arg_reduce=actions.use_reduce,
                                             # log=log,
@@ -1139,7 +974,7 @@ def run(rargs):
   print "Setting up library files for non-standard residues"
   print "=================================================="
 
-  amber_prep_runner.run_elbow_antechamber(
+  amber_prep_runner.process_ligands(
       ns_names,
       nproc=inputs.nproc,
       prefer_input_method=inputs.antechamber.prefer_input_method,
@@ -1154,7 +989,7 @@ def run(rargs):
   #   finds gaps itself), and for making the unit cell pdb file; in
   #   the latter case, the second run of pdb4amber (with the unit cell
   #   pdb file) will find the gaps needed for the construction of the
-  #   4amber_base.prmtop file.
+  #   4amber_xxxx.prmtop file.
   #
   # N.B.: this means that the base_asu.prmtop file should never be used!
   #   we might want to make sure that this file is always removed.
@@ -1170,19 +1005,30 @@ def run(rargs):
                               redq=actions.redq,
                               )
   amber_prep_runner.update_rst7_box("asu")
-  amber_prep_runner.run_ambpdb_and_transfer()   # (note: only called once)
-  amber_prep_runner.finalize_pdb(
-      pdb_filename='%s_new2.pdb' % amber_prep_runner.base, sort_atoms=True)
+
+  phenix_file = '4phenix_%s.pdb' % amber_prep_runner.base
+  amber_prep_runner.asu_parm7_to_4phenix_pdb(phenix_file)
+
+  # N.B: above 4phenix file does not have the phenix atom order inside
+  #    residues: pass this through a phenix hierarchy function to get that.
+  pdb_post = iotbx.pdb.input(file_name=phenix_file)
+  pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=True)
+  pdb_h_post.write_pdb_file(file_name=phenix_file,
+            append_end=True,
+            crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
 
   print "\n============================================================"
   print "Preparing unit cell files: 4amber_%s.prmtop and 4amber_%s.rst7" % (base, base)
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq)
-  inout = '4phenix_%s.pdb' % amber_prep_runner.base
-  amber_prep_runner.correct_resid(amber_prep_runner.pdb_filename, inout)
-  amber_prep_runner.correct_atom_occupancy_and_bfactor(inout)
+
+  #  we are done unless LES or minimization has been requested
+
   if actions.LES:
+    print "\n=================================================="
+    print "Building the LES prmtop and rst7 files"
+    print "=================================================="
     pdb_file_name = working_params.amber_prep.input.pdb_file_name
     les_builder = LESBuilder(
         pdb_file_name,
@@ -1191,14 +1037,12 @@ def run(rargs):
         addles_input_file=actions.addles_input)
     les_builder.run()
 
-  if actions.minimise == "off":
-    pass
-  else:
+  if actions.minimise != "off":
     print "\n=================================================="
     print "Minimizing input coordinates."
     print "=================================================="
     amber_prep_runner.run_minimise(actions.minimise,
-                                   minimization_options=actions.minimization_options)
+                      minimization_options=actions.minimization_options)
 
   amber_prep_runner.check_special_positions()
 
@@ -1223,17 +1067,6 @@ def run(rargs):
   return amber_prep_runner.final_pdb_file_4phenix
 
 if __name__ == "__main__":
-  if 1:
-    args = sys.argv[1:]
-    del sys.argv[1:]
-    run(args)
-  else:
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("pdb_file_name", help="name of pdb file")
-    parser.add_argument("min", help="option to minimize", default=0)
-    parser.add_argument("-c", "--no_clean", help="don't remove "
-                        "intermediate files", action='True', default=False)
-    args = parser.parse_args()
-    run(args.pdb_file_name, minimize=args.min, clean=args.no_clean)
-    AmberPrepRunner.run_minimise(args.minimise, minimization_options=args.minimization_options)
+  args = sys.argv[1:]
+  del sys.argv[1:]
+  run(args)

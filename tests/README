@@ -30,3 +30,7 @@ Note: add "-s" if you want to see more verbose
 3. Further info
 - Check Makefile
 - Check __doc__ in ./run_tests.py
+
+4. To collect all the test names
+
+./run_tests.py --collect-only
