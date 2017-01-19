@@ -370,27 +370,28 @@ class AmberPrepRunner:
     assert self.pdb_hierarchy
     if nproc > 1:
       print "\n\tParallel processes not implemented\n"
+
     for residue_name in ns_names:
-      if prefer_input_method:
-        if prefer_input_method == "chemical_component":
-          _run_antechamber_ccif(residue_name)
-          continue
-        elif prefer_input_method == "elbow":
-          _run_elbow_antechamber(self.pdb_hierarchy, residue_name, debug=debug)
-          continue
-      if amber_library_server.is_in_components_lib(residue_name):
+
+      #  use existing mol2 file if present:
+      if os.path.isfile('%s.mol2' % residue_name):
+        print "%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
+
+      # else check if this has already been entered in the amber library:
+      elif amber_library_server.is_in_components_lib(residue_name):
         print """
   Residue "%s" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
         """ % residue_name
-        continue
-      elif os.path.isfile('%s.mol2' % residue_name):
-        print "%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
-        continue
-      elif get_chemical_components_file_name(residue_name):
+
+      #  else use chemical component dictionary if requested (should be rare):
+      elif prefer_input_method == "chemical_component":
         _run_antechamber_ccif(residue_name)
+
+      #  default is to use elbow/antechamber (this will be the most common):
       else:
         _run_elbow_antechamber(self.pdb_hierarchy, residue_name, debug=debug)
+
     return 0
 
   #=================================
