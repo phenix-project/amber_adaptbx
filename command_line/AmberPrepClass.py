@@ -810,6 +810,7 @@ def get_molecule_from_hierarchy(hierarchy, resname):
           mol.AddAtom(atom.element, xyz=atom.xyz)
           mol[-1].name = atom.name
         break
+    if mol: break
   return mol
 
 def _run_antechamber_ccif(residue_name,
