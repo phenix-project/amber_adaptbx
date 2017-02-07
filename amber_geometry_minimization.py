@@ -3,6 +3,11 @@ from cctbx import geometry_restraints
 import sys
 import amber_adaptbx.lbfgs
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 class lbfgs(amber_adaptbx.lbfgs.lbfgs):
   def __init__(self,
         sites_cart,

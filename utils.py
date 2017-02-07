@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import itertools
 import time
@@ -104,6 +105,8 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False)
   bond_extremes = extreme()
   bond_extremes.header  = '  Bond deltas from Amber ideals\n'
   bond_extremes.header += '    Atoms %s ideal   model   delta\n' % (' '*36)
+  # save coordinates here since calling parm.coordinates is time consumming
+  parm_coordinates = parm.coordinates
   for i, bond in enumerate(bonds):
     atom1_idx= bond.atom1.idx
     atom2_idx= bond.atom2.idx
@@ -112,8 +115,8 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False)
     # only use bonds from 1st ASU
     if atom1_idx >= natoms or atom2_idx >=natoms:
       continue
-    atom1 = parm.coordinates[atom1_idx]
-    atom2 = parm.coordinates[atom2_idx]
+    atom1 = parm_coordinates[atom1_idx]
+    atom2 = parm_coordinates[atom2_idx]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
@@ -140,6 +143,8 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   else:
     bonds = itertools.chain(parm.bonds_inc_h, parm.bonds_without_h)
   bond_Zs = []
+  # save coordinates here since calling parm.coordinates is time consumming
+  parm_coordinates = parm.coordinates
   for i, bond in enumerate(bonds):
     atom1_idx= bond.atom1.idx
     atom2_idx= bond.atom2.idx
@@ -148,8 +153,8 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     # only use bonds from 1st ASU
     if atom1_idx >= natoms or atom2_idx >=natoms:
       continue
-    atom1 = parm.coordinates[atom1_idx]
-    atom2 = parm.coordinates[atom2_idx]
+    atom1 = parm_coordinates[atom1_idx]
+    atom2 = parm_coordinates[atom2_idx]
     dx = atom1[0] - atom2[0]
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
@@ -176,6 +181,8 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False
   angle_extremes = extreme()
   angle_extremes.header  = '  Angle deltas from Amber ideals\n'
   angle_extremes.header += '    Atoms %s ideal   model   delta\n' % (' '*59)
+  # save coordinates here since calling parm.coordinates is time consumming
+  parm_coordinates = parm.coordinates
   for i, angle in enumerate(angles):
     # in non-P1 space groups, amber topology knows entire unit cell angles
     # only use angles from 1st ASU
@@ -185,9 +192,9 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False
     natoms=len(sites_cart)
     if atom1_idx >= natoms or atom2_idx >=natoms or atom3_idx >=natoms:
       continue
-    atom1 = parm.coordinates[atom1_idx]
-    atom2 = parm.coordinates[atom2_idx]
-    atom3 = parm.coordinates[atom3_idx]
+    atom1 = parm_coordinates[atom1_idx]
+    atom2 = parm_coordinates[atom2_idx]
+    atom3 = parm_coordinates[atom3_idx]
     a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
@@ -218,6 +225,8 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   else:
     angles = itertools(parm.angles_inc_h, parm.angles_without_h)
   angle_Zs = []
+  # save coordinates here since calling parm.coordinates is time consumming
+  parm_coordinates = parm.coordinates
   for i, angle in enumerate(angles):
     atom1_idx= angle.atom1.idx
     atom2_idx= angle.atom2.idx
@@ -225,9 +234,9 @@ def angle_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
     natoms=len(sites_cart)
     if atom1_idx >= natoms or atom2_idx >=natoms or atom3_idx >=natoms:
       continue
-    atom1 = parm.coordinates[atom1_idx]
-    atom2 = parm.coordinates[atom2_idx]
-    atom3 = parm.coordinates[atom3_idx]
+    atom1 = parm_coordinates[atom1_idx]
+    atom2 = parm_coordinates[atom2_idx]
+    atom3 = parm_coordinates[atom3_idx]
     a = [ atom1[0]-atom2[0], atom1[1]-atom2[1], atom1[2]-atom2[2] ]
     b = [ atom3[0]-atom2[0], atom3[1]-atom2[1], atom3[2]-atom2[2] ]
     a = flex.double(a)
@@ -309,25 +318,30 @@ def write_rst7_from_GeometryManager(geom, crystal_symmetry, filename):
   # restore
   parm.coordinates = old_coords
 
-def build_unitcell(asu_pdb_file, output_file):
+def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
   '''build unitcell from asu pdb file
 
   Parameters
   ----------
   asu_pdb_file : str, ASU pdb file name
   output_file : str, unitcell pdb file name
+  use_amber_unitcell : bool, default False
+      if True, use amber UnitCell program to construct unitcell.
+      If True, require asu_pdb_file to have remark 290
   '''
-  import iotbx.pdb
-  import cctbx
-
-  use_UnitCell = False
-  if use_UnitCell:
+  if use_amber_unitcell:
+    with open(asu_pdb_file ) as fh:
+      if 'REMARK 290   SMTRY' not in fh.read():
+        print('UnitCell program requires pdb file to have "REMARK 290   SMTRY" line')
+        raise ValueError('Should use option: skip_remark_290=True')
     cmd = "UnitCell -p %s -o %s" % (asu_pdb_file, output_file)
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
     ero.show_stdout()
     ero.show_stderr()
   else:
+    import iotbx.pdb
+    import cctbx
     pdb_inp = iotbx.pdb.input(asu_pdb_file)
     cs = pdb_inp.crystal_symmetry()
     ph = pdb_inp.construct_hierarchy()
@@ -335,4 +349,3 @@ def build_unitcell(asu_pdb_file, output_file):
     abc = cs.unit_cell().parameters()[:3]
     cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
     ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
-

@@ -11,7 +11,8 @@ import libtbx.load_env
 import libtbx.phil.command_line
 from libtbx import easy_run
 from elbow.command_line import builder
-from amber_adaptbx import pdb4amber
+# from amber_adaptbx.deprecated import pdb4amber
+import pdb4amber
 from amber_adaptbx import amber_library_server
 from amber_adaptbx.utils import build_unitcell
 from amber_adaptbx.les_builder.build import LESBuilder
@@ -58,6 +59,9 @@ master_phil_string = """
         .type = str
         .caption = User specify addles input filename. Optional.
         .help = User specify addles input filename. Optional.
+      skip_remark_290 = False
+        .type = bool
+        .help = If True, not using REMARK 290 to build unitcell (thus, not use amber's UnitCell)
     }
     output
     {
@@ -131,7 +135,7 @@ def setup_options_args(rargs):
   phil_args = []
   for arg in args:
     if os.path.isfile(arg):
-      if iotbx.pdb.is_pdb_file(arg):
+      if iotbx.pdb.is_pdb_file(arg) or arg.endswith('.cif'):
         pdbs.append(arg)
       else:
         try:
@@ -295,7 +299,7 @@ class AmberPrepRunner:
         atom.occupancy = atom.bond_partners[0].occupancy
         atom.bfactor = atom.bond_partners[0].bfactor
 
-    parm.write_pdb( pdb_filename, standard_resnames=True, renumber=False )
+    parm.write_pdb(pdb_filename, standard_resnames=True, renumber=False)
 
   def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file, 
                               template_pdb, outpdb):
@@ -344,7 +348,7 @@ class AmberPrepRunner:
         atom.occupancy = template_atom.occupancy
         atom.bfactor = template_atom.bfactor
 
-    asu_parm.write_pdb( outpdb, standard_resnames=True, renumber=False )
+    asu_parm.write_pdb(outpdb, standard_resnames=True, renumber=False)
 
   def validate_pdb(self):
     assert self.pdb_hierarchy
@@ -556,7 +560,8 @@ class AmberPrepRunner:
     ero.show_stderr()
     return 0
 
-  def build_unitcell_prmtop_and_rst7_files(self, redq=False):
+  def build_unitcell_prmtop_and_rst7_files(self, redq=False,
+          use_amber_unitcell=True):
 
     #-----------------------------------------------------------------
     # Step 1: add SYMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
@@ -588,7 +593,8 @@ class AmberPrepRunner:
     #-----------------------------------------------------------------
 
     tleap_pdb_file1 = "%s_4tleap_uc1.pdb" % self.base
-    build_unitcell(uc_pdb_file, tleap_pdb_file1)
+    build_unitcell(uc_pdb_file, tleap_pdb_file1,
+                   use_amber_unitcell=use_amber_unitcell)
 
     #-----------------------------------------------------------------
     # Step 3: run xxxx_4leap_uc1.pdb back through pdb4amber to get new 
@@ -599,6 +605,7 @@ class AmberPrepRunner:
     tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
     ns_names, gaplist, sslist = pdb4amber.run(
         tleap_pdb_file, tleap_pdb_file1, arg_elbow=True,
+        arg_logfile=sys.stderr,
     )
 
     #-----------------------------------------------------------------
@@ -950,7 +957,8 @@ def run(rargs):
   invalid = amber_prep_runner.validate_pdb()
   if invalid:
     raise Sorry('PDB input is not "valid"')
-  basename = os.path.basename(inputs.pdb_file_name)
+
+  # basename = os.path.basename(inputs.pdb_file_name)
   # amber_prep_runner.curate_model(remove_alt_confs=True)
   #current_pdb_file_name = basename.replace(
   #    '.pdb',
@@ -968,7 +976,7 @@ def run(rargs):
                                             inputs.pdb_file_name,
                                             arg_elbow=True,
                                             arg_reduce=actions.use_reduce,
-                                            # log=log,
+                                            arg_logfile=sys.stderr,
                                             )
 
   print "\n=================================================="
@@ -1022,7 +1030,8 @@ def run(rargs):
   print "Preparing unit cell files: 4amber_%s.prmtop and 4amber_%s.rst7" % (base, base)
   print "============================================================"
 
-  amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq)
+  amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
+          use_amber_unitcell=not working_params.amber_prep.actions.skip_remark_290)
 
   #  we are done unless LES or minimization has been requested
 

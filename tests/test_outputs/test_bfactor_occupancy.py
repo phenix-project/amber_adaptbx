@@ -27,6 +27,7 @@ def test_bfactor_occupancy_by_comparing_pdb_files(code):
  command_build = [
          'phenix.AmberPrep',
          pdb_fn,
+         'skip_remark_290=True',
          'LES=True'
  ]
 

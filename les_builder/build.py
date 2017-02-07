@@ -72,11 +72,11 @@ class LESBuilder(object):
 
     self.base = '.'.join(os.path.basename(
         self.original_pdb_file).split('.')[:-1])
-    asu_pdb_parm = parmed.load_file(original_pdb_file)
-    self.space_group = asu_pdb_parm.space_group
-    self.symmetry = asu_pdb_parm.symmetry
-    self.box = asu_pdb_parm.box
-    self.n_asu_residues = len(asu_pdb_parm.residues)
+    self._orig_structure = parmed.load_file(original_pdb_file)
+    self.space_group = self._orig_structure.space_group
+    self.symmetry = self._orig_structure.symmetry
+    self.box = self._orig_structure.box
+    self.n_asu_residues = len(self._orig_structure.residues)
     self.unitcell_pdb_file = unitcell_pdb_file
     self.addles_input_file = addles_input_file
 
@@ -159,7 +159,17 @@ class LESBuilder(object):
     expected_header = EXPECTED_HEADER_TEMPLATE.format(base=self.base)
     assert expected_header in input, 'addles input must have header\n\n{}\n'.format(expected_header)
 
+  def _has_altlocs(self):
+    for residue in self._orig_structure.residues:
+      for atom in residue.atoms:
+        if atom.other_locations:
+          return True
+    return False
+
   def run(self):
+
+    if not self._has_altlocs():
+      raise ValueError("pdb file should have altlocs for LES build")
 
     # build unitcell from asu pdb============================================
     #    (input is usually original pdb file; creates xxxx_uc.pdb)

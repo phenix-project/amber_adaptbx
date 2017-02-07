@@ -23,12 +23,13 @@ def test_netcdf_trajectory():
     'amber.netcdf_trajectory_file_name=hello.nc'
   ]
 
-  n_frames = 60
+  n_frames = 59
   parm = pmd.load_file(get_fn('vAla3/vAla3.prmtop'))
   expected_boxes = np.array(n_frames*[[30., 30., 30., 90., 90., 90.],], dtype='f8')
 
   with tempfolder():
     output = subprocess.check_output(command_refine)
     traj = NetCDFTraj.open_old('hello.nc')
+    print(traj.coordinates.shape)
     aa_eq(traj.box, expected_boxes)
-    assert traj.coordinates.shape == (60, len(parm.atoms), 3)
+    assert traj.coordinates.shape == (n_frames, len(parm.atoms), 3)

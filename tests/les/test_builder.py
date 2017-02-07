@@ -8,6 +8,7 @@ from amber_adaptbx.tests.utils import (tempfolder, get_fn,
         run_sander_minimization,
         get_prmtop_and_rst7_and_pdb_filenames_from_pdb,
         get_minimized_pdb_filename,
+        get_minimized_rst7_filename,
 )
 from amber_adaptbx.tests.config import (PDB_COLLECTION, saved_2igd_prmtop_file,
         saved_2igd_rst7_file,
@@ -40,17 +41,47 @@ def test_run_sander_LES_minimization_from_LES_build(pdb_file):
 
 @pytest.mark.parametrize('pdb_file', [
     get_fn('3kug/3kug.pdb'),
-    get_fn('2g3i/2g3i.pdb'),
     get_fn('1gdu/1gdu.pdb')
 ])
 def test_minus_0_coordinates_use_phenix_all_for_minimise(pdb_file):
   """ ensure there is no error if having -0.0 coordinates """
+  # Note: not include 2g3i here since minimise=phenix_all will crash due to strong overlap
   command = "phenix.AmberPrep {} LES=True minimise=phenix_all minimization_options='max_iterations=2'".format(pdb_file)
   with tempfolder():
     # use minimization_type='phenix_all' to trigger computing reorder map
     minimimized_pdb = get_minimized_pdb_filename(pdb_file, LES=True, minimization_type='phenix_all')
     subprocess.check_call(command.split())
     assert os.path.exists(minimimized_pdb)
+
+@pytest.mark.parametrize('pdb_file', [
+    get_fn('2g3i/2g3i.pdb'),
+])
+def test_minus_0_coordinates_use_amber_all_for_minimise(pdb_file):
+  """ ensure there is no error if having -0.0 coordinates """
+  command_build = [
+          'phenix.AmberPrep',
+          pdb_file,
+          'LES=True',
+          'minimise=amber_all',
+          "minimization_options='maxcyc=10'"
+  ]
+  amber_minimimized_pdb = get_minimized_pdb_filename(pdb_file, LES=True, minimization_type='amber_all')
+  prmtop, _, _ = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file, LES=True)
+  minimized_rst7 = get_minimized_rst7_filename(pdb_file, minimization_type='amber_all', LES=True)
+
+  command_geom = [
+    'phenix.geometry_minimization',
+    amber_minimimized_pdb,
+    'amber.topology_file_name',
+    prmtop,
+    'amber.coordinate_file_name',
+    minimized_rst7
+
+  ]
+  with tempfolder():
+    subprocess.check_call(command_build)
+    # use geometry_minimization to trigger computing reorder map
+    subprocess.check_call(command_geom)
     
 @pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
 def test_command_line_build(pdb_file):
