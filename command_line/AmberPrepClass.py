@@ -39,7 +39,7 @@ master_phil_string = """
     }
     actions
     {
-      minimise = amber_all amber_h phenix_all *off
+      minimise = amber_all amber_h *off
         .type = choice
       minimization_options = ''
         .type = str
@@ -82,7 +82,7 @@ master_phil = phil.parse(master_phil_string,
 def setup_parser():
   from libtbx.option_parser import OptionParser
   usage = """
-  phenix.AmberPrep 3a37.pdb minimise=phenix_all
+  phenix.AmberPrep 3a37.pdb minimise=amber_all
   """
   parser = OptionParser(
       prog="phenix.amber_prep",
@@ -223,10 +223,6 @@ class AmberPrepRunner:
     self.final_prmtop_file = '4amber_%s.prmtop' % self.base
     self.final_rst7_file = '4amber_%s.rst7' % self.base
     self.final_pdb_file_4phenix = '4phenix_%s.pdb' % self.base
-    if self.LES:
-      self.final_prmtop_file = self.final_prmtop_file.replace('.prmtop', '.LES.prmtop')
-      self.final_rst7_file = self.final_rst7_file.replace('.rst7', '.LES.rst7')
-      self.final_pdb_file_4phenix = self.final_pdb_file_4phenix.replace('.pdb', '.LES.pdb')
     self.non_les_prmtop_file_name = '4amber_%s.prmtop' % self.base
     self.non_les_rst7_file_name = '4amber_%s.rst7' % self.base
 
@@ -661,8 +657,8 @@ class AmberPrepRunner:
       inputs['amber_h'] = inputs['amber_h'].replace('/', minimization_options + '\n /')
       inputs['amber_all'] = inputs['amber_all'].replace('/', minimization_options + '\n /')
 
-    output_rst7_file = '4amber_%s%s.min.%s.rst7' % (self.base, LEStype, mintype)
-    output_pdb_file = '4phenix_%s%s.min.%s.pdb' % (self.base, LEStype, mintype)
+    output_rst7_file = '4amber_%s.min.rst7' % self.base
+    output_pdb_file = '4phenix_%s.min.pdb' % self.base
 
     if mintype in ["amber_h", "amber_all"]:
 
@@ -670,13 +666,13 @@ class AmberPrepRunner:
       f = open('%s_%s.in' % (self.base, mintype), 'wb')
       f.write(inputs[mintype])
       f.close()
-      cmd = 'sander%s -O -i %s -p %s -c %s -o %s_%s%s.out \
+      cmd = 'sander%s -O -i %s -p %s -c %s -o %s.min.out \
            -ref %s -r %s' % (
           LEStype,
           input_file,
           self.final_prmtop_file,
           self.final_rst7_file,
-          self.base, mintype, LEStype, 
+          self.base, 
           self.final_rst7_file,
           output_rst7_file
       )
@@ -689,7 +685,7 @@ class AmberPrepRunner:
       assert (ero.return_code == 0)
 
       self.uc_parm7_to_4phenix_pdb( self.final_prmtop_file, output_rst7_file,
-                    "4phenix_%s%s.pdb" % (self.base, LEStype),
+                    "4phenix_%s.pdb" % self.base ,
                     output_pdb_file )
 
       pdb_inp = iotbx.pdb.input(file_name=output_pdb_file )
@@ -699,43 +695,10 @@ class AmberPrepRunner:
                            crystal_symmetry=self.pdb_inp.crystal_symmetry(),
                            )
 
-      self.final_pdb_file_4phenix = output_pdb_file
-      self.final_rst7_file = output_rst7_file
-
-    elif mintype == "phenix_all":
-      if self.LES:
-        cmd = 'phenix.geometry_minimization 4phenix_%s.LES.pdb amber.use_amber=True \
-             amber.topology_file_name=%s \
-             amber.coordinate_file_name=%s  \
-             output_file_name_prefix=4phenix_%s_minPhenix' % (self.base, self.final_prmtop_file, self.final_rst7_file, self.base)
-      else:
-        cmd = 'phenix.geometry_minimization 4phenix_%s.pdb amber.use_amber=True \
-             amber.topology_file_name=4amber_%s.prmtop \
-             amber.coordinate_file_name=4amber_%s.rst7  \
-             output_file_name_prefix=4phenix_%s_minPhenix ' % tuple([self.base] * 4)
-
-      cmd = cmd + ' ' + minimization_options
-      restraints = "%s.ligands.cif" % self.base
-      if os.path.exists(restraints):
-        cmd += " %s" % restraints
-      print_cmd(cmd)
-      ero = easy_run.fully_buffered(cmd).raise_if_errors()  # .return_code
-      assert (ero.return_code == 0)
-      ero.show_stdout()
-      ero.show_stderr()
-      if self.LES:
-        self.final_pdb_file_4phenix = '4phenix_%s.LES.min.%s.pdb' % (self.base, mintype)
-      else:
-        self.final_pdb_file_4phenix = '4phenix_%s.min.%s.pdb' % (self.base, mintype)
-      os.rename('4phenix_%s_minPhenix.pdb' % self.base,
-                self.final_pdb_file_4phenix)
     return 0
 
   def check_special_positions(self):
-    if self.LES:
-      pdb_file = '4phenix_%s.LES.pdb' % self.base
-    else:
-      pdb_file = '4phenix_%s.pdb' % self.base
+    pdb_file = '4phenix_%s.pdb' % self.base
     print 'checking special positions in %s' % pdb_file
     xrs = iotbx.pdb.input(file_name=pdb_file).xray_structure_simple()
     site_symmetry_table = xrs.site_symmetry_table()
@@ -769,7 +732,6 @@ class AmberPrepRunner:
       sqm.pdb
       sqm.out
       sqm.in
-      4antechamber
       amber_all.in
       mdinfo
       addles.in
@@ -786,6 +748,12 @@ class AmberPrepRunner:
         for filename in glob.glob("%s%s" % (pre, filename)):
           # print '  removing' , filename
           os.remove(filename)
+    for filename in glob.glob("./4antechamber*"):
+      # print '  removing' , filename
+      os.remove(filename)
+    for filename in glob.glob("./*.pickle"):
+      # print '  removing' , filename
+      os.remove(filename)
     for s in ['%s.eff',
               '%s_curated.pdb',
               '%s_uc.pdb',
@@ -795,6 +763,7 @@ class AmberPrepRunner:
               '4amber_%s.LES.pdb',
               ]:
       if os.path.isfile(s % self.base):
+        # print '  removing' , s % self.base
         os.remove(s % self.base)
 
 #  end of the AmberPrepRunner class block
@@ -1050,12 +1019,25 @@ def run(rargs):
         addles_input_file=actions.addles_input)
     les_builder.run()
 
+    #  rename the files to the canonical three we want.  (Do this here,
+    #    so that these lines can be commented out if debugging is 
+    #    required.)
+    os.rename('4amber_%s.LES.prmtop' % base,'4amber_%s.prmtop' % base)
+    os.rename('4amber_%s.LES.rst7' % base, '4amber_%s.rst7' % base)
+    os.rename('4phenix_%s.LES.pdb' % base, '4phenix_%s.pdb' % base)
+
   if actions.minimise != "off":
     print "\n=================================================="
     print "Minimizing input coordinates."
     print "=================================================="
     amber_prep_runner.run_minimise(actions.minimise,
                       minimization_options=actions.minimization_options)
+
+    #  rename the files to the canonical three we want.  (Do this here,
+    #    so that these lines can be commented out if debugging is 
+    #    required.)
+    os.rename('4amber_%s.min.rst7' % base, '4amber_%s.rst7' % base)
+    os.rename('4phenix_%s.min.pdb' % base, '4phenix_%s.pdb' % base)
 
   amber_prep_runner.check_special_positions()
 
