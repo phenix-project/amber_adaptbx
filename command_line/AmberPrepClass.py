@@ -606,6 +606,7 @@ class AmberPrepRunner:
     ns_names, gaplist, sslist = pdb4amber.run(
         tleap_pdb_file, tleap_pdb_file1, arg_elbow=True,
         arg_logfile=sys.stderr,
+        arg_conect=False,
     )
 
     #-----------------------------------------------------------------
@@ -978,6 +979,7 @@ def run(rargs):
                                             arg_elbow=True,
                                             arg_reduce=actions.use_reduce,
                                             arg_logfile=sys.stderr,
+                                            arg_conect=False,
                                             )
 
   print "\n=================================================="
