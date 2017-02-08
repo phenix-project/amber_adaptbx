@@ -8,6 +8,7 @@ from amber_adaptbx.tests.utils import tempfolder, get_fn
 import parmed as pmd
 from parmed.amber.netcdffiles import NetCDFTraj
 
+@pytest.mark.xfail
 def test_netcdf_trajectory():
   command_refine = [
     'phenix.refine',
