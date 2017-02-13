@@ -20,13 +20,14 @@ def test_passing_minimization_options(pdb_file, minimization_type, minimization_
           'phenix.AmberPrep',
           pdb_file,
           'minimise={}'.format(minimization_type),
+          'clean=False',
           'minimization_options="{}"'.format(minimization_options)
   ]
 
   print('\n-->' + ' '.join(command_min))
   with tempfolder():
     base = os.path.basename(pdb_file).split('.')[0]
-    mdout_file_name = base + '_' + minimization_type + '.out'
+    mdout_file_name = base + '.min.out'
     subprocess.check_call(command_min)
     line = 'maxcyc  =      10, ncyc    =     200, ntmin   =       1'
     assert_file_has_line(mdout_file_name, line)
@@ -40,12 +41,13 @@ def test_default_min(pdb_file, minimization_type):
   command_min = [
           'phenix.AmberPrep',
           pdb_file,
+          'clean=False',
           'minimise={}'.format(minimization_type)
   ]
 
   with tempfolder():
     base = os.path.basename(pdb_file).split('.')[0]
-    mdout_file_name = base + '_' + minimization_type + '.out'
+    mdout_file_name = base + '.min.out'
     print('--> mdout_file_name = {}'.format(mdout_file_name))
     process = subprocess.Popen(command_min)
     # we don't need to have minimization finished
@@ -61,96 +63,6 @@ def test_default_min(pdb_file, minimization_type):
     elif minimization_type == 'amber_all':
       line = 'maxcyc  =      50, ncyc    =     200, ntmin   =       1'
     assert_file_has_line(mdout_file_name, line)
-
-
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
-@pytest.mark.parametrize('minimization_type', ['phenix_all'])
-@pytest.mark.parametrize('minimization_options', [
-    'max_iterations=2',
-])
-def test_passing_minimization_options_phenix_all(pdb_file, minimization_type, minimization_options):
-  command_min = [
-          'phenix.AmberPrep',
-          pdb_file,
-          'minimise={}'.format(minimization_type),
-          'minimization_options="{}"'.format(minimization_options)
-  ]
-
-  print('\n-->' + ' '.join(command_min))
-  with tempfolder():
-    output = subprocess.check_output(command_min)
-    line = 'output_file_name_prefix=4phenix_2igd_minPhenix  {}'.format(minimization_options)
-    print('line -->', line)
-    assert line in output
-
-
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
-@pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h', 'phenix_all'])
-@pytest.mark.parametrize('LES', [False])
-def test_file_exists_for_minized_pdb_4phenix_with_LES_False(pdb_file, minimization_type, LES):
-  if minimization_type in ['amber_h', 'amber_all']:
-    minimization_options = "maxcyc=1"
-  elif minimization_type in ['phenix_all']:
-    minimization_options = "max_iterations=1"
-  else:
-    raise ValueError('wrong minimization_type: {}'.format(minimization_type))
-  command_min = [
-          'phenix.AmberPrep',
-          pdb_file,
-          'minimise={}'.format(minimization_type),
-          'LES={}'.format(LES),
-          'minimization_options="{}"'.format(minimization_options)
-  ]
-  print('\n-->' + ' '.join(command_min))
-  with tempfolder():
-    output = subprocess.check_output(command_min)
-    assert os.path.exists(get_minimized_pdb_filename(pdb_file, minimization_type=minimization_type, LES=LES))
-
-
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
-@pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h', 'phenix_all'])
-@pytest.mark.parametrize('LES', [True])
-def test_file_exists_for_minized_pdb_4phenix_with_LES_True(pdb_file, minimization_type, LES):
-  if minimization_type in ['amber_h', 'amber_all']:
-    minimization_options = "maxcyc=1"
-  elif minimization_type in ['phenix_all']:
-    minimization_options = "max_iterations=1"
-  else:
-    raise ValueError('wrong minimization_type: {}'.format(minimization_type))
-  command_min = [
-          'phenix.AmberPrep',
-          pdb_file,
-          'minimise={}'.format(minimization_type),
-          'LES={}'.format(LES),
-          'minimization_options="{}"'.format(minimization_options)
-  ]
-  print('\n-->' + ' '.join(command_min))
-  with tempfolder():
-    output = subprocess.check_output(command_min)
-    assert os.path.exists(get_minimized_pdb_filename(pdb_file, minimization_type=minimization_type, LES=LES))
-
-
-@pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
-@pytest.mark.parametrize('minimization_type', ['amber_all', 'amber_h'])
-@pytest.mark.parametrize('LES', [True, False])
-def test_file_exists_for_minized_rst7_4amber(pdb_file, minimization_type, LES):
-  if minimization_type in ['amber_h', 'amber_all']:
-    minimization_options = "maxcyc=2"
-  elif minimization_type in ['phenix_all']:
-    minimization_options = "max_iterations=1"
-  else:
-    raise ValueError('wrong minimization_type: {}'.format(minimization_type))
-  command_min = [
-          'phenix.AmberPrep',
-          pdb_file,
-          'minimise={}'.format(minimization_type),
-          'LES={}'.format(LES),
-          'minimization_options="{}"'.format(minimization_options)
-  ]
-  print('\n-->' + ' '.join(command_min))
-  with tempfolder():
-    output = subprocess.check_output(command_min)
-    assert os.path.exists(get_minimized_rst7_filename(pdb_file, minimization_type=minimization_type, LES=LES))
 
 
 @pytest.mark.parametrize('pdb_file', [get_fn('2igd/2igd.pdb')])
@@ -172,6 +84,7 @@ def test_run_refinement_after_minimization_that_used_sander(pdb_file, minimizati
           pdb_file,
           'minimise={}'.format(minimization_type),
           'LES={}'.format(LES),
+          'clean=False',
           'minimization_options="{}"'.format(minimization_options)
   ]
   command_refinement = [

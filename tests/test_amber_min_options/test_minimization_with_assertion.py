@@ -26,15 +26,21 @@ def test_minimization_with_amber_h_LES(pdb_file, LES, minimization_type, expecte
           'phenix.AmberPrep',
           pdb_file,
           'LES={}'.format(LES),
+  ]
+  min_options = [
           'minimise={}'.format(minimization_type),
-          'minimization_options="maxcyc=100"',
+          'minimization_options="maxcyc=100"'
   ]
   prmtop_file, original_rst7_file, _ = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file, LES)
   minimized_rst7_file = get_minimized_rst7_filename(pdb_file, LES=LES, minimization_type=minimization_type)
   with tempfolder():
     print('--> command_build: ', ' '.join(command_build))
+    # no minimization
     output = subprocess.check_output(command_build)
     parm0 = pmd.load_file(prmtop_file, original_rst7_file)
+
+    # minimization
+    output = subprocess.check_output(command_build + min_options)
     parm1 = pmd.load_file(prmtop_file, minimized_rst7_file)
     rmsd_data = utils.rmsd(parm0.coordinates, parm1.coordinates)
 

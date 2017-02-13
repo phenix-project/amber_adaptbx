@@ -50,19 +50,6 @@ def test_geometry_minimization_command_line_with_amber_h_option(pdb_file):
 
 @pytest.mark.slow
 @pytest.mark.no_assertion
-@pytest.mark.parametrize('pdb_file', [
-    get_fn('2igd/2igd.pdb'),
-    get_fn('4lzt/4lzt_no_BHOH.pdb'),
-    get_fn('4lzt/4lzt.pdb'),
-])
-def test_command_line_minimization_phenix_all(pdb_file):
-  """ ensure there is no error, there is no assertion """
-  command = 'phenix.AmberPrep {} minimise=phenix_all'.format(pdb_file)
-  with tempfolder():
-    output = subprocess.check_output(command.split())
-
-@pytest.mark.slow
-@pytest.mark.no_assertion
 @pytest.mark.phenix
 @pytest.mark.parametrize('pdb_file, mtz_file', [
     (get_fn('4lzt/4lzt.pdb'), get_fn('4lzt/4lzt.mtz')),

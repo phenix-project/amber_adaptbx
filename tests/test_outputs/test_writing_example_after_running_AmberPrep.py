@@ -39,9 +39,9 @@ def test_writing_example_after_running_AmberPrep_LES_without_minimization():
   expected_line = """
 ==================================================
 Done.  Three new files have been made:
-      4phenix_2igd.LES.pdb
-      4amber_2igd.LES.prmtop
-      4amber_2igd.LES.rst7
+      4phenix_2igd.pdb
+      4amber_2igd.prmtop
+      4amber_2igd.rst7
 ==================================================
 """
   # always create new command_build
@@ -54,7 +54,7 @@ Done.  Three new files have been made:
     output_build = subprocess.check_output(command_build)
     assert expected_line in output_build
 
-@pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
+@pytest.mark.parametrize('minimization_type', ['amber_h', 'amber_all'])
 def test_writing_example_after_running_AmberPrep_LES_with_minimization(minimization_type):
   pdb_file = get_fn('2igd/2igd.pdb')
   LES = True
@@ -63,27 +63,19 @@ def test_writing_example_after_running_AmberPrep_LES_with_minimization(minimizat
           'amber_h': """
 ==================================================
 Done.  Three new files have been made:
-      4phenix_2igd.LES.min.amber_h.pdb
-      4amber_2igd.LES.prmtop
-      4amber_2igd.LES.min.amber_h.rst7
+      4phenix_2igd.pdb
+      4amber_2igd.prmtop
+      4amber_2igd.rst7
 ==================================================
 """,
           'amber_all': """
 ==================================================
 Done.  Three new files have been made:
-      4phenix_2igd.LES.min.amber_all.pdb
-      4amber_2igd.LES.prmtop
-      4amber_2igd.LES.min.amber_all.rst7
+      4phenix_2igd.pdb
+      4amber_2igd.prmtop
+      4amber_2igd.rst7
 ==================================================
 """,
-          'phenix_all': """
-==================================================
-Done.  Three new files have been made:
-      4phenix_2igd.LES.min.phenix_all.pdb
-      4amber_2igd.LES.prmtop
-      4amber_2igd.LES.rst7
-==================================================
-"""
   }
   # always create new command_build
   command_build = [
@@ -100,7 +92,7 @@ Done.  Three new files have been made:
     output_build = subprocess.check_output(command_build)
     assert expected_line_dict[minimization_type] in output_build
 
-@pytest.mark.parametrize('minimization_type', ['phenix_all', 'amber_h', 'amber_all'])
+@pytest.mark.parametrize('minimization_type', ['amber_h', 'amber_all'])
 def test_writing_example_after_running_AmberPrep_not_LES_with_minimization(minimization_type):
   pdb_file = get_fn('2igd/2igd.pdb')
 
@@ -108,27 +100,19 @@ def test_writing_example_after_running_AmberPrep_not_LES_with_minimization(minim
           'amber_h': """
 ==================================================
 Done.  Three new files have been made:
-      4phenix_2igd.min.amber_h.pdb
+      4phenix_2igd.pdb
       4amber_2igd.prmtop
-      4amber_2igd.min.amber_h.rst7
+      4amber_2igd.rst7
 ==================================================
 """,
           'amber_all': """
 ==================================================
 Done.  Three new files have been made:
-      4phenix_2igd.min.amber_all.pdb
-      4amber_2igd.prmtop
-      4amber_2igd.min.amber_all.rst7
-==================================================
-""",
-          'phenix_all': """
-==================================================
-Done.  Three new files have been made:
-      4phenix_2igd.min.phenix_all.pdb
+      4phenix_2igd.pdb
       4amber_2igd.prmtop
       4amber_2igd.rst7
 ==================================================
-"""
+""",
   }
   command_build = [
           'phenix.AmberPrep',

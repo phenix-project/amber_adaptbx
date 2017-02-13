@@ -40,20 +40,6 @@ def test_run_sander_LES_minimization_from_LES_build(pdb_file):
     assert 'FINAL RESULTS' in output, 'minimization must be finished'
 
 @pytest.mark.parametrize('pdb_file', [
-    get_fn('3kug/3kug.pdb'),
-    get_fn('1gdu/1gdu.pdb')
-])
-def test_minus_0_coordinates_use_phenix_all_for_minimise(pdb_file):
-  """ ensure there is no error if having -0.0 coordinates """
-  # Note: not include 2g3i here since minimise=phenix_all will crash due to strong overlap
-  command = "phenix.AmberPrep {} LES=True minimise=phenix_all minimization_options='max_iterations=2'".format(pdb_file)
-  with tempfolder():
-    # use minimization_type='phenix_all' to trigger computing reorder map
-    minimimized_pdb = get_minimized_pdb_filename(pdb_file, LES=True, minimization_type='phenix_all')
-    subprocess.check_call(command.split())
-    assert os.path.exists(minimimized_pdb)
-
-@pytest.mark.parametrize('pdb_file', [
     get_fn('2g3i/2g3i.pdb'),
 ])
 def test_minus_0_coordinates_use_amber_all_for_minimise(pdb_file):
@@ -109,14 +95,6 @@ def test_geometry_minimization_from_AmberPrep_with_amber_all_option(pdb_file):
   command = "phenix.AmberPrep {} LES=True minimise=amber_all minimization_options='maxcyc=2'".format(pdb_file)
   with tempfolder():
     prmtop_file, rst7_file, new_pdb_file = get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file)
-    subprocess.check_output(command.split())
-
-@pytest.mark.slow
-@pytest.mark.parametrize('pdb_file', PDB_COLLECTION)
-def test_command_line_minimization_phenix_all(pdb_file):
-  """ ensure there is no error, there is no assertion """
-  command = 'phenix.AmberPrep {} LES=True minimise=phenix_all'.format(pdb_file)
-  with tempfolder():
     subprocess.check_output(command.split())
 
 @pytest.mark.parametrize('pdb_file', [

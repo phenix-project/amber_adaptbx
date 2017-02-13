@@ -9,7 +9,7 @@ def test_adding_addles_option_to_command_line():
   addles_input = get_fn('2igd/addles_test/addles.in') 
   addles_input_wrong_header  = get_fn('2igd/addles_test/addles.wrong_header.in') 
   pdb_fn = get_fn('2igd/2igd.pdb')
-  prmtop = '4amber_2igd.LES.prmtop'
+  prmtop = '4amber_2igd.prmtop'
 
   command_build_addles_input_cmd = [
           'phenix.AmberPrep',

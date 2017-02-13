@@ -761,6 +761,7 @@ class AmberPrepRunner:
               '%sab.rst7',
               '4amber_%s.pdb',
               '4amber_%s.LES.pdb',
+              '%s.min.out',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
