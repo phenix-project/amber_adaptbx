@@ -761,7 +761,6 @@ class AmberPrepRunner:
               '%sab.rst7',
               '4amber_%s.pdb',
               '4amber_%s.LES.pdb',
-              '%s.min.out',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
@@ -799,7 +798,7 @@ def _run_antechamber_ccif(residue_name,
   cmd = 'antechamber -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
       -s 2 -pf y -c bcc -at gaff2' % (ccif, residue_name, residue_name)
   if use_am1_and_maxcyc_zero:
-    cmd += ' -ek "qm_theory=\'AM1\', grms_tol=0.0005, scfconv=1.d-10, maxcyc=0, ndiis_attempts=700,"'
+    cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)
 
   for cmd in cmds:
@@ -896,7 +895,7 @@ def _run_elbow_antechamber(pdb_hierarchy,
       -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, residue_name, mol.charge, mol.multiplicity)
   if use_am1_and_maxcyc_zero:
-    cmd += ' -ek "qm_theory=\'AM1\', grms_tol=0.0005, scfconv=1.d-10, maxcyc=0, ndiis_attempts=700,"'
+    cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
     cmd = 'antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \

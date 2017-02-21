@@ -30,9 +30,9 @@ def test_cleaning_unused_files(code):
  expected_files_les = set()
  expected_files_les.update(expected_files_non_les)
  expected_files_les.update(set([
-         '4phenix_{}.LES.pdb'.format(code),
-         '4amber_{}.LES.prmtop'.format(code),
-         '4amber_{}.LES.rst7'.format(code),
+         '4phenix_{}.pdb'.format(code),
+         '4amber_{}.prmtop'.format(code),
+         '4amber_{}.rst7'.format(code),
  ]))
 
  with tempfolder():

@@ -23,6 +23,6 @@ def test_keeping_original_resnum():
   # LES=True
   with tempfolder():
     subprocess.check_call(command_build + ['LES=True'])
-    parm = pmd.load_file('4phenix_{}.LES.pdb'.format(code))
+    parm = pmd.load_file('4phenix_{}.pdb'.format(code))
     assert parm.residues[0].number == 16
     assert parm.residues[-1].number == 2201
