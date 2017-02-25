@@ -273,9 +273,10 @@ class AmberPrepRunner:
     # transfer occupancy and bfactor for heavy atoms;
     for template_residue, residue in zip(template_parm.residues, parm.residues):
 
-      # transfer residue numbers and chainId's:
+      # transfer residue numbers, chainId's and insertion codes:
       residue.number = template_residue.number
       residue.chain = template_residue.chain
+      residue.insertion_code = template_residue.insertion_code
 
       # for each residue, sort atom by name to make sure we get the same 
       #   atom order between the two parms
@@ -307,6 +308,9 @@ class AmberPrepRunner:
 
     Note:  the atom order in outpdb will be the "Amber" atom order; use phenix
     routines after this to convert to phenix atom order.
+
+    Note also: there is a lot of duplication between this routine and code
+    in asu_parm7_to_4phenix_pdb()
     '''
 
     template_parm = parmed.load_file(template_pdb)
@@ -329,9 +333,10 @@ class AmberPrepRunner:
     for template_residue, residue in zip(template_parm.residues, 
                                          asu_parm.residues):
 
-      # transfer residue numbers and chainId's:
+      # transfer residue numbers, chainId's, and insertion codes:
       residue.number = template_residue.number
       residue.chain = template_residue.chain
+      residue.insertion_code = template_residue.insertion_code
 
       # for each residue, sort atom by name to make sure we get the same 
       #   atom order between the two parms
@@ -501,13 +506,15 @@ class AmberPrepRunner:
     #
     if gaplist:
       for d, res1, resid1, res2, resid2 in gaplist:
-        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1, resid2))
+        # 1-based index
+        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1+1, resid2+1))
     #
     #  process sslist
     #
     if sslist:
       for resid1, resid2 in sslist:
-        f.write('bond x.%d.SG x.%d.SG\n' % (resid1, resid2))
+        # 1-based index
+        f.write('bond x.%d.SG x.%d.SG\n' % (resid1+1, resid2+1))
 
     f.write('saveAmberParm x %s.prmtop %s.rst7\n' % (
         "%s_%s" % (self.base, output_base),
@@ -975,6 +982,10 @@ def run(rargs):
   # N.B.: this means that the base_asu.prmtop file should never be used!
   #   we might want to make sure that this file is always removed.
 
+  # H.N.: Now we use ParmEd for pdb4amber. If pdb has gap, ParmEd will auto-add
+  # TER keyword when saving to pdb file, so there won't be any gaps in the next pdb
+  # https://github.com/ParmEd/ParmEd/issues/822
+
   dummy_gaplist = []
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
                               'asu',
@@ -1003,7 +1014,11 @@ def run(rargs):
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
-          use_amber_unitcell=not working_params.amber_prep.actions.skip_remark_290)
+          use_amber_unitcell=False)
+  #  above was this:
+  #   use_amber_unitcell=not working_params.amber_prep.actions.skip_remark_290)
+  #   dac made this change on 2/24/17: since Amber's UnitCell routine does
+  #     not properly handle insertion codes
 
   #  we are done unless LES or minimization has been requested
 
