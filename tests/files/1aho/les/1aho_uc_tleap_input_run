@@ -1,0 +1,32 @@
+logFile leap.log
+source leaprc.protein.ff14SB
+source leaprc.DNA.OL15
+source leaprc.RNA.OL3
+source leaprc.water.tip3p
+source leaprc.gaff2
+set default nocenter on
+set default reorder_residues off
+x = loadpdb 1aho_4tleap_uc.pdb
+set x box { 45.9  40.7  30.1 }
+deleteBond x.58.C x.59.N
+deleteBond x.249.C x.250.N
+deleteBond x.440.C x.441.N
+deleteBond x.631.C x.632.N
+bond x.12.SG x.61.SG
+bond x.16.SG x.36.SG
+bond x.22.SG x.46.SG
+bond x.26.SG x.48.SG
+bond x.203.SG x.252.SG
+bond x.207.SG x.227.SG
+bond x.213.SG x.237.SG
+bond x.217.SG x.239.SG
+bond x.394.SG x.443.SG
+bond x.398.SG x.418.SG
+bond x.404.SG x.428.SG
+bond x.408.SG x.430.SG
+bond x.585.SG x.634.SG
+bond x.589.SG x.609.SG
+bond x.595.SG x.619.SG
+bond x.599.SG x.621.SG
+saveAmberParm x 1aho_uc.prmtop 1aho_uc.rst7
+quit

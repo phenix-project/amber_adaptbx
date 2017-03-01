@@ -1,0 +1,112 @@
+
+==================================================
+Summary of pdb4amber for: 1aho.pdb
+===================================================
+
+----------Chains
+The following (original) chains have been found:
+A
+
+---------- Alternate Locations (Original Residues!))
+
+The following residues had alternate locations:
+ASP_9
+CYS_12
+GLU_24
+CYS_61
+
+---------- Gaps (Renumbered Residues!)
+gap of 6.778859 A between GLY 59 and ARG 60
+
+---------- Mising heavy atom(s)
+
+ASP_9 misses 1 heavy atom(s)
+LYS_30 misses 3 heavy atom(s)
+LYS_50 misses 1 heavy atom(s)
+The alternate coordinates have been discarded.
+Only the first occurrence for each atom was kept.
+
+==================================================
+Summary of pdb4amber for: 1aho_4tleap_uc1.pdb
+===================================================
+
+----------Chains
+The following (original) chains have been found:
+A
+
+---------- Alternate Locations (Original Residues!))
+
+The following residues had alternate locations:
+None
+
+---------- Gaps (Renumbered Residues!)
+gap of 6.778859 A between GLY 59 and ARG 60
+gap of 6.778859 A between GLY 250 and ARG 251
+gap of 6.778859 A between GLY 441 and ARG 442
+gap of 6.778859 A between GLY 632 and ARG 633
+
+---------- Mising heavy atom(s)
+
+None
+
+==================================================
+Running pdb4amber on 1aho.pdb
+==================================================
+
+==================================================
+Setting up library files for non-standard residues
+==================================================
+
+==================================================
+Preparing asu files and 4phenix_1aho.pdb
+==================================================
+
+~> tleap -f 1aho_asu_tleap_input_run
+
+Checking output filenames
+  file : 1aho_asu.prmtop
+  file : 1aho_asu.rst7
+
+~> ChBox -c 1aho_asu.rst7 -o 1aho_asu.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
+
+
+============================================================
+Preparing unit cell files: 4amber_1aho.prmtop and 4amber_1aho.rst7
+============================================================
+
+~> UnitCell -p 1aho_4UnitCell.pdb -o 1aho_4tleap_uc1.pdb
+
+
+~> tleap -f 1aho_uc_tleap_input_run
+
+Checking output filenames
+  file : 1aho_uc.prmtop
+  file : 1aho_uc.rst7
+
+~> ChBox -c 1aho_uc.rst7 -o 1aho_uc.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
+
+
+==================================================
+Minimizing input coordinates.
+==================================================
+
+~> sander -O -i 1aho_amber_all.in -p 4amber_1aho.prmtop -c 4amber_1aho.rst7 -o 1aho.min.out            -ref 4amber_1aho.rst7 -r 4amber_1aho.min.rst7
+
+checking special positions in 4phenix_1aho.pdb
+
+==================================================
+Done.  Three new files have been made:
+      4phenix_1aho.pdb
+      4amber_1aho.prmtop
+      4amber_1aho.rst7
+==================================================
+
+Example
+
+  phenix.refine 4phenix_1aho.pdb use_amber=True \
+    amber.topology_file_name=4amber_1aho.prmtop \
+    amber.coordinate_file_name=4amber_1aho.rst7 \
+    ....(other refinement keywords here).....
+
+
+
