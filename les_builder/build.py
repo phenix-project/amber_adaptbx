@@ -176,7 +176,8 @@ class LESBuilder(object):
     #    note: this file won't have missing atoms...
     if self.unitcell_pdb_file is None:
       self.unitcell_pdb_file = self.base + '_uc.pdb'
-      build_unitcell(self.original_pdb_file, self.unitcell_pdb_file)
+      build_unitcell(self.original_pdb_file, self.unitcell_pdb_file,
+          use_amber_unitcell=True )
 
       # use reduce to add hydrogens to unitcell pdb==========================
       #   (input is xxxx_uc.pdb; creates xxxx_uc_H.pdb)

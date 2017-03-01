@@ -1,0 +1,4 @@
+Created an artifical "gap" by removing residues 60 and 61.
+
+This should be a good test case: has disulfide bonds, alternate locations,
+more than 1 asu in a unit cell, and (now) a gap.

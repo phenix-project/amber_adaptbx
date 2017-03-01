@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#  simple test case: has alternate conformers, ss bonds, gaps, multiple
+#    chains per unit cell
+
+#  does not have:  non-standard residues
+
+phenix.AmberPrep 1aho.pdb minimise=amber_all
+
+./dacdif regression/4phenix_1aho.pdb 4phenix_1aho.pdb
+./dacdif regression/4amber_1aho.prmtop 4amber_1aho.prmtop
+./dacdif regression/4amber_1aho.rst7 4amber_1aho.rst7
+./dacdif regression/1aho.min.out 1aho.min.out
+

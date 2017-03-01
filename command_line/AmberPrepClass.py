@@ -506,14 +506,13 @@ class AmberPrepRunner:
     #
     if gaplist:
       for d, res1, resid1, res2, resid2 in gaplist:
-        # 1-based index
-        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1+1, resid2+1))
+        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1, resid2))
     #
     #  process sslist
     #
     if sslist:
       for resid1, resid2 in sslist:
-        # 1-based index
+        # convert from 0-based to 1-based index:
         f.write('bond x.%d.SG x.%d.SG\n' % (resid1+1, resid2+1))
 
     f.write('saveAmberParm x %s.prmtop %s.rst7\n' % (
@@ -601,7 +600,7 @@ class AmberPrepRunner:
 
     #-----------------------------------------------------------------
     # Step 3: run xxxx_4leap_uc1.pdb back through pdb4amber to get new 
-    #         sslist that describes gaps and SS bonds.  Output will be
+    #         lists that describe gaps and SS bonds.  Output will be
     #         xxxx_4tleap_uc.pdb
     #-----------------------------------------------------------------
 
@@ -1014,7 +1013,7 @@ def run(rargs):
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
-          use_amber_unitcell=False)
+          use_amber_unitcell=True)
   #  above was this:
   #   use_amber_unitcell=not working_params.amber_prep.actions.skip_remark_290)
   #   dac made this change on 2/24/17: since Amber's UnitCell routine does
