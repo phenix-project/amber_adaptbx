@@ -166,7 +166,7 @@ class LESBuilder(object):
           return True
     return False
 
-  def run(self):
+  def run(self, use_amber_unitcell=True):
 
     if not self._has_altlocs():
       raise ValueError("pdb file should have altlocs for LES build")
@@ -177,7 +177,7 @@ class LESBuilder(object):
     if self.unitcell_pdb_file is None:
       self.unitcell_pdb_file = self.base + '_uc.pdb'
       build_unitcell(self.original_pdb_file, self.unitcell_pdb_file,
-          use_amber_unitcell=True )
+          use_amber_unitcell=use_amber_unitcell)
 
       # use reduce to add hydrogens to unitcell pdb==========================
       #   (input is xxxx_uc.pdb; creates xxxx_uc_H.pdb)
