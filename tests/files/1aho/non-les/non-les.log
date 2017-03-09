@@ -33,6 +33,12 @@ Summary of pdb4amber for: 1aho_4tleap_uc1.pdb
 ----------Chains
 The following (original) chains have been found:
 A
+a
+b
+c
+d
+e
+f
 
 ---------- Alternate Locations (Original Residues!))
 
@@ -73,9 +79,6 @@ Checking output filenames
 ============================================================
 Preparing unit cell files: 4amber_1aho.prmtop and 4amber_1aho.rst7
 ============================================================
-
-~> UnitCell -p 1aho_4UnitCell.pdb -o 1aho_4tleap_uc1.pdb
-
 
 ~> tleap -f 1aho_uc_tleap_input_run
 

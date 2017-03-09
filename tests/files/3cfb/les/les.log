@@ -1,0 +1,158 @@
+
+==================================================
+Summary of pdb4amber for: 3cfb.pdb
+===================================================
+
+----------Chains
+The following (original) chains have been found:
+A
+B
+H
+L
+
+---------- Alternate Locations (Original Residues!))
+
+The following residues had alternate locations:
+SER_25
+SER_43
+SER_76
+ARG_77
+SER_168
+SER_176
+ASP_184
+SER_191
+CYS_194
+SER_25
+VAL_37
+GLN_39
+SER_53
+SER_84
+CYS_92
+SER_112
+SER_113
+SER_20
+SER_22
+SER_25
+SER_27
+SER_43
+MET_51
+SER_56
+VAL_83
+SER_168
+MET_175
+ASP_184
+CYS_194
+SER_25
+VAL_37
+SER_82
+CYS_92
+SER_112
+
+---------- Mising heavy atom(s)
+
+None
+The alternate coordinates have been discarded.
+Only the first occurrence for each atom was kept.
+
+==================================================
+Summary of pdb4amber for: 3cfb_4tleap_uc1.pdb
+===================================================
+
+----------Chains
+The following (original) chains have been found:
+A
+B
+H
+L
+
+---------- Alternate Locations (Original Residues!))
+
+The following residues had alternate locations:
+None
+
+---------- Mising heavy atom(s)
+
+None
+
+==================================================
+Running pdb4amber on 3cfb.pdb
+==================================================
+
+==================================================
+Setting up library files for non-standard residues
+==================================================
+GOL.mol2 is present. Skipping elbow/antechamber run for this residue.
+
+SPB.mol2 is present. Skipping elbow/antechamber run for this residue.
+
+
+==================================================
+Preparing asu files and 4phenix_3cfb.pdb
+==================================================
+
+~> tleap -f 3cfb_asu_tleap_input_run
+
+Checking output filenames
+  file : 3cfb_asu.prmtop
+  file : 3cfb_asu.rst7
+
+~> ChBox -c 3cfb_asu.rst7 -o 3cfb_asu.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
+
+
+============================================================
+Preparing unit cell files: 4amber_3cfb.prmtop and 4amber_3cfb.rst7
+============================================================
+
+~> UnitCell -p 3cfb_4UnitCell.pdb -o 3cfb_4tleap_uc1.pdb
+
+
+~> tleap -f 3cfb_uc_tleap_input_run
+
+Checking output filenames
+  file : 3cfb_uc.prmtop
+  file : 3cfb_uc.rst7
+
+~> ChBox -c 3cfb_uc.rst7 -o 3cfb_uc.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
+
+
+==================================================
+Building the LES prmtop and rst7 files
+==================================================
+
+~> UnitCell -p 3cfb.pdb -o 3cfb_uc.pdb
+
+
+~> reduce -build -nuclear 3cfb_uc.pdb > 3cfb_uc_H.pdb 2>reduce_lesbuilder.log
+
+
+============================================================
+ Building the prmtop and rst7 file with alternate conformers
+============================================================
+
+~> addles <addles.in > addles.log
+
+
+==================================================
+Minimizing input coordinates.
+==================================================
+
+~> sander.LES -O -i 3cfb_amber_all.in -p 4amber_3cfb.prmtop -c 4amber_3cfb.rst7 -o 3cfb.min.out            -ref 4amber_3cfb.rst7 -r 4amber_3cfb.min.rst7
+
+Traceback (most recent call last):
+  File "/Users/case/xtal/phenix_svn3/build/../modules/amber_adaptbx/command_line/AmberPrepClass.py", line 1081, in <module>
+    run(args)
+  File "/Users/case/xtal/phenix_svn3/build/../modules/amber_adaptbx/command_line/AmberPrepClass.py", line 1048, in run
+    minimization_options=actions.minimization_options)
+  File "/Users/case/xtal/phenix_svn3/build/../modules/amber_adaptbx/command_line/AmberPrepClass.py", line 695, in run_minimise
+    output_pdb_file )
+  File "/Users/case/xtal/phenix_svn3/build/../modules/amber_adaptbx/command_line/AmberPrepClass.py", line 317, in uc_parm7_to_4phenix_pdb
+    parm = parmed.load_file( parm7_file, xyz=rst7_file )
+  File "/home/case/amber16/lib/python2.7/site-packages/parmed/formats/registry.py", line 197, in load_file
+    return cls.parse(filename, *args, **kwargs)
+  File "/home/case/amber16/lib/python2.7/site-packages/parmed/amber/amberformat.py", line 359, in parse
+    return LoadParm(filename, *args, **kwargs)
+  File "/home/case/amber16/lib/python2.7/site-packages/parmed/amber/readparm.py", line 73, in LoadParm
+    f = load_file(xyz)
+  File "/home/case/amber16/lib/python2.7/site-packages/parmed/formats/registry.py", line 168, in load_file
+    raise IOError('%s does not exist' % filename)
+IOError: 4amber_3cfb.min.rst7 does not exist

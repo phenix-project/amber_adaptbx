@@ -1,0 +1,40 @@
+#!/bin/sh
+
+#  simple test case: has alternate conformers, ss bonds, multiple
+#    chains per unit cell, non-standard residues, insertion codes
+
+#  does not have:  gaps
+#  also of interest: leaving out the use_reduce=False fails
+
+echo "Running non-LES test on 3cfb:"
+phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all > non-les.log 2>&1
+
+./dacdif non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
+./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
+./dacdif non-les/4amber_3cfb.rst7 4amber_3cfb.rst7
+./dacdif non-les/3cfb.min.out 3cfb.min.out
+./dacdif non-les/non-les.log non-les.log
+
+/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb
+
+if false; then
+
+# 3cfb test currently (9mar17) exceeds the MAXLESTYP variable in sander
+
+echo "Running LES test on 3cfb:"
+phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all LES=true > les.log 2>&1
+
+./dacdif les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
+./dacdif les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
+./dacdif les/4amber_3cfb.rst7 4amber_3cfb.rst7
+./dacdif les/3cfb.min.out 3cfb.min.out
+./dacdif les/addles.in addles.in
+./dacdif les/addles.out addles.out
+./dacdif les/les.log les.log
+
+fi
+
+./dacdif non-les/GOL.mol2 GOL.mol2
+./dacdif non-les/GOL.frcmod GOL.frcmod
+./dacdif non-les/SPB.mol2 SPB.mol2
+./dacdif non-les/SPB.frcmod SPB.frcmod

@@ -3,10 +3,10 @@
           Amber 16 SANDER                              2016
           -------------------------------------------------------
 
-| Run on 03/01/2017 at 11:35:22
+| Run on 03/07/2017 at 10:24:49
 
 |   Executable path: sander
-| Working directory: /Users/case/Dropbox/projects/xtal/test100/1aho_gap
+| Working directory: /Users/case/xtal/phenix_svn3/modules/amber_adaptbx/tests/files/1aho
 |          Hostname: Unknown
   [-O]verwriting output
 
@@ -49,7 +49,7 @@ Initial minimization
 | peek_ewald_inpcrd: Box info found
 |Largest sphere to fit in unit cell has radius =    15.050
 | New format PARM file being parsed.
-| Version =    1.000 Date = 03/01/17 Time = 11:35:22
+| Version =    1.000 Date = 03/07/17 Time = 10:24:49
  NATOM  =    5312 NTYPES =      16 NBONH =    3336 MBONA  =    2040
  NTHETH =    4068 MTHETA =    2760 NPHIH =    8584 MPHIA  =    8488
  NHPARM =       0 NPARM  =       0 NNB   =   22756 NRES   =     764
@@ -169,7 +169,7 @@ Ewald parameters:
 
 
    NSTEP       ENERGY          RMS            GMAX         NAME    NUMBER
-     20       5.0472E+05     6.8514E+03     1.4036E+05     O        5034
+     20       5.0472E+05     6.8514E+03     1.4036E+05     O        2378
 
  BOND    =    58495.2970  ANGLE   =     4751.9715  DIHED      =     2786.1304
  VDWAALS =   445306.3140  EEL     =   -19452.4462  HBOND      =        0.0000
@@ -178,7 +178,7 @@ Ewald parameters:
 
 
    NSTEP       ENERGY          RMS            GMAX         NAME    NUMBER
-     30       5.0394E+04     9.9438E+01     3.1726E+03     C        4872
+     30       5.0394E+04     9.9438E+01     3.1726E+03     C        2216
 
  BOND    =    40050.1734  ANGLE   =     4466.9494  DIHED      =     2772.8661
  VDWAALS =     9592.0909  EEL     =   -19354.5188  HBOND      =        0.0000
@@ -187,7 +187,7 @@ Ewald parameters:
 
 
    NSTEP       ENERGY          RMS            GMAX         NAME    NUMBER
-     40       1.1168E+03     2.4849E+01     8.8256E+02     C        4872
+     40       1.1168E+03     2.4849E+01     8.8256E+02     C        2216
 
  BOND    =     5070.0650  ANGLE   =     2334.7665  DIHED      =     2785.9493
  VDWAALS =     -518.4835  EEL     =   -21050.4307  HBOND      =        0.0000
@@ -196,7 +196,7 @@ Ewald parameters:
 
 
    NSTEP       ENERGY          RMS            GMAX         NAME    NUMBER
-     50      -5.1357E+03     6.5655E+00     1.3758E+02     C         888
+     50      -5.1357E+03     6.5655E+00     1.3758E+02     C        3544
 
  BOND    =     1639.3030  ANGLE   =     1499.6414  DIHED      =     2845.0836
  VDWAALS =    -1142.5662  EEL     =   -22470.5325  HBOND      =        0.0000
@@ -212,7 +212,7 @@ Ewald parameters:
 
 
    NSTEP       ENERGY          RMS            GMAX         NAME    NUMBER
-     50      -5.1357E+03     6.5655E+00     1.3758E+02     C         888
+     50      -5.1357E+03     6.5655E+00     1.3758E+02     C        3544
 
  BOND    =     1639.3030  ANGLE   =     1499.6414  DIHED      =     2845.0836
  VDWAALS =    -1142.5662  EEL     =   -22470.5325  HBOND      =        0.0000
@@ -223,38 +223,37 @@ Ewald parameters:
    5.  TIMINGS
 --------------------------------------------------------------------------------
 
-|    Read coords time           0.00 ( 0.11% of Total)
-|                Build the list             0.19 (95.87% of List )
-|                Other                      0.01 ( 4.13% of List )
-|             List time                  0.20 ( 9.24% of Nonbo)
-|                   Short_ene time             1.65 (99.43% of Direc)
-|                   Other                      0.01 ( 0.57% of Direc)
-|                Direct Ewald time          1.66 (84.68% of Ewald)
-|                Adjust Ewald time          0.05 ( 2.48% of Ewald)
-|                Self Ewald time            0.00 ( 0.01% of Ewald)
-|                   Fill Bspline coeffs        0.01 ( 4.98% of Recip)
-|                   Fill charge grid           0.03 (12.95% of Recip)
-|                   Scalar sum                 0.04 (17.19% of Recip)
-|                   Grad sum                   0.06 (25.39% of Recip)
-|                   FFT time                   0.09 (39.47% of Recip)
-|                   Other                      0.00 ( 0.03% of Recip)
-|                Recip Ewald time           0.23 (11.93% of Ewald)
-|                Virial junk                0.00 ( 0.06% of Ewald)
-|                Other                      0.02 ( 0.85% of Ewald)
-|             Ewald time                 1.96 (90.76% of Nonbo)
-|          Nonbond force              2.16 (94.14% of Force)
-|          Bond/Angle/Dihedral        0.13 ( 5.81% of Force)
-|          Other                      0.00 ( 0.06% of Force)
-|       Force time                 2.30 (100.0% of Runmd)
-|    Runmd Time                 2.30 (84.04% of Total)
-|    Other                      0.43 (15.85% of Total)
-| Total time                 2.73 (100.0% of ALL  )
+|    Read coords time           0.00 ( 0.10% of Total)
+|                Build the list             0.22 (96.81% of List )
+|                Other                      0.01 ( 3.19% of List )
+|             List time                  0.23 (10.90% of Nonbo)
+|                   Short_ene time             1.55 (99.44% of Direc)
+|                   Other                      0.01 ( 0.56% of Direc)
+|                Direct Ewald time          1.56 (84.39% of Ewald)
+|                Adjust Ewald time          0.04 ( 2.42% of Ewald)
+|                   Fill Bspline coeffs        0.01 ( 5.11% of Recip)
+|                   Fill charge grid           0.03 (12.92% of Recip)
+|                   Scalar sum                 0.04 (17.01% of Recip)
+|                   Grad sum                   0.06 (25.80% of Recip)
+|                   FFT time                   0.09 (39.14% of Recip)
+|                   Other                      0.00 ( 0.02% of Recip)
+|                Recip Ewald time           0.23 (12.29% of Ewald)
+|                Virial junk                0.00 ( 0.05% of Ewald)
+|                Other                      0.02 ( 0.83% of Ewald)
+|             Ewald time                 1.84 (89.10% of Nonbo)
+|          Nonbond force              2.07 (94.29% of Force)
+|          Bond/Angle/Dihedral        0.12 ( 5.65% of Force)
+|          Other                      0.00 ( 0.05% of Force)
+|       Force time                 2.19 (100.0% of Runmd)
+|    Runmd Time                 2.19 (85.32% of Total)
+|    Other                      0.37 (14.58% of Total)
+| Total time                 2.57 (100.0% of ALL  )
 
 | Number of list builds   :          5
 
 | Highest rstack allocated:     273718
 | Highest istack allocated:       5312
-|           Job began  at 11:35:22.216  on 03/01/2017
-|           Setup done at 11:35:22.297  on 03/01/2017
-|           Run   done at 11:35:24.949  on 03/01/2017
+|           Job began  at 10:24:49.165  on 03/07/2017
+|           Setup done at 10:24:49.227  on 03/07/2017
+|           Run   done at 10:24:51.738  on 03/07/2017
 |     wallclock() was called    1958 times
