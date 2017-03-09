@@ -24,7 +24,7 @@ def main():
     '-v',
     '-k', '"not slow"',
     '-p', 'no:cacheprovider'
-  ]
+  ] + sys.argv[1:]
   easy_run.call(' '.join(run_command))
 
 if __name__=="__main__":
