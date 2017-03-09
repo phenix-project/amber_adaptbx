@@ -16,7 +16,7 @@ def test_build_from_pdb_that_does_not_have_remark_290(pdb_file):
     command_build = [
             'phenix.AmberPrep',
             pdb_file,
-            'skip_remark_290=True',
+            'use_amber_unitcell=False',
     ]
 
     with tempfolder():
