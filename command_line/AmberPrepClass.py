@@ -59,9 +59,9 @@ master_phil_string = """
         .type = str
         .caption = User specify addles input filename. Optional.
         .help = User specify addles input filename. Optional.
-      skip_remark_290 = False
+      use_amber_unitcell = False
         .type = bool
-        .help = If True, not using REMARK 290 to build unitcell (thus, not use amber's UnitCell)
+        .help = 'If True, use UnitCell from Amber; else use expand_to_p1()'
     }
     output
     {
@@ -563,7 +563,7 @@ class AmberPrepRunner:
     return 0
 
   def build_unitcell_prmtop_and_rst7_files(self, redq=False,
-          use_amber_unitcell=True):
+          use_amber_unitcell=False):
 
     #-----------------------------------------------------------------
     # Step 1: add SYMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
@@ -981,10 +981,6 @@ def run(rargs):
   # N.B.: this means that the base_asu.prmtop file should never be used!
   #   we might want to make sure that this file is always removed.
 
-  # H.N.: Now we use ParmEd for pdb4amber. If pdb has gap, ParmEd will auto-add
-  # TER keyword when saving to pdb file, so there won't be any gaps in the next pdb
-  # https://github.com/ParmEd/ParmEd/issues/822
-
   dummy_gaplist = []
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
                               'asu',
@@ -1013,11 +1009,7 @@ def run(rargs):
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
-          use_amber_unitcell=True)
-  #  above was this:
-  #   use_amber_unitcell=not working_params.amber_prep.actions.skip_remark_290)
-  #   dac made this change on 2/24/17: since Amber's UnitCell routine does
-  #     not properly handle insertion codes
+          use_amber_unitcell=actions.use_amber_unitcell)
 
   #  we are done unless LES or minimization has been requested
 
@@ -1031,7 +1023,7 @@ def run(rargs):
         prmtop=amber_prep_runner.non_les_prmtop_file_name,
         rst7_file=amber_prep_runner.non_les_rst7_file_name,
         addles_input_file=actions.addles_input)
-    les_builder.run()
+    les_builder.run(use_amber_unitcell=actions.use_amber_unitcell)
 
     #  rename the files to the canonical three we want.  (Do this here,
     #    so that these lines can be commented out if debugging is 
