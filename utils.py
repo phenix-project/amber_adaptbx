@@ -327,13 +327,14 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
   output_file : str, unitcell pdb file name
   use_amber_unitcell : bool, default False
       if True, use amber UnitCell program to construct unitcell.
-      If True, require asu_pdb_file to have remark 290
+      (require asu_pdb_file to have remark 290)
+      If False, use phenix stuff
   '''
   if use_amber_unitcell:
     with open(asu_pdb_file ) as fh:
       if 'REMARK 290   SMTRY' not in fh.read():
         print('UnitCell program requires pdb file to have "REMARK 290   SMTRY" line')
-        raise ValueError('Should use option: skip_remark_290=True')
+        raise ValueError('Should use option: use_amber_unitcell=False')
     cmd = "UnitCell -p %s -o %s" % (asu_pdb_file, output_file)
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
