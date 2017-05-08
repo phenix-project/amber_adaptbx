@@ -2,7 +2,6 @@
 
 import os
 import sys
-# from datetime import datetime
 import iotbx.pdb
 import StringIO
 from libtbx import phil
@@ -11,7 +10,6 @@ import libtbx.load_env
 import libtbx.phil.command_line
 from libtbx import easy_run
 from elbow.command_line import builder
-# from amber_adaptbx.deprecated import pdb4amber
 import pdb4amber
 from amber_adaptbx import amber_library_server
 from amber_adaptbx.utils import build_unitcell
@@ -55,6 +53,10 @@ master_phil_string = """
         .type = bool
         .caption = Run reduce on the input pdb file to place hydrogens
         .help = Run reduce on the input pdb file to place hydrogens
+      use_glycam = False
+        .type = bool
+        .caption = Load GLYCAM carbohydrate force field
+        .help = Load GLYCAM carbohydrate force field
       addles_input = ''
         .type = str
         .caption = User specify addles input filename. Optional.
@@ -411,6 +413,7 @@ class AmberPrepRunner:
                 reorder_residues,
                 logfile="leap.log",
                 redq=False,
+                use_glycam=False,
                 verbose=False,
                 ):
     def _parse_tleap_logfile(logfile):
@@ -477,7 +480,8 @@ class AmberPrepRunner:
     f.write('source leaprc.protein.ff14SB\n')
     f.write('source leaprc.DNA.OL15\n')
     f.write('source leaprc.RNA.OL3\n')
-    # f.write('source leaprc.GLYCAM_06j-1\n') #un-comment for glycoproteins
+    if( use_glycam ):
+       f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
     #  (for the future: have some mechanism for modifying the above list)
@@ -562,7 +566,7 @@ class AmberPrepRunner:
     ero.show_stderr()
     return 0
 
-  def build_unitcell_prmtop_and_rst7_files(self, redq=False,
+  def build_unitcell_prmtop_and_rst7_files(self, redq=False, use_glycam=False,
           use_amber_unitcell=False):
 
     #-----------------------------------------------------------------
@@ -623,6 +627,7 @@ class AmberPrepRunner:
                    reorder_residues='off',
                    # logfile='tleap_uc.log',
                    redq=redq,
+                   use_glycam=use_glycam,
                    )
     self.update_rst7_box('uc')
 
@@ -990,6 +995,7 @@ def run(rargs):
                               reorder_residues='off',
                               # logfile='tleap_asu.log',
                               redq=actions.redq,
+                              use_glycam=actions.use_glycam,
                               )
   amber_prep_runner.update_rst7_box("asu")
 
@@ -1009,6 +1015,7 @@ def run(rargs):
   print "============================================================"
 
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
+          use_glycam=actions.use_glycam,
           use_amber_unitcell=actions.use_amber_unitcell)
 
   #  we are done unless LES or minimization has been requested
