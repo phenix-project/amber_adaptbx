@@ -21,7 +21,9 @@ def test_writing_HOH(code):
 
     # LES = False
     with tempfolder():
-        subprocess.check_call(command_les + ['LES=False', ])
+        subprocess.check_call(command_les + [
+            'LES=False',
+        ])
         parm = pmd.load_file(output_pdb)
         assert 'HOH' in set(residue.name for residue in parm.residues)
         assert 'WAT' not in set(residue.name for residue in parm.residues)
@@ -45,14 +47,21 @@ def test_HOH_occupancy(code):
     ]
     output_pdb = '4phenix_{}.pdb'.format(code)
     with tempfolder():
-        subprocess.check_call(command_les + ['LES=False',])
+        subprocess.check_call(command_les + [
+            'LES=False',
+        ])
         parm = pmd.load_file(output_pdb)
-        subprocess.check_call(command_les + ['LES=True',])
+        subprocess.check_call(command_les + [
+            'LES=True',
+        ])
         parm_les = pmd.load_file(output_pdb)
         wat_residues_les = [
-            residue for residue in parm_les.residues if residue.name[:3] == 'HOH']
+            residue for residue in parm_les.residues
+            if residue.name[:3] == 'HOH'
+        ]
         wat_residues = [
-            residue for residue in parm.residues if residue.name[:3] == 'HOH']
+            residue for residue in parm.residues if residue.name[:3] == 'HOH'
+        ]
 
         for residue in wat_residues_les:
             # all atoms in residue should have the same occupancy
@@ -61,9 +70,19 @@ def test_HOH_occupancy(code):
             # all atoms in residue should have the same occupancy
             assert len(set(atom.occupancy for atom in residue.atoms)) == 1
 
-        if code in ['1gdu', ]:
+        if code in [
+                '1gdu',
+        ]:
             # having some O (HOH) with occupancy < 1.0
             occupancy_set = set(
-                atom.occupancy for atom in itertools.chain.from_iterable(wat_residues_les))
-            assert len(occupancy_set -
-                       set([0.75, 1.0, 0.74, 0.94, 0.5, 0.88, 0.73, ])) > 0
+                atom.occupancy
+                for atom in itertools.chain.from_iterable(wat_residues_les))
+            assert len(occupancy_set - set([
+                0.75,
+                1.0,
+                0.74,
+                0.94,
+                0.5,
+                0.88,
+                0.73,
+            ])) > 0

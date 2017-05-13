@@ -606,6 +606,7 @@ class AmberPrepRunner:
     # Step 3: run xxxx_4leap_uc1.pdb back through pdb4amber to get new 
     #         lists that describe gaps and SS bonds.  Output will be
     #         xxxx_4tleap_uc.pdb
+    #         Note: don't need to call reduce this time around.
     #-----------------------------------------------------------------
 
     tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
@@ -745,7 +746,6 @@ class AmberPrepRunner:
       sqm.in
       amber_all.in
       mdinfo
-      addles.in
       reduce_info.log
       reduce_lesbuilder.log
       reduce.log
@@ -771,7 +771,6 @@ class AmberPrepRunner:
               '%s_uc_H.pdb',
               '%sab.rst7',
               '4amber_%s.pdb',
-              '4amber_%s.LES.pdb',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
@@ -960,6 +959,7 @@ def run(rargs):
                                             arg_reduce=actions.use_reduce,
                                             arg_logfile=sys.stderr,
                                             arg_conect=False,
+                                            arg_no_reduce_db=True,
                                             )
 
   print "\n=================================================="

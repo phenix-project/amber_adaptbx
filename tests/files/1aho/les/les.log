@@ -93,7 +93,7 @@ Checking output filenames
 Building the LES prmtop and rst7 files
 ==================================================
 
-~> reduce -build -nuclear 1aho_uc.pdb > 1aho_uc_H.pdb 2>reduce_lesbuilder.log
+~> reduce -BUILD -NUC -DB ./dummydb 1aho_uc.pdb > 1aho_uc_H.pdb 2>reduce_lesbuilder.log
 
 
 ============================================================

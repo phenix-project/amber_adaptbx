@@ -13,7 +13,9 @@ def test_tleap_input():
 
     excluded_files = ['README.md']
 
-    all_expected_files = [os.path.basename(fn) for fn in glob(regression_folder + '/*')]
+    all_expected_files = [
+        os.path.basename(fn) for fn in glob(regression_folder + '/*')
+    ]
     for fn in excluded_files:
         all_expected_files.remove(fn)
 
@@ -30,6 +32,7 @@ def test_tleap_input():
             expected_fn = os.path.join(regression_folder, fn)
             equal_files(expected_fn, fn)
 
+
 def test_gap_in_tleap():
     code = '4lzt'
     pdb_fn = get_fn('{code}/{code}.pdb'.format(code=code))
@@ -42,7 +45,8 @@ def test_gap_in_tleap():
         new_parm = parm[':1,3,9,10']
         gap_pdb_fn = 'new0.pdb'
         new_parm.save(gap_pdb_fn, overwrite=True)
-        subprocess.check_call('cat {} | sed "/TER/d" > new1.pdb'.format(gap_pdb_fn), shell=True)
+        subprocess.check_call(
+            'cat {} | sed "/TER/d" > new1.pdb'.format(gap_pdb_fn), shell=True)
         for residue in new_parm.residues:
             residue.ter = False
         command_non_les = [

@@ -4,7 +4,8 @@
 #    chains per unit cell, non-standard residues, insertion codes
 
 #  does not have:  gaps
-#  also of interest: leaving out the use_reduce=False fails
+#  also of interest: leaving out the use_reduce=False is OK, but gives
+#           slightly different results
 
 echo "Running non-LES test on 3cfb:"
 phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all > non-les.log 2>&1

@@ -32,9 +32,7 @@ def tempfolder():
 def get_fn(basename):
     # basename is relative to amber_adaptbx/tests/files/ folder
     # e.g get_fn('4amber_2igd.LES.save.rst7')
-    fn = os.path.join(os.path.dirname(__file__),
-                      'files',
-                      basename)
+    fn = os.path.join(os.path.dirname(__file__), 'files', basename)
     assert os.path.exists(fn), 'File must exists {}'.format(fn)
     return fn
 
@@ -62,12 +60,10 @@ def get_prmtop_and_rst7_and_pdb_filenames_from_pdb(pdb_file, LES=False):
     basename = os.path.basename(pdb_file)
     root = basename.split('.')[0]
     if LES:
-        return ('4amber_' + root + '.prmtop',
-                '4amber_' + root + '.rst7',
+        return ('4amber_' + root + '.prmtop', '4amber_' + root + '.rst7',
                 '4phenix_' + root + '.pdb')
     else:
-        return ('4amber_' + root + '.prmtop',
-                '4amber_' + root + '.rst7',
+        return ('4amber_' + root + '.prmtop', '4amber_' + root + '.rst7',
                 '4phenix_' + root + '.pdb')
 
 
@@ -95,20 +91,20 @@ def get_energy_and_forces(prmtop_file, rst7_file):
     import sanderles
     md_engine = sanderles if is_prmtop_LES(prmtop_file) else sander
     parm = pmd.load_file(prmtop_file, rst7_file)
-    with md_engine.setup(prmtop_file, rst7_file, box=parm.box, mm_options=sanderles.pme_input()):
+    with md_engine.setup(
+            prmtop_file, rst7_file, box=parm.box,
+            mm_options=sanderles.pme_input()):
         ene, force = sanderles.energy_forces()
     return ene, force
 
 
-def assert_energy_and_forces(prmtop_file,
-                             rst7_file,
-                             saved_prmtop_file,
+def assert_energy_and_forces(prmtop_file, rst7_file, saved_prmtop_file,
                              saved_rst7_file):
     """make sure to reproduce energy and force from saved prmtop
     """
     ene, forces = get_energy_and_forces(prmtop_file, rst7_file)
-    saved_ene, saved_forces = get_energy_and_forces(
-        saved_prmtop_file, saved_rst7_file)
+    saved_ene, saved_forces = get_energy_and_forces(saved_prmtop_file,
+                                                    saved_rst7_file)
     aa_eq(forces, saved_forces, decimal=4)
     aa_eq([ene.tot], [saved_ene.tot], decimal=4)
 
@@ -141,20 +137,26 @@ def run_sander_minimization(prmtop_file, rst7_file, maxcyc=2):
 
 def equal_files(fn1, fn2, skiprows=0):
     with open(fn1) as fh1, open(fn2) as fh2:
-        for line0, line1 in zip(fh1.readlines()[skiprows:], fh2.readlines()[skiprows:]):
+        for line0, line1 in zip(fh1.readlines()[skiprows:],
+                                fh2.readlines()[skiprows:]):
             assert line0.strip() == line1.strip()
+
 
 if __name__ == '__main__':
     print(get_minimized_pdb_filename('2igd.pdb', minimization_type='amber_h'))
-    assert (get_minimized_pdb_filename('2igd.pdb', minimization_type='amber_h') ==
-            '4phenix_2igd.pdb')
-    assert (get_minimized_pdb_filename('2igd.pdb', LES=True, minimization_type='amber_h') ==
-            '4phenix_2igd.pdb')
-    assert (get_minimized_rst7_filename('2igd.pdb', minimization_type='amber_h') ==
-            '4amber_2igd.rst7')
-    assert (get_minimized_rst7_filename('2igd.pdb', LES=True, minimization_type='amber_h') ==
-            '4amber_2igd.rst7')
-    assert (get_prmtop_and_rst7_and_pdb_filenames_from_pdb('fake_dir/my.pdb') ==
-            ('4amber_my.prmtop', '4amber_my.rst7', '4phenix_my.pdb'))
-    assert (get_prmtop_and_rst7_and_pdb_filenames_from_pdb('fake_dir/my.pdb', LES=True) ==
-            ('4amber_my.prmtop', '4amber_my.rst7', '4phenix_my.pdb'))
+    assert (get_minimized_pdb_filename(
+        '2igd.pdb', minimization_type='amber_h') == '4phenix_2igd.pdb')
+    assert (get_minimized_pdb_filename(
+        '2igd.pdb', LES=True,
+        minimization_type='amber_h') == '4phenix_2igd.pdb')
+    assert (get_minimized_rst7_filename(
+        '2igd.pdb', minimization_type='amber_h') == '4amber_2igd.rst7')
+    assert (get_minimized_rst7_filename(
+        '2igd.pdb', LES=True,
+        minimization_type='amber_h') == '4amber_2igd.rst7')
+    assert (
+        get_prmtop_and_rst7_and_pdb_filenames_from_pdb('fake_dir/my.pdb') == (
+            '4amber_my.prmtop', '4amber_my.rst7', '4phenix_my.pdb'))
+    assert (get_prmtop_and_rst7_and_pdb_filenames_from_pdb(
+        'fake_dir/my.pdb', LES=True) == ('4amber_my.prmtop', '4amber_my.rst7',
+                                         '4phenix_my.pdb'))

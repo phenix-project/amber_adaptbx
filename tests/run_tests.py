@@ -2,7 +2,7 @@
 import sys
 import pytest
 
-args = sys.argv[1:] if sys.argv[1:]  else ['-vs', '.']
+args = sys.argv[1:] if sys.argv[1:] else ['-vs', '.']
 
 pytest.main(args)
 

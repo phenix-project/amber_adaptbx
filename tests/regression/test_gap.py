@@ -27,18 +27,20 @@ phenix.AmberPrep {test_folder}/{pdb_code}.pdb minimise=amber_all LES=true
 # @pytest.mark.parametrize('pdb_code', ['3cfb', '1aho'])
 @pytest.mark.parametrize('pdb_code', ['1aho'])
 def test_gap(pdb_code):
-    test_AmberPrep_fn = get_fn('{pdb_code}/test_AmberPrep'.format(pdb_code=pdb_code))
+    test_AmberPrep_fn = get_fn(
+        '{pdb_code}/test_AmberPrep'.format(pdb_code=pdb_code))
     test_folder = os.path.dirname(test_AmberPrep_fn)
 
     outputs = []
-    lines = [line for line in template.format(test_folder=test_folder,
-        pdb_code=pdb_code).split('\n')
-            if line.startswith('phenix') or 'dacdif' in line]
+    lines = [
+        line
+        for line in template.format(
+            test_folder=test_folder, pdb_code=pdb_code).split('\n')
+        if line.startswith('phenix') or 'dacdif' in line
+    ]
 
     for line in lines:
         print('command = ', line)
-        outputs.append(
-                subprocess.check_output(line, shell=True).decode()
-        )
+        outputs.append(subprocess.check_output(line, shell=True).decode())
         print(outputs[-1])
     assert 'possible FAILURE:' not in ''.join(outputs)

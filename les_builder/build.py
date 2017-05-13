@@ -168,6 +168,10 @@ class LESBuilder(object):
 
   def run(self, use_amber_unitcell=True):
 
+    def touch(fname, times=None):
+        with open(fname, 'a'):
+            os.utime(fname, times)
+
     if not self._has_altlocs():
       raise ValueError("pdb file should have altlocs for LES build")
 
@@ -181,11 +185,13 @@ class LESBuilder(object):
 
       # use reduce to add hydrogens to unitcell pdb==========================
       #   (input is xxxx_uc.pdb; creates xxxx_uc_H.pdb)
+      touch('./dummydb')
       self.new_pdb_with_H = self.base + '_uc_H.pdb'
-      cmd = 'reduce -build -nuclear {} > {} 2>reduce_lesbuilder.log'.format(
+      cmd = 'reduce -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
           self.unitcell_pdb_file, self.new_pdb_with_H)
       print "\n~> %s\n" % cmd
       easy_run.fully_buffered(cmd)
+      os.unlink('./dummydb')
 
     # use addles to construct LES parm7 and rst7 files========================
     #   (input is 4amber_xxxx.{prmtop,rst7};  output is
