@@ -14,7 +14,7 @@ phenix.refine  \
    prefix=amber serial=1 \
    write_geo=False --overwrite cdl=True > amber1.log 
 
-tail -2 amber1.log > tail.log
+tail -2 amber1.log | sed 's/,/ /' > tail.log
 dacdif -a 0.001 non-les/tail.log tail.log
 status=$?
 
