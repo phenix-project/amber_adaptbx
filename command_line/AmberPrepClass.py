@@ -10,7 +10,10 @@ import libtbx.load_env
 import libtbx.phil.command_line
 from libtbx import easy_run
 from elbow.command_line import builder
-import pdb4amber
+try: import pdb4amber
+except ImportError:
+  raise Sorry('  Import error - Please check that AMBERHOME is set correctly: %s' % (
+    os.environ.get('AMBERHOME', None)))
 from amber_adaptbx import amber_library_server
 from amber_adaptbx.utils import build_unitcell
 from amber_adaptbx.les_builder.build import LESBuilder
