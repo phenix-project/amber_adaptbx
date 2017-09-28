@@ -137,6 +137,8 @@ done
 #
 # Remove blank lines
 #
+# Replace "," with " "  (dangerous?)
+#
 
 for path in $@
 do
@@ -164,6 +166,7 @@ do
         -e 's@$@@' \
         -e 's@ *$@@' \
         -e '\@^$@d' \
+        -e 's/,/ /' \
         > $tmpdir$file
     if [ "$ignore_sign" = "$on" ]
     then
