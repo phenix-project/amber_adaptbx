@@ -15,10 +15,10 @@ phenix.refine  \
    write_geo=False --overwrite cdl=True > amber1.log 
 
 tail -2 amber1.log > tail.log
-dacdif non-les/tail.log tail.log
+dacdif -a 0.001 non-les/tail.log tail.log
 status=$?
 
-if [$status -ne 0 ]; then
+if [ $status -ne 0 ]; then
    echo "(The expected full log file is in non-les/amber1.log)"
 fi
 
