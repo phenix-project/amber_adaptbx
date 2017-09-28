@@ -14,7 +14,7 @@ dif_ext=dif
 usage()
 {
 cat << EOF
-Usage: $0 [-k] [-s] [-r relerr] [-a abserr] [-t {0,1,2,3,4,5,6,7,8}]  \
+Usage: $0 [-k] [-s] [-r relerr] [-a abserr]  \
           [-v] [-w] original_file new_files
 
 Description
@@ -30,9 +30,6 @@ Options
 
        -s
               ignore the sign of floating point numbers.
-
-       -t n={0,1,2,3,4,5,6,7,8}
-              truncate the last n digits of floating point numbers.
 
        -v
               do not emit verbose messages that indicate the processing status.
@@ -64,14 +61,12 @@ tmpdir="ddtmp."
 keep_files=''
 ignore_sign=''
 ignore_whitespace=''
-truncate=''
 verbose=$on
 while [ $# -gt 0 ]
 do
     case "$1" in
         -k)    keep_files=$on; ;;
         -s)    ignore_sign=$on ;;
-        -t)    truncate=$on; shift; digits=$1 ;;
         -v)    verbose='' ;;
         -w)    ignore_whitespace=$on ;;
         -r)    ndiff=$on; shift; relerr=$1 ;;
@@ -94,7 +89,7 @@ for path in $@; do
   if [ ! -e $path ]; then
     echo "possible FAILURE:  file $path does not exist."
     echo "=============================================================="
-    exit
+    exit 1
   fi
 done
 
@@ -142,7 +137,6 @@ done
 #
 # Remove blank lines
 #
-# Optionally remove signs, truncate digits, and remove whitespace
 
 for path in $@
 do
@@ -181,62 +175,6 @@ do
             /bin/rm $tmpdir$file.t
         fi
     fi
-    if [ "$truncate" = "$on" ]
-    then
-        mv $tmpdir$file $tmpdir$file.t
-        case "$digits" in
-            0)    cat $tmpdir$file.t > $tmpdir$file ;;
-            1)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            2)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            3)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            4)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            5)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            6)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            7)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            8)    sed -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      -e 's@\([-+]\{0,1\}[0-9][0-9]*\.[0-9]*\)[0-9]@\1@g' \
-                      $tmpdir$file.t > $tmpdir$file ;;
-            *)    usage ;;
-        esac
-        if [ "$keep_files" != "$on" ]
-        then
-            /bin/rm $tmpdir$file.t
-        fi
-    fi
 done
 
 # get original file
@@ -260,13 +198,10 @@ do
     else
         if [ "$ndiff" = "$on" ]
         then
-            #  $AMBERHOME/bin/ndiff -r $relerr $old $new > $path.$dif_ext
-            awk -f $AMBERHOME/test/ndiff.awk -v RELERR=$relerr \
-                 $old $new > $path.$dif_ext
+            awk -f ./ndiff.awk -v RELERR=$relerr $old $new > $path.$dif_ext
         elif [ "$ndiffa" = "$on" ]
         then
-            awk -f $AMBERHOME/test/ndiff.awk -v ABSERR=$abserr \
-                 $old $new > $path.$dif_ext
+            awk -f ./ndiff.awk -v ABSERR=$abserr $old $new > $path.$dif_ext
         else
             diff $old $new > $path.$dif_ext
         fi
@@ -285,15 +220,7 @@ do
             /bin/rm $path.$dif_ext
         fi
     else
-        #Figure out the directory we are in and the main test directory
-        #for writing TEST_FAILURES info file
-        fulldir=`pwd`
-        dacdifdir=`echo $0 | sed s/dacdif//`
         echo "possible FAILURE:  check $path.$dif_ext"
-        echo "possible FAILURE:  check $path.$dif_ext" >> $dacdifdir/TEST_FAILURES.diff
-        echo $fulldir >> $dacdifdir/TEST_FAILURES.diff
-        cat $path.$dif_ext >> $dacdifdir/TEST_FAILURES.diff
-        echo "---------------------------------------" >> $dacdifdir/TEST_FAILURES.diff
     fi
     echo "=============================================================="
     if [ "$keep_files" != "$on" ]
@@ -302,9 +229,8 @@ do
     fi
 done
 
-if [ "$keep_files" != "$on" ]
-then
+if [ "$keep_files" != "$on" ]; then
     /bin/rm $old
 fi
-exit
+exit $status
 

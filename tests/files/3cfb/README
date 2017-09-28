@@ -1,0 +1,14 @@
+Run tests on 3cfb: similar to 1aho, but takes longer :-(
+
+#  simple test case: has alternate conformers, ss bonds, multiple
+#    chains per unit cell, non-standard residues, insertion codes
+
+#  does not have:  gaps
+#  also of interest: leaving out the use_reduce=False is OK, but gives
+#           slightly different results
+
+To run the tests:
+
+./test_AmberPrep      (takes 153 sec on dac laptop)
+./test_phenix.refine  (takes 590 sec on dac laptop)
+

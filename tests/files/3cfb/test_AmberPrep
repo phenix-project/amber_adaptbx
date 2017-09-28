@@ -10,13 +10,18 @@
 echo "Running non-LES test on 3cfb:"
 phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all > non-les.log 2>&1
 
-./dacdif non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
-./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
-./dacdif non-les/4amber_3cfb.rst7 4amber_3cfb.rst7
-./dacdif non-les/3cfb.min.out 3cfb.min.out
-./dacdif non-les/non-les.log non-les.log
+status=0
 
-/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb
+./dacdif -a 0.002 non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
+status=$(($status + $?))
+./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
+status=$(($status + $?))
+./dacdif -a 0.002 non-les/4amber_3cfb.rst7 4amber_3cfb.rst7
+status=$(($status + $?))
+./dacdif -r 0.0001 non-les/3cfb.min.out 3cfb.min.out
+status=$(($status + $?))
+./dacdif non-les/non-les.log non-les.log
+status=$(($status + $?))
 
 if false; then
 
@@ -36,6 +41,14 @@ phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all LES=true > les.log
 fi
 
 ./dacdif non-les/GOL.mol2 GOL.mol2
+status=$(($status + $?))
 ./dacdif non-les/GOL.frcmod GOL.frcmod
+status=$(($status + $?))
 ./dacdif non-les/SPB.mol2 SPB.mol2
+status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
+status=$(($status + $?))
+
+/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb
+
+exit $status

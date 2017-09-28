@@ -1,0 +1,29 @@
+echo "running 1 cycle of coordinate refinement on 3cfb:"
+
+phenix.refine  \
+   non-les/4phenix_3cfb.pdb 3cfb.mtz non-les/SPB.cif \
+   c_beta_restraints=False discard_psi_phi=False \
+   refinement.input.xray_data.r_free_flags.generate=True \
+   strategy=individual_sites+individual_adp \
+   refinement.main.number_of_macro_cycles=1 \
+   topology_file_name=non-les/4amber_3cfb.prmtop \
+   amber.coordinate_file_name=non-les/4amber_3cfb.rst7 \
+   use_amber=True \
+   hydrogens.refine=individual \
+   hydrogens.contribute_to_f_calc=False \
+   prefix=amber serial=1 \
+   write_geo=False --overwrite cdl=True \
+   write_map_coefficients=False  write_eff_file=False > amber1.log 
+
+tail -2 amber1.log > tail.log
+dacdif non-les/tail.log tail.log
+status=$?
+
+if [ $status -ne 0 ]; then
+   echo "(The expected full log file is in non-les/amber1.log)"
+fi
+
+/bin/rm -f amber_data.mtz amber_phenix_atom_order_map.txt \
+      amber_001.{log,mtz,pdb,eff} amber_002.def 
+
+exit $status
