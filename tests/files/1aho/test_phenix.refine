@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo "running 1 cycle of coordinate refinement on 1aho:"
 
 phenix.refine  \
@@ -15,7 +17,7 @@ phenix.refine  \
    write_geo=False --overwrite cdl=True > amber1.log 
 
 tail -2 amber1.log | sed 's/,/ /' > tail.log
-dacdif -a 0.001 non-les/tail.log tail.log
+./dacdif -a 0.005 non-les/tail.log tail.log
 status=$?
 
 if [ $status -ne 0 ]; then
