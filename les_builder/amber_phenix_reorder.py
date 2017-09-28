@@ -150,7 +150,12 @@ def round3(a):
   >>> round3(1.235)
   1.2
   """
-  x = round(round(round(a, 3), 2), 1)
+  #  format the input number in the way that would have been done
+  #    when 4phenix_xxxx.pdb was made:
+  y = '%8.3f' % a 
+  #  now, round to 1 decimal place: since both the 4phenix and the 4amber
+  #     string representations should be the same, this should work:
+  x = round( float(y), 1 )
   if x == -0.0:
     # avoid '-0.0' and '0.0' key
     x = 0.0
@@ -186,11 +191,10 @@ def get_indices(ids_dict, big_arr):
     except KeyError:
       print("**********ATTENTION***************")
       print(msg)
-      print('atom index = {}, coordinates = {}'.format(index, arr))
-      key = list(ids_dict.keys())[index]
-      print('expected {}'.format(key))
-      rounding_example = ' '.join(str(round3(el)) for el in arr)
-      print('Notes about lookup table key: e.g {} will be rounded to {}'.format(arr, rounding_example))
+      print('atom index = {}, coordinates in rst7 file = {}'.format(index, arr))
+      attempted_key = ' '.join(str(round3(i)) for i in arr)
+      print('argument to sites_cart_ids dict: {}'.format(attempted_key))
+      print ids_dict
       raise KeyError(msg)
   return np.array(string_list)
 
