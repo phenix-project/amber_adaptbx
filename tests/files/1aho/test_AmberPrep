@@ -19,17 +19,4 @@ status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
 status=$(($status + $?))
 
-if false; then
-
-echo "Running LES test on 1aho with a gap:"
-phenix.AmberPrep 1aho.pdb minimise=amber_all LES=true > les.log 2>&1
-
-./dacdif les/4phenix_1aho.pdb 4phenix_1aho.pdb
-./dacdif les/4amber_1aho.prmtop 4amber_1aho.prmtop
-./dacdif les/4amber_1aho.rst7 4amber_1aho.rst7
-./dacdif les/1aho.min.out 1aho.min.out
-./dacdif les/les.log les.log
-
-fi
-
 exit $status

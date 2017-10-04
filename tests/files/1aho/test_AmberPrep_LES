@@ -1,0 +1,24 @@
+#!/bin/sh
+
+#  simple test case: has alternate conformers, ss bonds, gaps, multiple
+#    chains per unit cell
+
+#  does not have:  non-standard residues
+
+echo "Running LES test on 1aho with a gap:"
+phenix.AmberPrep 1aho.pdb minimise=amber_all LES=true > les.log 2>&1
+
+./dacdif les/4phenix_1aho.pdb 4phenix_1aho.pdb
+status=$?
+./dacdif les/4amber_1aho.prmtop 4amber_1aho.prmtop
+status=$(($status + $?))
+./dacdif les/4amber_1aho.rst7 4amber_1aho.rst7
+status=$(($status + $?))
+./dacdif les/1aho.min.out 1aho.min.out
+status=$(($status + $?))
+./dacdif les/les.log les.log
+status=$(($status + $?))
+
+/bin/rm -f 4amber_1aho.LES.pdb addles.in
+
+exit $status
