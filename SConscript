@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import libtbx.load_env
 from libtbx.utils import Sorry
@@ -7,7 +8,7 @@ import sys
 amber_dist = libtbx.env.dist_path("amber", default=None)
 amberhome = os.environ.get("AMBERHOME", False)
 amber_mgdx = os.environ.get("AMBER_MDGX", False)
-if(amber_dist and 
+if(amber_dist and
    os.path.exists(amber_dist) and
    os.path.isdir(amber_dist) and
    amberhome and
@@ -15,7 +16,7 @@ if(amber_dist and
    os.path.isdir(amberhome) and
    amber_mgdx
    ):
-  print "AMBER SCONS: Amber linked. Will attempt MDGX compile."
+  print("AMBER SCONS: Amber linked. Will attempt MDGX compile.")
   Import("env_base", "env_etc")
   ext_sources = [
     "ext.cpp",
