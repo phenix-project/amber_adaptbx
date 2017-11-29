@@ -50,6 +50,8 @@ master_phil_string = """
         .type = bool
       redq = False
         .type = bool
+        .caption = Use reduced-charge Amber force field
+        .help = Use reduced-charge Amber force field
       LES = False
         .type = bool
       use_reduce = True
@@ -480,14 +482,18 @@ class AmberPrepRunner:
       raise Sorry('Amber environment appears to be older than AmberTools16; quitting')
 
     # Now we can assume that we are dealing with AmberTools16:
-    f.write('source leaprc.protein.ff14SB\n')
-    f.write('source leaprc.DNA.OL15\n')
-    f.write('source leaprc.RNA.OL3\n')
+    if( redq ):
+      f.write('source leaprc.ff14SB.redq\n')
+    else:
+      f.write('source leaprc.protein.ff14SB\n')
+      f.write('source leaprc.DNA.OL15\n')
+      f.write('source leaprc.RNA.OL3\n')
     if( use_glycam ):
        f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
-    #  (for the future: have some mechanism for modifying the above list)
+    #  for the future: have some mechanism for modifying the above list, e.g.:
+    #  f.write('source myleaprc\n')
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
 
