@@ -2,9 +2,15 @@ from __future__ import division
 from math import sqrt
 import scitbx.restraints
 from libtbx.utils import Sorry
-import sander
-import sanderles
-import parmed # require version in AmberTools >= 16
+try:
+  import sander
+  import sanderles
+  import parmed # require version in AmberTools >= 16
+except ImportError, e:
+  sander = None
+  sanderles = None
+  parmed = None
+  
 from amber_adaptbx.utils import (
     bond_rmsd,
     angle_rmsd,

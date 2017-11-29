@@ -3,8 +3,11 @@ from libtbx.utils import Sorry
 try:
   import sander
   import sanderles
-except:
-  raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
+except ImportError, e:
+  sander = None
+  sanderles = None
+  #raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
+  
 from amber_adaptbx.utils import (
     expand_coord_to_unit_cell,
     get_amber_structs,
