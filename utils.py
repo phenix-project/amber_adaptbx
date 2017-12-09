@@ -347,6 +347,6 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
     cs = pdb_inp.crystal_symmetry()
     ph = pdb_inp.construct_hierarchy()
     ph_p1 = ph.expand_to_p1(crystal_symmetry=cs)
-    abc = cs.unit_cell().parameters()[:3]
+    abc = cs.unit_cell().parameters()[:6]
     cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
     ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
