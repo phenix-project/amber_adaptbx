@@ -260,14 +260,15 @@ class AmberPrepRunner:
     routines after this to conver to phenix atom order.
     '''
 
+    #  Note: here self.pdb_filename is typically the input pdb file
     template_parm = parmed.load_file(self.pdb_filename)
     parm = parmed.load_file("%s_asu.prmtop" % self.base, 
                          xyz="%s_asu.rst7" % self.base )
 
     # following kludge is needed to get got atom numbers; not needed if
     #   conversion to phenix order is done right after this
-    #parm.write_pdb( pdb_filename )
-    #parm = parmed.load_file( pdb_filename )
+    # parm.write_pdb( pdb_filename )
+    # parm = parmed.load_file( pdb_filename )
 
     # update occupancy to take into account alternate locations:
     for atom in template_parm.atoms:
@@ -492,8 +493,9 @@ class AmberPrepRunner:
        f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
-    #  for the future: have some mechanism for modifying the above list, e.g.:
-    #  f.write('source myleaprc\n')
+    #  kludgy mechanism mechanism for modifying the above list:
+    if os.path.isfile('myleaprc'):
+       f.write('source myleaprc\n')
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
 
