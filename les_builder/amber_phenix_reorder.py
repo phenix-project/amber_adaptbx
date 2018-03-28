@@ -58,6 +58,10 @@ def initialize_order_converter(self):
     print 'reading order mapping from file {}'.format(self.amber_structs.order_map_file_name)
     geometry_manager.order_converter = self.amber_structs.order_converter
   else:
+    #
+    # this functionality has been moved to AmberPrep and should be removed
+    # at least for the Amber Geom. Restraints Manager.
+    #
     # compute reorder map based on original ASU pdb and unitcell rst7 (and parm7) files
     asu_n_atoms = len(self.sites_cart)
     n_models = int(len(self.amber_structs.parm.coordinates) / asu_n_atoms)
@@ -142,88 +146,7 @@ def get_indices_convert_dict(fn):
   return {'p2a': np.array([newids[atom.id_str()] for atom in pdb_inp.atoms()]),
           'a2p': np.array([oldids[atom.id_str()] for atom in pdb_hierarchy.atoms()])}
 
-def round3(a):
-  """
 
-  Examples
-  --------
-  >>> round3(1.235)
-  1.2
-  """
-  #  format the input number in the way that would have been done
-  #    when 4phenix_xxxx.pdb was made:
-  y = '%8.3f' % a 
-  #  now, round to 1 decimal place: since both the 4phenix and the 4amber
-  #     string representations should be the same, this should work:
-  x = round( float(y), 1 )
-  if x == -0.0:
-    # avoid '-0.0' and '0.0' key
-    x = 0.0
-  return x
-
-def make_dict(big_arr):
-  """
-  
-  Examples
-  --------
-  >>> make_dict([[1.234, 4.56, 7.89],
-  ...            [3.466, 7.893, 9.134]])
-  {'1.2 4.6 7.9': 0, '3.5 7.9 9.1': 1}
-  """
-  return OrderedDict((' '.join(str(round3(i)) for i in arr), idx) for (idx, arr) in enumerate(big_arr))
-
-def get_indices(ids_dict, big_arr):
-  """
-
-  Examples
-  --------
-  >>> ids_dict = {'1.2 4.6 7.9': 0, '3.5 7.9 9.1': 1}
-  >>> arr = [[1.234, 4.56, 7.89],
-  ...        [3.466, 7.893, 9.134]]
-  >>> get_indices(ids_dict, arr)
-  array([0, 1])
-  """
-  msg = "sites_cart (read from pdb) and amber_coords (read from rst7) do not have matched value"
-  string_list = []
-  for index, arr in enumerate(big_arr):
-    try:
-      string_list.append(ids_dict[' '.join(str(round3(i)) for i in arr)])
-    except KeyError:
-      print("**********ATTENTION***************")
-      print(msg)
-      print('atom index = {}, coordinates in rst7 file = {}'.format(index, arr))
-      attempted_key = ' '.join(str(round3(i)) for i in arr)
-      print('argument to sites_cart_ids dict: {}'.format(attempted_key))
-      print ids_dict
-      raise KeyError(msg)
-  return np.array(string_list)
-
-def get_indices_convert_dict_from_array(sites_cart, amber_coords):
-  """this method will be use in amber_adaptbx/__init__.py
-
-  Parameters
-  ----------
-  sites_cart : flex.vec3_double
-  amber_coords : 2D numpy array
-
-  Returns
-  -------
-  dict(a2p=, p2a=)
-
-  Examples
-  --------
-  >>> # make a fake phenix's sites_cart (flex.vec3_double)
-  >>> # make a fake amber's coordinates (2D array)
-  """
-  # 2D array
-  old_arr = np.asarray(amber_coords)
-  new_arr = np.asarray(sites_cart)
-
-  old_ids = make_dict(old_arr)
-  new_ids = make_dict(new_arr)
-
-  return {'p2a': get_indices(new_ids, old_arr),
-          'a2p': get_indices(old_ids, new_arr)}
 
 if __name__ == '__main__':
   import parmed as pmd

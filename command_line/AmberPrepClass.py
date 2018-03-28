@@ -15,7 +15,8 @@ except ImportError:
   raise Sorry('  Import error - Please check that AMBERHOME is set correctly: %s' % (
     os.environ.get('AMBERHOME', None)))
 from amber_adaptbx import amber_library_server
-from amber_adaptbx.utils import build_unitcell
+from amber_adaptbx.utils import build_unitcell, \
+  get_indices_convert_dict_from_array
 from amber_adaptbx.les_builder.build import LESBuilder
 import parmed
 
@@ -229,6 +230,7 @@ class AmberPrepRunner:
     self.LES = LES
     self.final_prmtop_file = '4amber_%s.prmtop' % self.base
     self.final_rst7_file = '4amber_%s.rst7' % self.base
+    self.final_order_file = '4amber_%s.order' % self.base
     self.final_pdb_file_4phenix = '4phenix_%s.pdb' % self.base
     self.non_les_prmtop_file_name = '4amber_%s.prmtop' % self.base
     self.non_les_rst7_file_name = '4amber_%s.rst7' % self.base
@@ -1050,6 +1052,50 @@ def run(rargs):
     os.rename('4amber_%s.LES.rst7' % base, '4amber_%s.rst7' % base)
     os.rename('4phenix_%s.LES.pdb' % base, '4phenix_%s.pdb' % base)
 
+  #
+  # get atom order file
+  #
+  from iotbx import pdb
+  pdb_inp =  pdb.input('4phenix_%s.pdb' % base)
+  hierarchy = pdb_inp.construct_hierarchy()
+  print dir(hierarchy)
+  print dir(hierarchy.atoms())
+  sites_cart = hierarchy.atoms().extract_xyz()
+  parm = parmed.load_file("4amber_%s.prmtop" % base, 
+                          xyz="4amber_%s.rst7" % base )
+  print parm
+  asu_n_atoms = len(sites_cart)
+  n_models = int(len(parm.coordinates) / asu_n_atoms)
+  order_converter = get_indices_convert_dict_from_array(
+    sites_cart,
+    parm.coordinates[:asu_n_atoms])
+  import numpy as np
+  # asu
+  asu_p2a_indices = order_converter['p2a']
+  asu_a2p_indices = order_converter['a2p']
+
+  # unitcell
+  uc_p2a_indices = []
+  uc_a2p_indices = []
+
+  for index in range(n_models):
+    # need to increase atom indices
+    uc_p2a_indices.extend((asu_p2a_indices + index * asu_n_atoms).tolist())
+    uc_a2p_indices.extend((asu_a2p_indices + index * asu_n_atoms).tolist())
+
+  # extend array for unitcell
+  order_converter['p2a'] = np.array(uc_p2a_indices)
+  order_converter['a2p'] = np.array(uc_a2p_indices)
+
+  # save to disk for debugging
+  saved_arr = np.array([order_converter['a2p'],
+                        order_converter['p2a']],
+                        dtype='i4')
+  # 1st column: amber -> phenix
+  # 2nd column: phenix -> amber
+  filename = amber_prep_runner.final_order_file
+  np.savetxt(filename, saved_arr.transpose(), fmt='%5d')
+
   if actions.minimise != "off":
     print "\n=================================================="
     print "Minimizing input coordinates."
@@ -1072,14 +1118,14 @@ def run(rargs):
   outl += "Done.  Three new files have been made:\n"
   outl += "      %s\n" % amber_prep_runner.final_pdb_file_4phenix
   outl += "      %s\n" % amber_prep_runner.final_prmtop_file
-  outl += "      %s\n" % amber_prep_runner.final_rst7_file
+  outl += "      %s\n" % amber_prep_runner.final_order_file
   outl += "==================================================\n\n"
   outl += "Example\n\n  phenix.refine"
   outl += " %s use_amber=True \\\n" % (
       amber_prep_runner.final_pdb_file_4phenix,
   )
   outl += "    amber.topology_file_name=%s \\\n" % amber_prep_runner.final_prmtop_file
-  outl += "    amber.coordinate_file_name=%s \\\n" % amber_prep_runner.final_rst7_file
+  outl += "    amber.order_file_name=%s \\\n" % amber_prep_runner.final_order_file
   outl += "    ....(other refinement keywords here)....."
   outl += "\n\n\n"
   print outl

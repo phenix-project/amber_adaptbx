@@ -100,5 +100,14 @@ class geometry_manager(object):
           result.energy_components[3],
           result.energy_components[4],
           result.energy_components[5])
-
+    #print result.bond_deviations(self.sites_cart,
+    #                             self.amber_structs.parm,
+    #                             ignore_hd=False,
+    #                             verbose=1,
+    #)
+    #print result.angle_deviations(self.sites_cart,
+    #                             self.amber_structs.parm,
+    #                             ignore_hd=False,
+    #                             verbose=1,
+    #)
     return result

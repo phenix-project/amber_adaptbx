@@ -94,8 +94,14 @@ def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
 
   return sites_cart_uc
 
-def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False):
-  print "starting bond_rmsd: %s" % time.strftime("%H:%M:%S")
+def bond_rmsd(parm,
+              sites_cart,
+              ignore_hd,
+              get_deltas=False,
+              get_extremes=False,
+              verbose=False,
+  ):
+  if verbose: print "starting bond_rmsd: %s" % time.strftime("%H:%M:%S")
   ignore_hd=True   # dac timing test
   if ignore_hd:
     bonds = parm.bonds_without_h
@@ -121,7 +127,7 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False)
     dy = atom1[1] - atom2[1]
     dz = atom1[2] - atom2[2]
     delta = bond.type.req - sqrt(dx*dx + dy*dy + dz*dz)
-    # print "bond deltas:  %6d %6d %6d  %7.2f" % ( i, atom1_idx, atom2_idx, delta )
+    #print "bond deltas:  %6d %6d %6d  %7.2f" % ( i, atom1_idx, atom2_idx, delta )
     if get_extremes:
       bond.model = sqrt(dx*dx + dy*dy + dz*dz)
       bond_extremes.process(delta, bond)
@@ -131,7 +137,7 @@ def bond_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False)
   b_ave = sqrt(flex.mean_default(b_sq, 0))
   b_max = sqrt(flex.max_default(b_sq, 0))
   b_min = sqrt(flex.min_default(b_sq, 0))
-  print "done with bond_rmsd: %s" % time.strftime("%H:%M:%S")
+  if verbose: print "done with bond_rmsd: %s" % time.strftime("%H:%M:%S")
   if not get_deltas:
     return b_min, b_max, b_ave
   else:
@@ -170,8 +176,14 @@ def bond_rmsZ(parm, sites_cart, ignore_hd, get_deltas=False):
   else:
     return (b_min, b_max, b_ave), bond_Zs
 
-def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False):
-  print "starting angle_rmsd: %s" % time.strftime("%H:%M:%S")
+def angle_rmsd(parm,
+               sites_cart,
+               ignore_hd,
+               get_deltas=False,
+               get_extremes=False,
+               verbose=False,
+  ):
+  if verbose: print "starting angle_rmsd: %s" % time.strftime("%H:%M:%S")
   ignore_hd=True   # dac timing test
   if ignore_hd:
     angles = parm.angles_without_h
@@ -213,7 +225,7 @@ def angle_rmsd(parm, sites_cart, ignore_hd, get_deltas=False, get_extremes=False
   a_ave = sqrt(flex.mean_default(a_sq, 0))
   a_max = sqrt(flex.max_default(a_sq, 0))
   a_min = sqrt(flex.min_default(a_sq, 0))
-  print "done with angle_rmsd: %s" % time.strftime("%H:%M:%S")
+  if verbose: print "done with angle_rmsd: %s" % time.strftime("%H:%M:%S")
   if not get_deltas:
     return (a_min, a_max, a_ave)
   else:
@@ -278,6 +290,7 @@ def is_prmtop_LES(parm_file_name):
     return False
 
 def check_file(s, file_name):
+  return
   if not os.path.exists(file_name):
     raise Sorry("Filename %s does not exist" % file_name)
 
@@ -350,3 +363,90 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
     abc = cs.unit_cell().parameters()[:6]
     cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
     ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
+
+
+# atom ordering
+from collections import OrderedDict
+
+def get_indices(ids_dict, big_arr):
+  """
+
+  Examples
+  --------
+  >>> ids_dict = {'1.2 4.6 7.9': 0, '3.5 7.9 9.1': 1}
+  >>> arr = [[1.234, 4.56, 7.89],
+  ...        [3.466, 7.893, 9.134]]
+  >>> get_indices(ids_dict, arr)
+  array([0, 1])
+  """
+  msg = "sites_cart (read from pdb) and amber_coords (read from rst7) do not have matched value"
+  string_list = []
+  for index, arr in enumerate(big_arr):
+    try:
+      string_list.append(ids_dict[' '.join(str(round3(i)) for i in arr)])
+    except KeyError:
+      print("**********ATTENTION***************")
+      print(msg)
+      print('atom index = {}, coordinates in rst7 file = {}'.format(index, arr))
+      attempted_key = ' '.join(str(round3(i)) for i in arr)
+      print('argument to sites_cart_ids dict: {}'.format(attempted_key))
+      print ids_dict
+      raise KeyError(msg)
+  return np.array(string_list)
+
+def round3(a):
+  """
+
+  Examples
+  --------
+  >>> round3(1.235)
+  1.2
+  """
+  #  format the input number in the way that would have been done
+  #    when 4phenix_xxxx.pdb was made:
+  y = '%8.3f' % a 
+  #  now, round to 1 decimal place: since both the 4phenix and the 4amber
+  #     string representations should be the same, this should work:
+  x = round( float(y), 1 )
+  if x == -0.0:
+    # avoid '-0.0' and '0.0' key
+    x = 0.0
+  return x
+
+def make_dict(big_arr):
+  """
+  
+  Examples
+  --------
+  >>> make_dict([[1.234, 4.56, 7.89],
+  ...            [3.466, 7.893, 9.134]])
+  {'1.2 4.6 7.9': 0, '3.5 7.9 9.1': 1}
+  """
+  return OrderedDict((' '.join(str(round3(i)) for i in arr), idx) for (idx, arr) in enumerate(big_arr))
+
+def get_indices_convert_dict_from_array(sites_cart, amber_coords):
+  """this method will be use in amber_adaptbx/__init__.py
+
+  Parameters
+  ----------
+  sites_cart : flex.vec3_double
+  amber_coords : 2D numpy array
+
+  Returns
+  -------
+  dict(a2p=, p2a=)
+
+  Examples
+  --------
+  >>> # make a fake phenix's sites_cart (flex.vec3_double)
+  >>> # make a fake amber's coordinates (2D array)
+  """
+  # 2D array
+  old_arr = np.asarray(amber_coords)
+  new_arr = np.asarray(sites_cart)
+
+  old_ids = make_dict(old_arr)
+  new_ids = make_dict(new_arr)
+
+  return {'p2a': get_indices(new_ids, old_arr),
+          'a2p': get_indices(old_ids, new_arr)}

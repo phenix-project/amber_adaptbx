@@ -63,8 +63,9 @@ class energies(scitbx.restraints.energies):
                        ignore_hd=False,
                        get_deltas=False,
                        get_extremes=False,
+                       verbose=False,
                        ):
-    return angle_rmsd(parm, sites_cart, ignore_hd, get_deltas, get_extremes)
+    return angle_rmsd(parm, sites_cart, ignore_hd, get_deltas, get_extremes, verbose)
 
   def bond_deviations(self,
                       sites_cart,
@@ -72,8 +73,9 @@ class energies(scitbx.restraints.energies):
                       ignore_hd=False,
                       get_deltas=False,
                       get_extremes=False,
+                      verbose=False
                       ):
-    return bond_rmsd(parm, sites_cart, ignore_hd, get_deltas, get_extremes)
+    return bond_rmsd(parm, sites_cart, ignore_hd, get_deltas, get_extremes, verbose)
 
   def n_angle_proxies(self, parm, ignore_hd=False):
     if not ignore_hd:
