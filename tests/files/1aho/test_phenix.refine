@@ -9,7 +9,7 @@ phenix.refine  \
    strategy=individual_sites \
    refinement.main.number_of_macro_cycles=1 \
    topology_file_name=non-les/4amber_1aho.prmtop \
-   amber.coordinate_file_name=non-les/4amber_1aho.rst7 \
+   amber.order_file_name=non-les/4amber_1aho.order \
    use_amber=True \
    hydrogens.refine=individual \
    hydrogens.contribute_to_f_calc=False \

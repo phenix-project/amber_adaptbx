@@ -102,6 +102,7 @@ Building the LES prmtop and rst7 files
 
 ~> addles <addles.in > addles.log
 
+4amber_1aho.prmtop
 
 ==================================================
 Minimizing input coordinates.
@@ -115,14 +116,14 @@ checking special positions in 4phenix_1aho.pdb
 Done.  Three new files have been made:
       4phenix_1aho.pdb
       4amber_1aho.prmtop
-      4amber_1aho.rst7
+      4amber_1aho.order
 ==================================================
 
 Example
 
   phenix.refine 4phenix_1aho.pdb use_amber=True \
     amber.topology_file_name=4amber_1aho.prmtop \
-    amber.coordinate_file_name=4amber_1aho.rst7 \
+    amber.order_file_name=4amber_1aho.order \
     ....(other refinement keywords here).....
 
 

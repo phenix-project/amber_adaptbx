@@ -1,3 +1,16 @@
+Notes:
+
+The tests that phenix automatically runs are in 
+     $PHENIX/modules/phenix/phenix/command_line/amber_run_tests.py
+
+These are "regression tests" that check that phenix.AmberPrep and
+phenix.refine with useAmber=True continue to give correct results.
+
+Description below are for a test suite that Hai Nguyen put together.
+But some of these are now outdated, so they would need some work to
+get working again.  These are more like "unit tests".
+
+==========================================================================
 1. How to run?
 
 Note: add "-s" if you want to see more verbose
@@ -34,3 +47,4 @@ Note: add "-s" if you want to see more verbose
 4. To collect all the test names
 
 ./run_tests.py --collect-only
+==========================================================================

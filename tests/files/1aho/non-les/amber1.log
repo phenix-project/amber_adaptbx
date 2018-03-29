@@ -1,10 +1,10 @@
-# Date 2017-09-27 Time 13:59:57 EDT -0400 (1506535197.35 s)
+# Date 2018-03-29 Time 13:54:57 MDT -0600 (1522353297.41 s)
 #phil __OFF__
 
-Command line arguments: "non-les/4phenix_1aho.pdb" "1aho.mtz" "c_beta_restraints=False" "discard_psi_phi=False" "refinement.input.xray_data.r_free_flags.generate=True" "strategy=individual_sites" "refinement.main.number_of_macro_cycles=1" "topology_file_name=non-les/4amber_1aho.prmtop" "amber.coordinate_file_name=non-les/4amber_1aho.rst7" "use_amber=True" "hydrogens.refine=individual" "hydrogens.contribute_to_f_calc=False" "prefix=amber" "serial=1" "write_geo=False" "--overwrite" "cdl=True"
+Command line arguments: "non-les/4phenix_1aho.pdb" "1aho.mtz" "c_beta_restraints=False" "discard_psi_phi=False" "refinement.input.xray_data.r_free_flags.generate=True" "strategy=individual_sites" "refinement.main.number_of_macro_cycles=1" "topology_file_name=non-les/4amber_1aho.prmtop" "amber.order_file_name=non-les/4amber_1aho.order" "use_amber=True" "hydrogens.refine=individual" "hydrogens.contribute_to_f_calc=False" "prefix=amber" "serial=1" "write_geo=False" "--overwrite" "cdl=True"
 
 USER = case
-PID = 64033
+PID = 70294
 
 -------------------------------------------------------------------------------
   PHENIX: Python-based Hierarchical ENvironment for Integrated Xtallography
@@ -62,7 +62,7 @@ Command line parameter definitions:
 
   refinement.amber.topology_file_name = non-les/4amber_1aho.prmtop
 
-  refinement.amber.coordinate_file_name = non-les/4amber_1aho.rst7
+  refinement.amber.order_file_name = non-les/4amber_1aho.order
 
   refinement.amber.use_amber = True
 
@@ -143,7 +143,7 @@ Number of work/free reflections by resolution:
   bin 10:  0.9992 -  0.9647 [2295/3412]  2147   148   6.4%
                                 overall 29001  2000   6.5%
   Monomer Library directory:
-    "/Users/case/xtal/phenix_svn/modules/chem_data/mon_lib"
+    "/Users/case/Dropbox/xtal/phenix_svnf/modules/chem_data/mon_lib"
   Total number of atoms: 1328
   Number of models: 1
   Model: ""
@@ -221,7 +221,7 @@ Number of work/free reflections by resolution:
       pdb=" H1  HOH A  76 " occ=0.50
       pdb=" H2  HOH A  76 " occ=0.50
     ... (remaining 31 not shown)
-  Time building chain proxies: 0.36, per 1000 atoms: 0.27
+  Time building chain proxies: 0.59, per 1000 atoms: 0.44
   Number of scatterers: 1328
   At special positions: 0
   Unit cell: (45.9, 40.7, 30.1, 90, 90, 90)
@@ -240,7 +240,7 @@ Number of work/free reflections by resolution:
 No array of experimental phases found.
 
 Writing MTZ file:
-  /Users/case/xtal/phenix_svn/modules/amber_adaptbx/tests/files/1aho/amber_data.mtz
+  /Users/case/Dropbox/xtal/phenix_svnf/modules/amber_adaptbx/tests/files/1aho/amber_data.mtz
 
 
 ============================== Scattering factors =============================
@@ -274,13 +274,14 @@ All atoms refined with f_prime=0 and f_double_prime=0.
         Amimo acid           : False - 1.90
         Carbohydrate         : True  - 1.99
         Ligands              : True  - 1.99
+        Small molecules      : False - 1.98
         Amino acid - RNA/DNA : False
       
   Number of custom bonds: simple=0, symmetry=0
-  Time building additional restraints: 0.35
-  Conformation dependent library (CDL) restraints added in 15.3 milliseconds
+  Time building additional restraints: 0.51
+  Conformation dependent library (CDL) restraints added in 37.5 milliseconds
   
-  Time building geometry restraints manager: 0.38 seconds
+  Time building geometry restraints manager: 0.58 seconds
 
   NOTE: a complete listing of the restraints can be obtained by requesting
         output of .geo file.
@@ -468,7 +469,8 @@ All atoms refined with f_prime=0 and f_double_prime=0.
 ============================== Initializing AMBER =============================
 
   topology    : non-les/4amber_1aho.prmtop
-  coordinates : non-les/4amber_1aho.rst7
+  coordinates : None
+reading order mapping from file non-les/4amber_1aho.order
   Amber total: -5503.15 bonds (n=5376): 1639.71 angles (n=6828): 1499.86 diheds (n=17072): 2844.91 elec.: -11345.88 vdW: -141.75
 
 ======================== Summary of geometry restraints =======================
@@ -509,9 +511,9 @@ Look at refinement.ncs for more NCS related parameters.
 =================== Write initial parameters into .eff file ===================
 
 Writing effective parameters to file:
-  /Users/case/xtal/phenix_svn/modules/amber_adaptbx/tests/files/1aho/amber_001.eff
+  /Users/case/Dropbox/xtal/phenix_svnf/modules/amber_adaptbx/tests/files/1aho/amber_001.eff
 
-CPU time processing inputs: 5.90
+CPU time processing inputs: 11.05
 
 
 ============================ Non-default parameters ===========================
@@ -597,7 +599,7 @@ refinement {
   amber {
     use_amber = True
     topology_file_name = "non-les/4amber_1aho.prmtop"
-    coordinate_file_name = "non-les/4amber_1aho.rst7"
+    order_file_name = "non-les/4amber_1aho.order"
   }
 }
 #phil __OFF__
@@ -808,18 +810,18 @@ r_work=0.2542 r_free=0.2492
   Amber total: -6996.46 bonds (n=5376): 1242.89 angles (n=6828): 1416.26 diheds (n=17072): 2820.45 elec.: -12303.88 vdW: -172.18
   Amber total: -7226.28 bonds (n=5376): 1209.24 angles (n=6828): 1375.99 diheds (n=17072): 2822.81 elec.: -12419.35 vdW: -214.97
   Amber total: -7501.87 bonds (n=5376): 1173.72 angles (n=6828): 1336.45 diheds (n=17072): 2825.14 elec.: -12581.20 vdW: -255.98
-  Amber total: -7969.96 bonds (n=5376): 1109.13 angles (n=6828): 1298.37 diheds (n=17072): 2828.36 elec.: -12899.08 vdW: -306.74
-  Amber total: -8004.37 bonds (n=5376): 1078.76 angles (n=6828): 1281.89 diheds (n=17072): 2822.81 elec.: -12879.60 vdW: -308.22
-  Amber total: -8073.97 bonds (n=5376): 1049.39 angles (n=6828): 1261.87 diheds (n=17072): 2817.43 elec.: -12891.26 vdW: -311.40
-  Amber total: -8208.33 bonds (n=5376): 1032.99 angles (n=6828): 1238.77 diheds (n=17072): 2811.13 elec.: -12965.70 vdW: -325.52
-  Amber total: -8458.77 bonds (n=5376): 996.65 angles (n=6828): 1208.74 diheds (n=17072): 2801.29 elec.: -13103.35 vdW: -362.10
-  Amber total: -8702.89 bonds (n=5376): 1025.48 angles (n=6828): 1210.17 diheds (n=17072): 2795.17 elec.: -13328.15 vdW: -405.56
-  Amber total: -8767.60 bonds (n=5376): 983.71 angles (n=6828): 1197.89 diheds (n=17072): 2792.79 elec.: -13326.42 vdW: -415.57
-  Amber total: -8837.15 bonds (n=5376): 953.35 angles (n=6828): 1186.01 diheds (n=17072): 2789.62 elec.: -13336.59 vdW: -429.54
-  Amber total: -8837.15 bonds (n=5376): 953.35 angles (n=6828): 1186.01 diheds (n=17072): 2789.62 elec.: -13336.59 vdW: -429.54
-  Amber total: -8837.15 bonds (n=5376): 953.35 angles (n=6828): 1186.01 diheds (n=17072): 2789.62 elec.: -13336.59 vdW: -429.54
-  Amber total: -8837.15 bonds (n=5376): 953.35 angles (n=6828): 1186.01 diheds (n=17072): 2789.62 elec.: -13336.59 vdW: -429.54
-23.10 23.61   0.51  0.030   3.3   12.9   0.0   1.9    1  0.612  3.730 -0.3100
+  Amber total: -7970.04 bonds (n=5376): 1109.05 angles (n=6828): 1298.35 diheds (n=17072): 2828.35 elec.: -12899.05 vdW: -306.74
+  Amber total: -8004.56 bonds (n=5376): 1078.74 angles (n=6828): 1281.88 diheds (n=17072): 2822.81 elec.: -12879.75 vdW: -308.23
+  Amber total: -8074.29 bonds (n=5376): 1049.38 angles (n=6828): 1261.85 diheds (n=17072): 2817.44 elec.: -12891.55 vdW: -311.41
+  Amber total: -8208.38 bonds (n=5376): 1033.04 angles (n=6828): 1238.78 diheds (n=17072): 2811.17 elec.: -12965.87 vdW: -325.50
+  Amber total: -8460.46 bonds (n=5376): 996.72 angles (n=6828): 1208.72 diheds (n=17072): 2801.26 elec.: -13104.61 vdW: -362.55
+  Amber total: -8707.29 bonds (n=5376): 1024.74 angles (n=6828): 1210.19 diheds (n=17072): 2795.08 elec.: -13330.58 vdW: -406.72
+  Amber total: -8767.12 bonds (n=5376): 982.52 angles (n=6828): 1197.84 diheds (n=17072): 2792.78 elec.: -13324.56 vdW: -415.70
+  Amber total: -8832.21 bonds (n=5376): 953.59 angles (n=6828): 1186.57 diheds (n=17072): 2789.75 elec.: -13333.30 vdW: -428.82
+  Amber total: -8832.21 bonds (n=5376): 953.59 angles (n=6828): 1186.57 diheds (n=17072): 2789.75 elec.: -13333.30 vdW: -428.82
+  Amber total: -8832.21 bonds (n=5376): 953.59 angles (n=6828): 1186.57 diheds (n=17072): 2789.75 elec.: -13333.30 vdW: -428.82
+  Amber total: -8832.21 bonds (n=5376): 953.59 angles (n=6828): 1186.57 diheds (n=17072): 2789.75 elec.: -13333.30 vdW: -428.82
+23.10 23.61   0.51  0.030   3.3   12.9   0.0   1.9    1  0.612  3.730 -0.3098
 
 Legend:
   - first line corresponds to starting state (before refinement)
@@ -838,9 +840,9 @@ Legend:
 |                                                                             |
 | r_work= 0.2310 r_free= 0.2361 coordinate error (max.-lik. estimate): 0.10 A |
 |                                                                             |
-| normalized target function (ml) (work): 3.730443                            |
-| target function (ml) not normalized (work): 108186.582731                   |
-| target function (ml) not normalized (free): 7504.400687                     |
+| normalized target function (ml) (work): 3.730418                            |
+| target function (ml) not normalized (work): 108185.838023                   |
+| target function (ml) not normalized (free): 7504.197814                     |
 |-----------------------------------------------------------------------------|
 
 |-----------------------------------------------------------------------------|
@@ -848,18 +850,18 @@ Legend:
 |number     range              work test   work   test        work        test|
 |  1: 15.8271 -  2.3227 0.95   2356  162 0.2324 0.2413      5.1428      5.1325|
 |  2:  2.3227 -  1.8445 0.98   2326  160 0.2252 0.2268      4.6805      4.6265|
-|  3:  1.8445 -  1.6116 0.97   2262  157 0.2244 0.2272      4.2295      4.2609|
-|  4:  1.6116 -  1.4644 0.96   2241  155 0.2210 0.2203      3.9822      4.0153|
-|  5:  1.4644 -  1.3595 0.96   2217  153 0.2171 0.2195      3.7588      3.8237|
-|  6:  1.3595 -  1.2794 0.94   2171  149 0.2225 0.2235      3.6173      3.6669|
-|  7:  1.2794 -  1.2153 0.95   2184  151 0.2183 0.2172      3.4892      3.4862|
-|  8:  1.2153 -  1.1624 0.94   2134  146 0.2216 0.2187       3.426      3.4277|
-|  9:  1.1624 -  1.1177 0.92   2115  147 0.2215 0.2361      3.3483      3.4369|
-| 10:  1.1177 -  1.0791 0.87   1987  137 0.2472 0.2684      3.3315      3.3992|
-| 11:  1.0791 -  1.0454 0.84   1934  133 0.2562 0.2588      3.2031      3.2473|
-| 12:  1.0454 -  1.0155 0.81   1836  127 0.2830 0.3335       3.151      3.2976|
-| 13:  1.0155 -  0.9888 0.80   1815  125 0.2869 0.2532      3.0722      2.9936|
-| 14:  0.9888 -  0.9647 0.63   1423   98 0.3010 0.3298      3.0337       2.932|
+|  3:  1.8445 -  1.6116 0.97   2262  157 0.2244 0.2273      4.2295      4.2612|
+|  4:  1.6116 -  1.4644 0.96   2241  155 0.2210 0.2203      3.9823      4.0154|
+|  5:  1.4644 -  1.3595 0.96   2217  153 0.2171 0.2194      3.7586      3.8233|
+|  6:  1.3595 -  1.2794 0.94   2171  149 0.2225 0.2236      3.6172      3.6666|
+|  7:  1.2794 -  1.2153 0.95   2184  151 0.2183 0.2169      3.4891      3.4854|
+|  8:  1.2153 -  1.1624 0.94   2134  146 0.2215 0.2186      3.4258      3.4277|
+|  9:  1.1624 -  1.1177 0.92   2115  147 0.2215 0.2362      3.3484      3.4368|
+| 10:  1.1177 -  1.0791 0.87   1987  137 0.2472 0.2683      3.3316      3.3987|
+| 11:  1.0791 -  1.0454 0.84   1934  133 0.2562 0.2589       3.203      3.2476|
+| 12:  1.0454 -  1.0155 0.81   1836  127 0.2830 0.3333       3.151      3.2974|
+| 13:  1.0155 -  0.9888 0.80   1815  125 0.2869 0.2531      3.0723      2.9934|
+| 14:  0.9888 -  0.9647 0.63   1423   98 0.3010 0.3297      3.0335      2.9323|
 |-----------------------------------------------------------------------------|
 
 |-----------------------------------------------------------------------------|
@@ -868,25 +870,25 @@ Legend:
 |                                                                             |
 | Bin     Resolution      No. Refl.   FOM  Phase Scale    Alpha        Beta   |
 |  #        range        work  test        error factor                       |
-|  1: 15.8271 -  2.3227  2356   162  0.83  21.99   1.00     0.97       3922.17|
-|  2:  2.3227 -  1.8445  2326   160  0.82  24.31   1.01     0.98       1968.19|
-|  3:  1.8445 -  1.6116  2262   157  0.83  23.71   1.00     0.97        803.89|
-|  4:  1.6116 -  1.4644  2241   155  0.84  23.00   1.01     0.97        493.69|
-|  5:  1.4644 -  1.3595  2217   153  0.84  23.17   1.00     0.95        322.72|
-|  6:  1.3595 -  1.2794  2171   149  0.85  22.74   0.99     0.97        238.53|
-|  7:  1.2794 -  1.2153  2184   151  0.85  21.95   1.00     0.97        180.83|
-|  8:  1.2153 -  1.1624  2134   146  0.86  21.17   1.03     0.98        151.04|
-|  9:  1.1624 -  1.1177  2115   147  0.87  21.00   1.00     0.98        135.80|
-| 10:  1.1177 -  1.0791  1987   137  0.84  23.40   1.00     0.95        130.12|
-| 11:  1.0791 -  1.0454  1934   133  0.81  26.45   0.98     0.93        122.59|
-| 12:  1.0454 -  1.0155  1836   127  0.79  28.31   0.98     0.91        108.72|
-| 13:  1.0155 -  0.9888  1815   125  0.80  28.15   1.00     0.92         87.67|
-| 14:  0.9888 -  0.9647  1423    98  0.83  25.03   0.99     0.91         63.81|
+|  1: 15.8271 -  2.3227  2356   162  0.83  21.99   1.00     0.97       3921.91|
+|  2:  2.3227 -  1.8445  2326   160  0.82  24.32   1.01     0.98       1968.38|
+|  3:  1.8445 -  1.6116  2262   157  0.83  23.71   1.00     0.97        804.14|
+|  4:  1.6116 -  1.4644  2241   155  0.84  23.01   1.01     0.97        493.75|
+|  5:  1.4644 -  1.3595  2217   153  0.84  23.16   1.00     0.95        322.55|
+|  6:  1.3595 -  1.2794  2171   149  0.85  22.73   0.99     0.97        238.34|
+|  7:  1.2794 -  1.2153  2184   151  0.85  21.94   1.00     0.97        180.66|
+|  8:  1.2153 -  1.1624  2134   146  0.86  21.16   1.03     0.98        150.93|
+|  9:  1.1624 -  1.1177  2115   147  0.87  21.00   1.00     0.98        135.75|
+| 10:  1.1177 -  1.0791  1987   137  0.84  23.40   1.00     0.95        130.09|
+| 11:  1.0791 -  1.0454  1934   133  0.81  26.45   0.98     0.93        122.56|
+| 12:  1.0454 -  1.0155  1836   127  0.79  28.31   0.98     0.91        108.68|
+| 13:  1.0155 -  0.9888  1815   125  0.80  28.15   1.00     0.92         87.64|
+| 14:  0.9888 -  0.9647  1423    98  0.83  25.03   0.99     0.91         63.79|
 |alpha:            min =        0.91 max =            0.98 mean =         0.96|
-|beta:             min =       63.81 max =         3922.17 mean =       687.09|
+|beta:             min =       63.79 max =         3921.91 mean =       687.05|
 |figures of merit: min =        0.00 max =            1.00 mean =         0.83|
-|phase err.(work): min =        0.00 max =           89.96 mean =        23.73|
-|phase err.(test): min =        0.00 max =           89.81 mean =        23.85|
+|phase err.(work): min =        0.00 max =           90.00 mean =        23.73|
+|phase err.(test): min =        0.00 max =           89.78 mean =        23.84|
 |-----------------------------------------------------------------------------|
 
 ==================================== Final ====================================
@@ -907,20 +909,20 @@ Total model structure factor:
 
     k_total = k_isotropic * k_anisotropic
    Resolution    Compl Nwork Nfree R_work    <Fobs>  <Fmodel> kiso   kani kmask
- 15.825-6.710    81.97    94     6 0.3902   123.102   107.693 0.776 1.002 0.364
-  6.681-5.432    92.59    94     6 0.2706   150.525   144.017 0.898 0.997 0.363
+ 15.825-6.710    81.97    94     6 0.3901   123.102   107.699 0.776 1.002 0.364
+  6.681-5.432    92.59    94     6 0.2706   150.525   144.022 0.898 0.997 0.362
   5.422-4.402    83.85   149    12 0.2318   195.017   189.974 0.958 1.002 0.355
-  4.390-3.571    91.09   297    20 0.2175   204.579   196.335 0.973 0.999 0.210
-  3.569-2.898    96.33   565    39 0.2268   165.163   158.870 0.973 0.998 0.162
+  4.390-3.571    91.09   297    20 0.2175   204.579   196.332 0.973 0.999 0.210
+  3.569-2.898    96.33   565    39 0.2268   165.163   158.869 0.973 0.998 0.162
   2.897-2.351    98.88  1073    73 0.2238   126.927   122.923 0.936 0.997 0.000
   2.351-1.908    98.31  1962   136 0.2241    98.356    95.139 0.995 0.997 0.000
-  1.908-1.548    96.68  3573   247 0.2257    61.030    59.151 0.987 0.998 0.000
-  1.548-1.256    95.43  6500   448 0.2185    38.262    36.987 0.975 0.998 0.000
-  1.256-1.020    88.52 11175   771 0.2375    24.661    23.525 0.969 1.001 0.000
-  1.020-0.965    71.93  3517   242 0.2914    15.796    14.354 0.931 1.008 0.000
+  1.908-1.548    96.68  3573   247 0.2256    61.030    59.151 0.987 0.998 0.000
+  1.548-1.256    95.43  6500   448 0.2185    38.262    36.988 0.975 0.998 0.000
+  1.256-1.020    88.52 11175   771 0.2375    24.661    23.524 0.969 1.001 0.000
+  1.020-0.965    71.93  3517   242 0.2914    15.796    14.354 0.932 1.008 0.000
 
   Approximation of k_total with k_overall*exp(-b_overall*s**2/4)
-    k_overall=0.9754   b_overall=0.0672  
+    k_overall=0.9753   b_overall=0.0660  
 
 ================= overall refinement statistics: step by step =================
 
@@ -941,13 +943,13 @@ leading digit, like 1_, means number of macro-cycle
         end: 0.2308 0.2362 0.030  3.29   0.0  57.8  12.0 387      0.127
 ------------------------------------------------------------------------
 
-CPU time actual refinement: 28.18
+CPU time actual refinement: 33.88
 
 
 ============================== Exporting results ==============================
 
 Writing refined structure to PDB file:
-  /Users/case/xtal/phenix_svn/modules/amber_adaptbx/tests/files/1aho/amber_001.pdb
+  /Users/case/Dropbox/xtal/phenix_svnf/modules/amber_adaptbx/tests/files/1aho/amber_001.pdb
 n_use            =  1328
 n_use_u_iso      =  1328
 n_use_u_aniso    =  0
@@ -960,7 +962,7 @@ n_grad_fdp       =  0
 total number of scatterers =  1328
 
 Writing default parameters for subsequent refinement:
-  /Users/case/xtal/phenix_svn/modules/amber_adaptbx/tests/files/1aho/amber_002.def
+  /Users/case/Dropbox/xtal/phenix_svnf/modules/amber_adaptbx/tests/files/1aho/amber_002.def
 
 
 =============================== Detailed timings ==============================
@@ -968,23 +970,23 @@ Writing default parameters for subsequent refinement:
   Micro-tasks:
     mask                            = 0.00   
     f_calc                          = 0.00   
-    alpha_beta                      = 0.37   
-    target                          = 0.14   
+    alpha_beta                      = 0.09   
+    target                          = 0.03   
     gradients_wrt_atomic_parameters = 0.00   
     fmodel                         = 0.00   
-    r_factors                      = 0.00   
-    phase_errors                   = 1.34   
-    foms                           = 0.03   
-    TOTAL for micro-tasks          = 1.88   
+    r_factors                      = 0.03   
+    phase_errors                   = 1.02   
+    foms                           = 0.00   
+    TOTAL for micro-tasks          = 1.17   
 NUMBER OF MASK CALCS=  0
-Total CPU time: 51.09 seconds
-from_scatterers_fft:    41 calls, 2.16 s
-gradients_fft:          31 calls, 2.38 s
+Total CPU time: 67.58 seconds
+from_scatterers_fft:    41 calls, 2.92 s
+gradients_fft:          31 calls, 3.11 s
 
 =========================== phenix.refine: finished ===========================
 
-# Date 2017-09-27 Time 14:00:48 EDT -0400 (1506535248.35 s)
-wall clock time: 52.54 s
+# Date 2018-03-29 Time 13:56:06 MDT -0600 (1522353366.14 s)
+wall clock time: 71.70 s
 
 Start R-work = 0.2539, R-free = 0.2479
 Final R-work = 0.2308, R-free = 0.2362
