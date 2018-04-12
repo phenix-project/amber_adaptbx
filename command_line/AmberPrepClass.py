@@ -1058,8 +1058,6 @@ def run(rargs):
   from iotbx import pdb
   pdb_inp =  pdb.input('4phenix_%s.pdb' % base)
   hierarchy = pdb_inp.construct_hierarchy()
-  print dir(hierarchy)
-  print dir(hierarchy.atoms())
   sites_cart = hierarchy.atoms().extract_xyz()
   parm = parmed.load_file("4amber_%s.prmtop" % base, 
                           xyz="4amber_%s.rst7" % base )
