@@ -169,27 +169,21 @@ Checking output filenames
 
 ~> ChBox -c 3cfb_uc.rst7 -o 3cfb_uc.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
 
-
-==================================================
-Minimizing input coordinates.
-==================================================
-
-~> sander -O -i 3cfb_amber_all.in -p 4amber_3cfb.prmtop -c 4amber_3cfb.rst7 -o 3cfb.min.out            -ref 4amber_3cfb.rst7 -r 4amber_3cfb.min.rst7
-
+4amber_3cfb.prmtop
 checking special positions in 4phenix_3cfb.pdb
 
 ==================================================
 Done.  Three new files have been made:
       4phenix_3cfb.pdb
       4amber_3cfb.prmtop
-      4amber_3cfb.rst7
+      4amber_3cfb.order
 ==================================================
 
 Example
 
   phenix.refine 4phenix_3cfb.pdb use_amber=True \
     amber.topology_file_name=4amber_3cfb.prmtop \
-    amber.coordinate_file_name=4amber_3cfb.rst7 \
+    amber.order_file_name=4amber_3cfb.order \
     ....(other refinement keywords here).....
 
 

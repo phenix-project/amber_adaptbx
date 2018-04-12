@@ -8,7 +8,7 @@
 #           slightly different results
 
 echo "Running non-LES test on 3cfb:"
-phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all > non-les.log 2>&1
+phenix.AmberPrep 3cfb.pdb use_reduce=False > non-les.log 2>&1
 
 status=0
 
@@ -16,9 +16,7 @@ status=0
 status=$(($status + $?))
 ./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
 status=$(($status + $?))
-./dacdif -a 0.002 non-les/4amber_3cfb.rst7 4amber_3cfb.rst7
-status=$(($status + $?))
-./dacdif -r 0.0001 non-les/3cfb.min.out 3cfb.min.out
+./dacdif non-les/4amber_3cfb.order 4amber_3cfb.order
 status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
 status=$(($status + $?))
@@ -49,6 +47,6 @@ status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
 status=$(($status + $?))
 
-/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb
+/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb 4amber_3cfb.rst7
 
 exit $status
