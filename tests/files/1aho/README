@@ -5,13 +5,10 @@ more than 1 asu in a unit cell, and (now) a gap.
 
 To run the tests:
 
+./test_amber_1aho    which just performs the following steps:
+
 ./test_AmberPrep      (takes 13 sec on dac laptop)
 ./test_phenix.refine  (takes 57 sec on dac laptop)
 ./test_AmberPrep_LES  (takes 13 sec on dac laptop)
+./test_phenix.refine_LES  (takes 45 sec on dac desktop)
 
-Current limitations (27sep17):
-
-1. there are three scripts, rather than one (combine?)  Note that the second
-       test does *not* depend on successful output from the first test.
-2. The phenix.refine test leaves behind an amber1.log file, which might be
-       useful to examine, but is left behind whether or not the test passes.
