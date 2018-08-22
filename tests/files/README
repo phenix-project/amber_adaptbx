@@ -1,8 +1,15 @@
-1gdu, 2g3i, 3kug 
-    - dir: casegroup: /home/pjanowsk/Phenix/test_100/test100
-    - why adding?
-        - first, I took all pdb codes (23 pdbs) having alternative conformations.
-        - run:
-            phenix.AmberPrep dir_to_pdb_file LES=True minimise=phenix_all
-        - got all pdb codes that caused failure
-        - add them (pdb files) to test folder
+Notes:  (dac, Aug. 2018)
+
+1.  The "real" test that should be run is in the 1aho folder: see
+    the README file there.  There are also good tests in the 3cfb
+    folder, but these take longer to run.
+
+2.  1gdu, 2g3i, 3kug  directories contain potential examples of LES problems
+    - started in dir: casegroup:/home/pjanowsk/Phenix/test_100/test100
+    - took all pdb codes (23 pdbs) having alternative conformations.
+    - run: phenix.AmberPrep dir_to_pdb_file LES=True minimise=phenix_all
+    - got all pdb codes that caused failure
+    - add them (pdb files) to the folders here
+
+3.  Other folders, like 2igd, 4lzt, fake and vAla3 have various, mostly
+    abortive attempts to make useful test files

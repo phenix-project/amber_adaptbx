@@ -9,6 +9,8 @@ One can also run these manually:
      ./test_AmberPrep
      ./test_phenix.refine
      ./test_AmberPrep_LES
+     #  The 3cfb tests take longer to run, and are currently commented out in
+     #    the amber_run_tests.py script
      cd $PHENIX/modules/amber_adaptbx/tests/files/3cfb
      ./test_AmberPrep
 
