@@ -299,6 +299,7 @@ class AmberPrepRunner:
       for template_atom, atom in zip(template_heavy_atoms, heavy_atoms):
         atom.occupancy = template_atom.occupancy
         atom.bfactor = template_atom.bfactor
+        atom.anisou = template_atom.anisou
 
     # update hydrogens by copying occupancy and bfactor from its bond partner
     for atom in parm.atoms:
@@ -306,7 +307,8 @@ class AmberPrepRunner:
         atom.occupancy = atom.bond_partners[0].occupancy
         atom.bfactor = atom.bond_partners[0].bfactor
 
-    parm.write_pdb(pdb_filename, standard_resnames=True, renumber=False)
+    parm.write_pdb(pdb_filename, standard_resnames=True, renumber=False,
+        write_anisou=True)
 
   def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file, 
                               template_pdb, outpdb):
@@ -358,8 +360,10 @@ class AmberPrepRunner:
       for template_atom, atom in zip(template_atoms, atoms):
         atom.occupancy = template_atom.occupancy
         atom.bfactor = template_atom.bfactor
+        atom.anisou = template_atom.anisou
 
-    asu_parm.write_pdb(outpdb, standard_resnames=True, renumber=False)
+    asu_parm.write_pdb(outpdb, standard_resnames=True, renumber=False,
+        write_anisou=True)
 
   def validate_pdb(self):
     assert self.pdb_hierarchy
@@ -495,9 +499,6 @@ class AmberPrepRunner:
        f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
     f.write('source leaprc.gaff2\n')
-    #  kludgy mechanism mechanism for modifying the above list:
-    if os.path.isfile('myleaprc'):
-       f.write('source myleaprc\n')
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
 
@@ -509,6 +510,9 @@ class AmberPrepRunner:
       else:
         f.write('%s = loadmol2 %s.mol2\n' % (res, res))
         f.write('loadAmberParams %s.frcmod\n' % res)
+    #  mechanism mechanism for user modifications:
+    if os.path.isfile('myleaprc'):
+       f.write('source myleaprc\n')
     #
     # input PDB file
     #
@@ -602,7 +606,7 @@ class AmberPrepRunner:
 
       with open("4phenix_%s.pdb" % self.base) as fin:
         for line in fin:
-          if not "CRYST1" in line:
+          if not "CRYST1" in line and not "ANISOU" in line:
             fout.write(line)
 
     #-----------------------------------------------------------------
@@ -616,7 +620,7 @@ class AmberPrepRunner:
                    use_amber_unitcell=use_amber_unitcell)
 
     #-----------------------------------------------------------------
-    # Step 3: run xxxx_4leap_uc1.pdb back through pdb4amber to get new 
+    # Step 3: run xxxx_4tleap_uc1.pdb back through pdb4amber to get new 
     #         lists that describe gaps and SS bonds.  Output will be
     #         xxxx_4tleap_uc.pdb
     #         Note: don't need to call reduce this time around.
@@ -633,6 +637,11 @@ class AmberPrepRunner:
     # Step 4:  feed xxxx_4tleap_uc.pdb to tleap
     #-----------------------------------------------------------------
 
+    # dac note: next line is currently needed for modified residues
+    #   that also have modified connectivities, such as IAS in 1dy5.
+    #   For now, we cannot both have modified connectivities and also
+    #   check for gaps.
+    #  dummy_gaplist = []
     self.run_tleap(tleap_pdb_file,
                    output_base='uc',
                    ns_names=ns_names,
@@ -1001,10 +1010,10 @@ def run(rargs):
 
   dummy_gaplist = []
   amber_prep_runner.run_tleap('%s_4tleap.pdb' % amber_prep_runner.base,
-                              'asu',
-                              ns_names,
-                              dummy_gaplist,
-                              sslist,
+                              output_base='asu',
+                              ns_names=ns_names,
+                              gaplist=dummy_gaplist,
+                              sslist=sslist,
                               reorder_residues='off',
                               # logfile='tleap_asu.log',
                               redq=actions.redq,
@@ -1030,8 +1039,6 @@ def run(rargs):
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
           use_glycam=actions.use_glycam,
           use_amber_unitcell=actions.use_amber_unitcell)
-
-  #  we are done unless LES or minimization has been requested
 
   if actions.LES:
     print "\n=================================================="
