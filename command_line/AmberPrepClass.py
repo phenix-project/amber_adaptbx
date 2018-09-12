@@ -202,7 +202,7 @@ def check_required_output_filenames(filenames=None,
 
 
 def print_cmd(cmd, verbose=False):
-  print "\n~> %s\n" % cmd
+  print "\n| ~> %s\n" % cmd
   if verbose:
     print '\nAMBERHOME: %s' % os.environ.get("AMBERHOME", None)
     path = os.environ.get("PATH", None)
@@ -471,12 +471,6 @@ class AmberPrepRunner:
     f = file(tleap_input_file, "wb")
     f.write('logFile %s\n' % logfile)
 
-    #amber_dir = libtbx.env.dist_path("amber")
-    #if os.environ["AMBERHOME"]!=amber_dir:
-    #  raise Sorry("$AMBERHOME %s\nnot pointing to Phenix module %s" % (
-    #    os.environ["AMBERHOME"],
-    #    amber_dir,
-    #    ))
     amber_dir = os.environ["AMBERHOME"]
 
     # Following should be true in AmberTools14/15:
@@ -548,7 +542,8 @@ class AmberPrepRunner:
     #
     if os.path.exists(logfile):
       os.remove(logfile)
-    cmd = 'tleap -f %s' % tleap_input_file
+    cmd = os.path.join( os.environ["AMBERHOME"],'bin','tleap' )
+    cmd += ' -f %s' % tleap_input_file
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
     _check_tleap_output(ero.stdout_lines)
@@ -571,7 +566,8 @@ class AmberPrepRunner:
     assert self.cryst1
     uc = self.cryst1.unit_cell().parameters()
     # note: dangerous to use same file for input and output here?
-    cmd = "ChBox -c %s_%s.rst7 -o %s_%s.rst7" % (self.base,
+    cmd = os.path.join( os.environ["AMBERHOME"],'bin','ChBox' )
+    cmd += " -c %s_%s.rst7 -o %s_%s.rst7" % (self.base,
                                                  output_base,
                                                  self.base,
                                                  output_base,
@@ -700,7 +696,8 @@ class AmberPrepRunner:
       f = open('%s_%s.in' % (self.base, mintype), 'wb')
       f.write(inputs[mintype])
       f.close()
-      cmd = 'sander%s -O -i %s -p %s -c %s -o %s.min.out \
+      cmd = os.path.join( os.environ["AMBERHOME"],'bin','sander' )
+      cmd += '%s -O -i %s -p %s -c %s -o %s.min.out \
            -ref %s -r %s' % (
           LEStype,
           input_file,
@@ -793,6 +790,7 @@ class AmberPrepRunner:
               '%s_uc_H.pdb',
               '%sab.rst7',
               '4amber_%s.pdb',
+              '4amber_%s.LES.pdb',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
@@ -827,7 +825,8 @@ def _run_antechamber_ccif(residue_name,
 
   ccif = get_chemical_components_file_name(residue_name)
   cmds = []
-  cmd = 'antechamber -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
+  cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+  cmd += ' -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
       -s 2 -pf y -c bcc -at gaff2' % (ccif, residue_name, residue_name)
   if use_am1_and_maxcyc_zero:
     cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
@@ -844,7 +843,8 @@ def _run_antechamber_ccif(residue_name,
       if line.find('Error') > -1:
         raise Sorry(line)
 
-  cmd = 'parmchk2 -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name,
+  cmd = os.path.join( os.environ["AMBERHOME"],'bin','parmchk2' )
+  cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name,
                                                            residue_name)
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
@@ -923,14 +923,16 @@ def _run_elbow_antechamber(pdb_hierarchy,
   print mol.DisplayBrief()
 
   cmds = []
-  cmd = 'antechamber -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
+  cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+  cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, residue_name, mol.charge, mol.multiplicity)
   if use_am1_and_maxcyc_zero:
     cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
-    cmd = 'antechamber -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
+    cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+    cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, mol.charge, mol.multiplicity)
     cmds.append(cmd)
@@ -946,7 +948,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
       if line.find('Error') > -1:
         raise Sorry(line)
 
-  cmd = 'parmchk2 -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name, residue_name)
+  cmd = os.path.join( os.environ["AMBERHOME"],'bin','parmchk2' )
+  cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name, residue_name)
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
 
