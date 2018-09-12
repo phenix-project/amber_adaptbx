@@ -113,7 +113,8 @@ class LESBuilder(object):
     parm.box = self.box
     reduce_to_les.update_rst7_and_pdb_coordinates_LES(template_parm=uc_parm,
                                                       target_parm=parm)
-    parm.write_pdb('4amber_%s.LES.pdb' % self.base, standard_resnames=True)
+    parm.write_pdb('4amber_%s.LES.pdb' % self.base, standard_resnames=True,
+        renumber=False, write_anisou=True)
     parm.save('4amber_%s.LES.rst7' % self.base, overwrite=True)
 
   def write_LES_asu_pdb(self):
@@ -144,7 +145,7 @@ class LESBuilder(object):
       residue.chain = template_residue.chain
 
     final_parm.write_pdb( final_pdb_asu_file,
-                          standard_resnames=True, renumber=False )
+             standard_resnames=True, renumber=False, write_anisou=True )
 
     # run through phenix heierarchy to get atoms sorted phenix-style:
     pdb_input = iotbx.pdb.input(final_pdb_asu_file)

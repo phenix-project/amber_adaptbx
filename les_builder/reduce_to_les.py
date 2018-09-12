@@ -121,6 +121,7 @@ def update_rst7_and_pdb_coordinates_LES(template_parm, target_parm):
         atom.xy = template_atom.xy
         atom.xz = template_atom.xz
         atom.bfactor = template_atom.bfactor
+        atom.anisou = template_atom.anisou
         atom.occupancy = template_atom.occupancy
   # TODO: already updated for ParmEd, will remove?
   label_alternates(target_parm)
