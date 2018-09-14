@@ -7,7 +7,7 @@ except ImportError, e:
   sander = None
   sanderles = None
   #raise Sorry('Unable to import "sander". Check that $AMBERHOME is set correctly to the Amber directory.')
-  
+
 from amber_adaptbx.utils import (
     expand_coord_to_unit_cell,
     get_amber_structs,
@@ -43,11 +43,6 @@ master_phil_str = """
   wxc_factor = .2
     .type = float
     .style = hidden
-  automatic_wxc_scale = False
-    .type = bool
-    .style = hidden
-    .help = Use the ratio of the restraints gradient norm and the Amber \
-            gradient norm to set wxc_scale
   restraint_wt = 0.
     .type = float
     .style = hidden
@@ -69,3 +64,10 @@ master_phil_str = """
     .type = bool
     .help = Print details of Amber energies during refinement
 """
+obsoleted = '''
+  automatic_wxc_scale = False
+    .type = bool
+    .style = hidden
+    .help = Use the ratio of the restraints gradient norm and the Amber \
+            gradient norm to set wxc_scale
+'''

@@ -14,11 +14,16 @@ hbond avgout %(preamble)s.hbond.dat
 go
 '''
 
+def get_number_of_residues(hierarchy):
+  atoms = hierarchy.select(hierarchy.get_peptide_c_alpha_selection()).atoms()
+  return len(atoms)
+
 class Program(ProgramTemplate):
 
   description = '''
   Enumerate the H-bonds in a model
     - requires hydrogen atoms be present
+    - requires AmberTools to be installed
 '''
   datatypes = ['phil', 'model']
 
@@ -26,7 +31,7 @@ class Program(ProgramTemplate):
 
   output
   {
-    show_number_of_h_bonds_per_100 = True
+    show_number_of_h_bonds_per_1000 = True
       .type = bool
     list_h_bonds = False
       .type = bool
@@ -69,17 +74,21 @@ class Program(ProgramTemplate):
       print
       print lines
 
-    if self.params.output.show_number_of_h_bonds_per_100:
+    nr = get_number_of_residues(model.get_hierarchy())
+
+    if self.params.output.show_number_of_h_bonds_per_1000:
       h_bonds = len(lines.splitlines())-1
       atoms = len(model.get_hierarchy().atoms())
       print '_'*80
       print '''
       Number of H-bonds found : %7d
       Number of atoms         : %7d
-      H-bonds pre 100 atoms   : %10.2f
+      H-bonds per 1000 atoms  : %10.2f
+      H-bonds per residues    : %10.2f
       ''' % (h_bonds,
              atoms,
-             h_bonds/atoms*100,
+             h_bonds/atoms*1000,
+             h_bonds/nr,
              )
 
 

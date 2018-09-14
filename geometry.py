@@ -87,19 +87,27 @@ class geometry_manager(object):
     result.finalize_target_and_gradients()
     if log is None:
       log = sys.stdout
-    # following forces printing of Amber energies; placeholder until
-    #    this can become an input keyword
-    if print_amber_energies or 1:
-      print >>log, """  Amber total: %0.2f bonds (n=%d): %0.2f angles (n=%d): %0.2f diheds (n=%d): %0.2f elec.: %0.2f vdW: %0.2f""" % (
-          result.residual_sum,
+    if print_amber_energies:
+      import decimal
+      outl = []
+      def _outl(f):
+        if f>1e4:
+          outl.append('%.2E' % decimal.Decimal(f))
+        else:
+          outl.append('%0.2f' % f)
+      for i in range(9):
+        if i: _outl(result.energy_components[i])
+        else: _outl(result.residual_sum)
+      print >>log, """  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s""" % (
+          outl[0],
           result.energy_components[6],
-          result.energy_components[1],
+          outl[1],
           result.energy_components[7],
-          result.energy_components[2],
+          outl[2],
           result.energy_components[8],
-          result.energy_components[3],
-          result.energy_components[4],
-          result.energy_components[5])
+          outl[3],
+          outl[4],
+          outl[5])
     #print result.bond_deviations(self.sites_cart,
     #                             self.amber_structs.parm,
     #                             ignore_hd=False,
