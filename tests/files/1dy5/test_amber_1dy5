@@ -1,0 +1,24 @@
+#!/bin/sh
+
+#  run several simple tests of Amber preparation and refinement on 1dy5:
+#  This is a test of using a non-standard residue, identified by having
+#  a xxx.lib file either in the current directory or in the amber
+#  library
+
+./test_AmberPrep
+status=$?
+
+if false; then
+
+   ./test_phenix.refine
+   status=$(($status + $?))
+
+   ./test_AmberPrep_LES
+   status=$(($status + $?))
+
+   ./test_phenix.refine_LES
+   status=$(($status + $?))
+
+fi
+
+exit $status

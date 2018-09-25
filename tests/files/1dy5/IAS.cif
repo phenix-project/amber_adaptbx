@@ -1,0 +1,132 @@
+# electronic Ligand Builder and Optimisation Workbench (eLBOW)
+#   - a module of PHENIX version dev-svn-
+#   - file written: Wed Aug 22 08:42:45 2018
+#
+#   Ligand name: L-aspartic acid
+#   Random seed: 3628800
+#   SMILES string: N[C@@H](CC(O)=O)C(O)=O
+#
+data_comp_list
+loop_
+_chem_comp.id
+_chem_comp.three_letter_code
+_chem_comp.name
+_chem_comp.group
+_chem_comp.number_atoms_all
+_chem_comp.number_atoms_nh
+_chem_comp.desc_level
+IAS        IAS 'L-aspartic acid          ' ligand 14 9 .
+#
+data_comp_IAS
+#
+loop_
+_chem_comp_atom.comp_id
+_chem_comp_atom.atom_id
+_chem_comp_atom.type_symbol
+_chem_comp_atom.type_energy
+_chem_comp_atom.charge
+_chem_comp_atom.partial_charge
+_chem_comp_atom.x
+_chem_comp_atom.y
+_chem_comp_atom.z
+IAS         N      N   NH2    0    .      -1.8294   -0.4821    0.1212
+IAS         CA     C   CH1    0    .      -0.3782   -0.4535    0.1124
+IAS         C      C   C      0    .       0.1357   -0.2577    1.5371
+IAS         O      O   O      0    .      -0.2584    0.7245    2.2191
+IAS         CB     C   CH2    0    .       0.1030    0.6998   -0.7653
+IAS         CG     C   C      0    .       1.6218    0.6307   -0.9092
+IAS         OD1    O   O      0    .       2.3534    1.4075   -0.2410
+IAS         OXT    O   OC    -1    .       0.9535   -1.0785    2.0297
+IAS         H      H   HNH2   0    .      -2.1659   -0.6556   -0.8073
+IAS         H2     H   HNH2   0    .      -2.1457   -1.2108    0.7330
+IAS         HA     H   HCH1   0    .      -0.0010   -1.3893   -0.2821
+IAS         HB2    H   HCH2   0    .      -0.3568    0.6249   -1.7449
+IAS         HB3    H   HCH2   0    .      -0.1742    1.6431   -0.3069
+IAS         OD2    O   OC    -1    .       2.1422   -0.2030   -1.6960
+#
+loop_
+_chem_comp_bond.comp_id
+_chem_comp_bond.atom_id_1
+_chem_comp_bond.atom_id_2
+_chem_comp_bond.type
+_chem_comp_bond.value_dist
+_chem_comp_bond.value_dist_esd
+_chem_comp_bond.value_dist_neutron
+IAS   N       CA    single        1.452 0.020     1.452
+IAS   N       H     single        0.860 0.020     1.020
+IAS   N       H2    single        0.890 0.020     1.040
+IAS   CA      C     single        1.527 0.020     1.527
+IAS   CA      CB    single        1.527 0.020     1.527
+IAS   CA      HA    single        0.970 0.020     1.090
+IAS   C       O     deloc         1.259 0.020     1.259
+IAS   C       OXT   deloc         1.259 0.020     1.259
+IAS   CB      CG    single        1.527 0.020     1.527
+IAS   CB      HB2   single        0.970 0.020     1.090
+IAS   CB      HB3   single        0.970 0.020     1.090
+IAS   CG      OD1   deloc         1.259 0.020     1.259
+IAS   CG      OD2   deloc         1.259 0.020     1.259
+#
+loop_
+_chem_comp_angle.comp_id
+_chem_comp_angle.atom_id_1
+_chem_comp_angle.atom_id_2
+_chem_comp_angle.atom_id_3
+_chem_comp_angle.value_angle
+_chem_comp_angle.value_angle_esd
+IAS   H2      N       H           109.47 3.000
+IAS   H2      N       CA          109.47 3.000
+IAS   H       N       CA          109.47 3.000
+IAS   HA      CA      CB          109.47 3.000
+IAS   HA      CA      C           109.47 3.000
+IAS   CB      CA      C           109.47 3.000
+IAS   HA      CA      N           109.47 3.000
+IAS   CB      CA      N           109.47 3.000
+IAS   C       CA      N           109.47 3.000
+IAS   OXT     C       O           120.00 3.000
+IAS   OXT     C       CA          120.00 3.000
+IAS   O       C       CA          120.00 3.000
+IAS   HB3     CB      HB2         109.47 3.000
+IAS   HB3     CB      CG          109.47 3.000
+IAS   HB2     CB      CG          109.47 3.000
+IAS   HB3     CB      CA          109.47 3.000
+IAS   HB2     CB      CA          109.47 3.000
+IAS   CG      CB      CA          109.47 3.000
+IAS   OD2     CG      OD1         120.00 3.000
+IAS   OD2     CG      CB          120.00 3.000
+IAS   OD1     CG      CB          120.00 3.000
+#
+loop_
+_chem_comp_tor.comp_id
+_chem_comp_tor.id
+_chem_comp_tor.atom_id_1
+_chem_comp_tor.atom_id_2
+_chem_comp_tor.atom_id_3
+_chem_comp_tor.atom_id_4
+_chem_comp_tor.value_angle
+_chem_comp_tor.value_angle_esd
+_chem_comp_tor.period
+IAS Var_01         OD1     CG      CB      CA         -102.54  30.0 3
+#
+loop_
+_chem_comp_chir.comp_id
+_chem_comp_chir.id
+_chem_comp_chir.atom_id_centre
+_chem_comp_chir.atom_id_1
+_chem_comp_chir.atom_id_2
+_chem_comp_chir.atom_id_3
+_chem_comp_chir.volume_sign
+IAS chir_01   CA      N       C       CB    positiv
+#
+loop_
+_chem_comp_plane_atom.comp_id
+_chem_comp_plane_atom.plane_id
+_chem_comp_plane_atom.atom_id
+_chem_comp_plane_atom.dist_esd
+IAS plan-1     CA 0.020
+IAS plan-1      C 0.020
+IAS plan-1      O 0.020
+IAS plan-1    OXT 0.020
+IAS plan-2     CB 0.020
+IAS plan-2     CG 0.020
+IAS plan-2    OD1 0.020
+IAS plan-2    OD2 0.020
