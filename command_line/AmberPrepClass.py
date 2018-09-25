@@ -392,8 +392,10 @@ class AmberPrepRunner:
 
     for residue_name in ns_names:
 
-      #  use existing mol2 file if present:
-      if os.path.isfile('%s.mol2' % residue_name):
+      #  use existing mol2 or lib files if present
+      if os.path.isfile('%s.lib' % residue_name):
+        print "%s.lib is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
+      elif os.path.isfile('%s.mol2' % residue_name):
         print "%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
 
       # else check if this has already been entered in the amber library:
@@ -428,6 +430,7 @@ class AmberPrepRunner:
                 use_glycam=False,
                 verbose=False,
                 ):
+
     def _parse_tleap_logfile(logfile):
       errors = []
       warnings = []
@@ -467,6 +470,7 @@ class AmberPrepRunner:
           if line.find(s) > -1:
             print_cmd('" --- Testing environment ---"', verbose=True)
             raise Sorry('tleap error : "%s"' % line)
+
     tleap_input_file = "%s_%s_tleap_input_run" % (self.base, output_base)
     f = file(tleap_input_file, "wb")
     f.write('logFile %s\n' % logfile)
@@ -497,13 +501,17 @@ class AmberPrepRunner:
     f.write('set default reorder_residues %s\n' % reorder_residues)
 
     for res in ns_names:
-      if amber_library_server.is_in_components_lib(res):
+      if os.path.isfile('%s.lib' % res):
+        f.write('loadOff %s.lib\n' % res)
+        f.write('loadAmberParams %s.frcmod\n' % res)
+      elif amber_library_server.is_in_components_lib(res):
         res_path = amber_library_server.path_in_components_lib(res)
         f.write('%s = loadmol2 %s\n' % (res, res_path[1]))
         f.write('loadAmberParams %s\n' % (res_path[0]))
       else:
         f.write('%s = loadmol2 %s.mol2\n' % (res, res))
         f.write('loadAmberParams %s.frcmod\n' % res)
+
     #  mechanism mechanism for user modifications:
     if os.path.isfile('myleaprc'):
        f.write('source myleaprc\n')
@@ -532,11 +540,10 @@ class AmberPrepRunner:
 
     f.write('saveAmberParm x %s.prmtop %s.rst7\n' % (
         "%s_%s" % (self.base, output_base),
-        "%s_%s" % (self.base, output_base),
-    )
-    )
+        "%s_%s" % (self.base, output_base) ) )
     f.write('quit\n')
     f.close()
+ 
     #
     # strangely tleap appends to the logfile so must delete first
     #
