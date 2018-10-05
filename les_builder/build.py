@@ -97,8 +97,9 @@ class LESBuilder(object):
       fn = self.addles_input_file
       self._check_valid_addles_input(fn)
       print('\n--> Using provided addles input: {}'.format(fn))
-    command_addles = 'addles <{} > addles.log'.format(fn)
-    print "\n~> %s\n" % command_addles
+    command_addles = os.path.join( os.environ["AMBERHOME"],'bin','addles' )
+    command_addles += ' <{} > addles.log'.format(fn)
+    print "\n| ~> %s\n" % command_addles
     easy_run.fully_buffered(command_addles)
 
   def update_LES_coordinates_from_uc(self):
@@ -188,9 +189,10 @@ class LESBuilder(object):
       #   (input is xxxx_uc.pdb; creates xxxx_uc_H.pdb)
       touch('./dummydb')
       self.new_pdb_with_H = self.base + '_uc_H.pdb'
-      cmd = 'reduce -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
+      cmd = os.path.join( os.environ["AMBERHOME"],'bin','reduce' )
+      cmd += ' -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
           self.unitcell_pdb_file, self.new_pdb_with_H)
-      print "\n~> %s\n" % cmd
+      print "\n| ~> %s\n" % cmd
       easy_run.fully_buffered(cmd)
       os.unlink('./dummydb')
 

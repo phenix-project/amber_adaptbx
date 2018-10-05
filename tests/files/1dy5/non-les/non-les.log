@@ -79,26 +79,26 @@ IAS.lib is present. Skipping elbow/antechamber run for this residue.
 Preparing asu files and 4phenix_1dy5.pdb
 ==================================================
 
-| ~> /home/case/ambermini/bin/tleap -f 1dy5_asu_tleap_input_run
+| ~> /home/case/amber18/bin/tleap -f 1dy5_asu_tleap_input_run
 
 Checking output filenames
   file : 1dy5_asu.prmtop
   file : 1dy5_asu.rst7
 
-| ~> /home/case/ambermini/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
+| ~> /home/case/amber18/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
 
 
 ============================================================
 Preparing unit cell files: 4amber_1dy5.prmtop and 4amber_1dy5.rst7
 ============================================================
 
-| ~> /home/case/ambermini/bin/tleap -f 1dy5_uc_tleap_input_run
+| ~> /home/case/amber18/bin/tleap -f 1dy5_uc_tleap_input_run
 
 Checking output filenames
   file : 1dy5_uc.prmtop
   file : 1dy5_uc.rst7
 
-| ~> /home/case/ambermini/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
+| ~> /home/case/amber18/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
 
 4amber_1dy5.prmtop
 
@@ -106,13 +106,14 @@ Checking output filenames
 Minimizing input coordinates.
 ==================================================
 
-| ~> /home/case/ambermini/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
+| ~> /home/case/amber18/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
 
 checking special positions in 4phenix_1dy5.pdb
 
 ==================================================
-Done.  Three new files have been made:
+Done.  Four new files have been made:
       4phenix_1dy5.pdb
+      4amber_1dy5.rst7
       4amber_1dy5.prmtop
       4amber_1dy5.order
 ==================================================
@@ -121,6 +122,7 @@ Example
 
   phenix.refine 4phenix_1dy5.pdb use_amber=True \
     amber.topology_file_name=4amber_1dy5.prmtop \
+    amber.coordinate_file_name=4amber_1dy5.rst7 \
     amber.order_file_name=4amber_1dy5.order \
     ....(other refinement keywords here).....
 
