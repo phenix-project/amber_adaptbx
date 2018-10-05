@@ -8,7 +8,8 @@ phenix.refine  \
    refinement.input.xray_data.r_free_flags.generate=True \
    strategy=individual_sites \
    refinement.main.number_of_macro_cycles=1 \
-   topology_file_name=non-les/4amber_1aho.prmtop \
+   amber.topology_file_name=non-les/4amber_1aho.prmtop \
+   amber.coordinate_file_name=non-les/4amber_1aho.rst7 \
    amber.order_file_name=non-les/4amber_1aho.order \
    use_amber=True \
    hydrogens.refine=individual \
