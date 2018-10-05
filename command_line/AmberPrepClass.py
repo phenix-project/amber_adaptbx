@@ -10,10 +10,14 @@ import libtbx.load_env
 import libtbx.phil.command_line
 from libtbx import easy_run
 from elbow.command_line import builder
-try: import pdb4amber
-except ImportError:
-  raise Sorry('  Import error - Please check that AMBERHOME is set correctly: %s' % (
-    os.environ.get('AMBERHOME', None)))
+
+# try: import pdb4amber
+# except ImportError:
+#   raise Sorry('  Import error - Please check that AMBERHOME is set correctly: %s' % (
+#     os.environ.get('AMBERHOME', None)))
+
+from amber_adaptbx import pdb4amber
+
 from amber_adaptbx import amber_library_server
 from amber_adaptbx.utils import build_unitcell, \
   get_indices_convert_dict_from_array
@@ -500,6 +504,10 @@ class AmberPrepRunner:
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
 
+    #  mechanism for user modifications:
+    if os.path.isfile('myleaprc'):
+       f.write('source myleaprc\n')
+
     for res in ns_names:
       if os.path.isfile('%s.lib' % res):
         f.write('loadOff %s.lib\n' % res)
@@ -512,9 +520,6 @@ class AmberPrepRunner:
         f.write('%s = loadmol2 %s.mol2\n' % (res, res))
         f.write('loadAmberParams %s.frcmod\n' % res)
 
-    #  mechanism mechanism for user modifications:
-    if os.path.isfile('myleaprc'):
-       f.write('source myleaprc\n')
     #
     # input PDB file
     #
@@ -537,6 +542,10 @@ class AmberPrepRunner:
       for resid1, resid2 in sslist:
         # convert from 0-based to 1-based index:
         f.write('bond x.%d.SG x.%d.SG\n' % (resid1+1, resid2+1))
+
+    #  second mechanism for user modifications:
+    if output_base == 'uc' and os.path.isfile('myuclinks'):
+       f.write('source myuclinks\n')
 
     f.write('saveAmberParm x %s.prmtop %s.rst7\n' % (
         "%s_%s" % (self.base, output_base),
