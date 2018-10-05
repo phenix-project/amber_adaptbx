@@ -1139,8 +1139,9 @@ def run(rargs):
     amber_prep_runner.run_clean()
 
   outl = "\n==================================================\n"
-  outl += "Done.  Three new files have been made:\n"
+  outl += "Done.  Four new files have been made:\n"
   outl += "      %s\n" % amber_prep_runner.final_pdb_file_4phenix
+  outl += "      %s\n" % amber_prep_runner.final_rst7_file
   outl += "      %s\n" % amber_prep_runner.final_prmtop_file
   outl += "      %s\n" % amber_prep_runner.final_order_file
   outl += "==================================================\n\n"
@@ -1149,6 +1150,7 @@ def run(rargs):
       amber_prep_runner.final_pdb_file_4phenix,
   )
   outl += "    amber.topology_file_name=%s \\\n" % amber_prep_runner.final_prmtop_file
+  outl += "    amber.coordinate_file_name=%s \\\n" % amber_prep_runner.final_rst7_file
   outl += "    amber.order_file_name=%s \\\n" % amber_prep_runner.final_order_file
   outl += "    ....(other refinement keywords here)....."
   outl += "\n\n\n"
