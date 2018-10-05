@@ -8,10 +8,10 @@
 ./test_AmberPrep
 status=$?
 
-if false; then
+./test_phenix.refine
+status=$(($status + $?))
 
-   ./test_phenix.refine
-   status=$(($status + $?))
+if false; then
 
    ./test_AmberPrep_LES
    status=$(($status + $?))
