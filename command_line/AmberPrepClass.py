@@ -1069,7 +1069,8 @@ def run(rargs):
         prmtop=amber_prep_runner.non_les_prmtop_file_name,
         rst7_file=amber_prep_runner.non_les_rst7_file_name,
         addles_input_file=actions.addles_input)
-    les_builder.run(use_amber_unitcell=actions.use_amber_unitcell)
+    les_builder.run(use_amber_unitcell=actions.use_amber_unitcell,
+                    use_reduce=actions.use_reduce)
 
     #  rename the files to the canonical three we want.  (Do this here,
     #    so that these lines can be commented out if debugging is 
