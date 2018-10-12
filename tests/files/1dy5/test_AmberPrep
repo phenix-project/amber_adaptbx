@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #  simple test case: has a modified residue, with a non-standard 
-#  connectivity
+#  connectivity, and non-covalent ligands
 
 echo "Running non-LES test on 1dy5:"
 phenix.AmberPrep 1dy5.pdb minimise=amber_all > non-les.log 2>&1
@@ -17,6 +17,6 @@ status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
 status=$(($status + $?))
 
-/bin/rm -f 1dy5.min.out
+/bin/rm -f 1dy5.min.out ACT.* IPA.* SO4.*
 
 exit $status
