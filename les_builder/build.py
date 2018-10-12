@@ -168,7 +168,7 @@ class LESBuilder(object):
           return True
     return False
 
-  def run(self, use_amber_unitcell=True):
+  def run(self, use_amber_unitcell=True, use_reduce=True):
 
     def touch(fname, times=None):
         with open(fname, 'a'):
@@ -187,14 +187,17 @@ class LESBuilder(object):
 
       # use reduce to add hydrogens to unitcell pdb==========================
       #   (input is xxxx_uc.pdb; creates xxxx_uc_H.pdb)
-      touch('./dummydb')
-      self.new_pdb_with_H = self.base + '_uc_H.pdb'
-      cmd = os.path.join( os.environ["AMBERHOME"],'bin','reduce' )
-      cmd += ' -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
-          self.unitcell_pdb_file, self.new_pdb_with_H)
-      print "\n| ~> %s\n" % cmd
-      easy_run.fully_buffered(cmd)
-      os.unlink('./dummydb')
+      if use_reduce:
+         touch('./dummydb')
+         self.new_pdb_with_H = self.base + '_uc_H.pdb'
+         cmd = os.path.join( os.environ["AMBERHOME"],'bin','reduce' )
+         cmd += ' -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
+             self.unitcell_pdb_file, self.new_pdb_with_H)
+         print "\n| ~> %s\n" % cmd
+         easy_run.fully_buffered(cmd)
+         os.unlink('./dummydb')
+      else:
+         self.new_pdb_with_H = self.base + '_uc.pdb'
 
     # use addles to construct LES parm7 and rst7 files========================
     #   (input is 4amber_xxxx.{prmtop,rst7};  output is
