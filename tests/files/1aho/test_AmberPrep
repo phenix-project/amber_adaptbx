@@ -3,7 +3,7 @@
 #  simple test case: has alternate conformers, ss bonds, gaps, multiple
 #    chains per unit cell
 
-#  does not have:  non-standard residues
+#  does not have:  non-standard residues, ligands
 
 echo "Running non-LES test on 1aho with a gap:"
 phenix.AmberPrep 1aho.pdb minimise=amber_all > non-les.log 2>&1
