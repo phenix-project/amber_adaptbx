@@ -534,7 +534,7 @@ class AmberPrepRunner:
     #
     if gaplist:
       for d, res1, resid1, res2, resid2 in gaplist:
-        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1, resid2))
+        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1+1, resid2+1))
     #
     #  process sslist
     #
