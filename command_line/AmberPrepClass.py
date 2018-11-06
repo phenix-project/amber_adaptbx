@@ -369,7 +369,7 @@ class AmberPrepRunner:
     asu_parm.write_pdb(outpdb, standard_resnames=True, renumber=False,
         write_anisou=True)
 
-  def validate_pdb(self):
+  def return_protein_chain_gaps(self):
     assert self.pdb_hierarchy
     from mmtbx import conformation_dependent_library
     gaps = []
@@ -383,6 +383,9 @@ class AmberPrepRunner:
         gaps.append(three)
     if gaps:
       return gaps
+    return False
+
+  def validate_pdb(self):
     return False
 
   def process_ligands(self,
