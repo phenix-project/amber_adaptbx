@@ -16,9 +16,12 @@ status=$(($status + $?))
 status=$(($status + $?))
 ./dacdif non-les/4amber_1aho.order 4amber_1aho.order
 status=$(($status + $?))
-./dacdif non-les/1aho.min.out 1aho.min.out
+awk 'NF!=6' 1aho.min.out > 1aho.min.out6
+./dacdif non-les/1aho.min.out6 1aho.min.out6
 status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
 status=$(($status + $?))
+
+/bin/rm -r 1aho.min.out
 
 exit $status

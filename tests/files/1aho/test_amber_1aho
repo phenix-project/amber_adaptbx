@@ -16,4 +16,6 @@ status=$(($status + $?))
 ./test_phenix.refine_LES
 status=$(($status + $?))
 
+/bin/rm -f amber_002.def
+
 exit $status
