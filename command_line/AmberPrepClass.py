@@ -385,9 +385,6 @@ class AmberPrepRunner:
       return gaps
     return False
 
-  def validate_pdb(self):
-    return False
-
   def process_ligands(self,
                       ns_names=[],
                       nproc=1,
@@ -979,9 +976,6 @@ def run(rargs):
   base = get_output_preamble(working_params)
   amber_prep_runner = AmberPrepRunner(base, LES=actions.LES)
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
-  invalid = amber_prep_runner.validate_pdb()
-  if invalid:
-    raise Sorry('PDB input is not "valid"')
 
   # basename = os.path.basename(inputs.pdb_file_name)
   # amber_prep_runner.curate_model(remove_alt_confs=True)
