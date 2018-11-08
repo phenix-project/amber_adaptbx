@@ -3,6 +3,10 @@
 #  simple test case: has a modified residue, with a non-standard 
 #  connectivity, and non-covalent ligands
 
+#  make the tests independent of whether the user has the amber library
+#  mounted or not:
+unset AMBER_LIBRARY_DIR     
+
 echo "Running non-LES test on 1dy5:"
 phenix.AmberPrep 1dy5.pdb minimise=amber_all > non-les.log 2>&1
 
