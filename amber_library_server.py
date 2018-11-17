@@ -53,12 +53,10 @@ def path_in_components_lib(residue_name):
                           residue_name.upper(),
                           )
   files = []
-  for ext in ["frcmod", "mol2"]:
-    if not os.path.exists("%s.%s" % (preamble, ext)):
-      break
-    files.append("%s.%s" % (preamble, ext))
-  else:
-    assert len(files) == 2
+  for ext in ["frcmod", "mol2", "lib"]:
+    if os.path.exists("%s.%s" % (preamble, ext)):
+      files.append("%s.%s" % (preamble, ext))
+  if len(files) == 2:
     return files
   return False
 
