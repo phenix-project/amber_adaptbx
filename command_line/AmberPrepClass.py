@@ -490,7 +490,11 @@ class AmberPrepRunner:
                                    ))):
       raise Sorry('Amber environment appears to be older than AmberTools16; quitting')
 
-    # Now we can assume that we are dealing with AmberTools16:
+    # Now we can assume that we are dealing with AmberTools16 or later:
+
+    if(os.path.isfile(os.path.join(amber_dir, 'dat', 'leap', 'cmd',
+                                   'leaprc.phenix',))):
+      f.write('source leaprc.phenix\n')
     if( redq ):
       f.write('source leaprc.ff14SB.redq\n')
     else:
