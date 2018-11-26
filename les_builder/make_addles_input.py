@@ -25,12 +25,15 @@ def get_LES_residue_dict(parm):
   """
   holder = {}
   holderbb = {}  # flag for backbone alternates
+  holderca = {}  # flag for side-chain alternates that include CA
   for atom in parm.atoms:
     if atom.other_locations:
       holder[atom.residue.idx+1] = len(atom.other_locations)
-      if atom.name in ["N", "C", "CA", "O" ]:
+      if atom.name in ["N", "C", "O" ]:
         holderbb[atom.residue.idx+1] = 1
-  return holder, holderbb
+      if atom.name in ["CA" ]:
+        holderca[atom.residue.idx+1] = 1
+  return holder, holderbb, holderca
   
 def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   root_name = os.path.basename(pdb_fn).split('.')[0]
@@ -67,7 +70,7 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   header = '\n'.join((line.strip() for line in header.split('\n')))
   commands.append(header.strip())
   
-  (holder, holderbb) = get_LES_residue_dict(parm)
+  (holder, holderbb, holderca) = get_LES_residue_dict(parm)
   
   for chain_id in range(n_asu):
     commands.append('~ protein chain: {}'.format(chain_id))
@@ -76,6 +79,8 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
       n_conformers = holder[resid] + 1
       if resid in holderbb.keys():
         line_template = 'spac numc={numc} pick #mon {resid} {resid} done'
+      elif resid in holderca.keys():
+        line_template = 'spac numc={numc} pick #sic {resid} {resid} done'
       else:
         line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
       commands.append(line_template.format(numc=n_conformers,
