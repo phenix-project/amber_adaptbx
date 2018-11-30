@@ -769,7 +769,6 @@ class AmberPrepRunner:
       4tleap_uc_nonprot.pdb
       4tleap.pdb
       4tleap_uc1.pdb
-      4tleap_renum.txt
       4tleap_uc_renum.txt
       4tleap_uc_sslink
       4tleap_sslink
@@ -1120,10 +1119,28 @@ def run(rargs):
   saved_arr = np.array([order_converter['a2p'],
                         order_converter['p2a']],
                         dtype='i4')
-  # 1st column: amber -> phenix
-  # 2nd column: phenix -> amber
   filename = amber_prep_runner.final_order_file
   np.savetxt(filename, saved_arr.transpose(), fmt='%5d')
+
+  # 1st column: amber -> phenix
+  # 2nd column: phenix -> amber
+  # dac: above are Hai's comments, but to be more explicit: if "a" and
+  # "p" are the Amber and phenix atom numbers, and "col1" and "col2" are
+  # the two column values, then col1[p] = a and col2[a] = p.
+  #
+  #  So: by this logic, column 1 is p2a, column 2 is a2p.  This is also
+  #  the order in ../utils.py.
+
+  #  Now: put in a consistency check: for each index i, 
+  #      p2a[ a2p[i] ] = i;   a2p[ p2a[i] ] = i
+
+  i = 0
+  while i< len(uc_p2a_indices):
+     if uc_p2a_indices[ uc_a2p_indices[i] ] != i:
+        raise Sorry( "bad order file for index %d" % i )
+     if uc_a2p_indices[ uc_p2a_indices[i] ] != i:
+        raise Sorry( "bad order file for index %d" % i )
+     i += 1
 
   if actions.minimise != "off":
     print "\n=================================================="
