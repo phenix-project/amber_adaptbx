@@ -399,19 +399,17 @@ def round3(a):
 
   Examples
   --------
-  >>> round3(1.235)
-  1.2
+  >>> round3(1.2350000..)
+  1.235
   """
   #  format the input number in the way that would have been done
   #    when 4phenix_xxxx.pdb was made:
   y = '%8.3f' % a 
-  #  now, round to 1 decimal place: since both the 4phenix and the 4amber
-  #     string representations should be the same, this should work:
-  x = round( float(y), 1 )
-  if x == -0.0:
-    # avoid '-0.0' and '0.0' key
-    x = 0.0
-  return x
+
+  if y == -0.000:
+    # avoid confusion between '-0.000' and '0.000'
+    y = 0.000
+  return y
 
 def make_dict(big_arr):
   """
