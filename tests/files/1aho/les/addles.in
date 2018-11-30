@@ -5,22 +5,18 @@ file wcrd name=(4amber_1aho.LES.rst7) wovr
 action
 omas
 ~ protein chain: 0
-spac numc=2 pick #sid 9 9 done
 spac numc=2 pick #mon 12 12 done
 spac numc=2 pick #sid 24 24 done
 spac numc=2 pick #mon 61 61 done
 ~ protein chain: 1
-spac numc=2 pick #sid 200 200 done
 spac numc=2 pick #mon 203 203 done
 spac numc=2 pick #sid 215 215 done
 spac numc=2 pick #mon 252 252 done
 ~ protein chain: 2
-spac numc=2 pick #sid 391 391 done
 spac numc=2 pick #mon 394 394 done
 spac numc=2 pick #sid 406 406 done
 spac numc=2 pick #mon 443 443 done
 ~ protein chain: 3
-spac numc=2 pick #sid 582 582 done
 spac numc=2 pick #mon 585 585 done
 spac numc=2 pick #sid 597 597 done
 spac numc=2 pick #mon 634 634 done

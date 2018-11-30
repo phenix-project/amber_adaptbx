@@ -21,4 +21,6 @@ if false; then
 
 fi
 
+/bin/rm -f 1dy5_4tleap_renum.txt
+
 exit $status

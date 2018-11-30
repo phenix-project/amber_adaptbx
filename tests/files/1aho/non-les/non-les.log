@@ -10,7 +10,6 @@ A
 ---------- Alternate Locations (Original Residues!))
 
 The following residues had alternate locations:
-ASP_9
 CYS_12
 GLU_24
 CYS_61
@@ -67,26 +66,26 @@ Setting up library files for non-standard residues
 Preparing asu files and 4phenix_1aho.pdb
 ==================================================
 
-| ~> /home/case/amber18/bin/tleap -f 1aho_asu_tleap_input_run
+| ~> /home/case/ambermini/bin/tleap -f 1aho_asu_tleap_input_run
 
 Checking output filenames
   file : 1aho_asu.prmtop
   file : 1aho_asu.rst7
 
-| ~> /home/case/amber18/bin/ChBox -c 1aho_asu.rst7 -o 1aho_asu.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
+| ~> /home/case/ambermini/bin/ChBox -c 1aho_asu.rst7 -o 1aho_asu.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
 
 
 ============================================================
 Preparing unit cell files: 4amber_1aho.prmtop and 4amber_1aho.rst7
 ============================================================
 
-| ~> /home/case/amber18/bin/tleap -f 1aho_uc_tleap_input_run
+| ~> /home/case/ambermini/bin/tleap -f 1aho_uc_tleap_input_run
 
 Checking output filenames
   file : 1aho_uc.prmtop
   file : 1aho_uc.rst7
 
-| ~> /home/case/amber18/bin/ChBox -c 1aho_uc.rst7 -o 1aho_uc.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
+| ~> /home/case/ambermini/bin/ChBox -c 1aho_uc.rst7 -o 1aho_uc.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
 
 4amber_1aho.prmtop
 
@@ -94,7 +93,7 @@ Checking output filenames
 Minimizing input coordinates.
 ==================================================
 
-| ~> /home/case/amber18/bin/sander -O -i 1aho_amber_all.in -p 4amber_1aho.prmtop -c 4amber_1aho.rst7 -o 1aho.min.out            -ref 4amber_1aho.rst7 -r 4amber_1aho.min.rst7
+| ~> /home/case/ambermini/bin/sander -O -i 1aho_amber_all.in -p 4amber_1aho.prmtop -c 4amber_1aho.rst7 -o 1aho.min.out            -ref 4amber_1aho.rst7 -r 4amber_1aho.min.rst7
 
 checking special positions in 4phenix_1aho.pdb
 
