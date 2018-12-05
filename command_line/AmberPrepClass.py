@@ -1128,8 +1128,9 @@ def run(rargs):
   # "p" are the Amber and phenix atom numbers, and "col1" and "col2" are
   # the two column values, then col1[p] = a and col2[a] = p.
   #
-  #  So: by this logic, column 1 is p2a, column 2 is a2p.  This is also
-  #  the order in ../utils.py.
+  #  So: by my(?) logic, column 1 is p2a (use p to get a), and
+  #  column 2 is a2p (use a to get p).  However, the code seems to use the 
+  #  opposite nomenclature.
 
   #  Now: put in a consistency check: for each index i, 
   #      p2a[ a2p[i] ] = i;   a2p[ p2a[i] ] = i
@@ -1137,9 +1138,11 @@ def run(rargs):
   i = 0
   while i< len(uc_p2a_indices):
      if uc_p2a_indices[ uc_a2p_indices[i] ] != i:
-        raise Sorry( "bad order file for index %d" % i )
+        raise Sorry( "bad order file for indexp:  %d  %d  %d" % ( i+1,
+            uc_a2p_indices[i]+1, uc_p2a_indices[ uc_a2p_indices[i] ]+1 ))
      if uc_a2p_indices[ uc_p2a_indices[i] ] != i:
-        raise Sorry( "bad order file for index %d" % i )
+        raise Sorry( "bad order file for indexa:  %d  %d  %d" % ( i+1,
+            uc_p2a_indices[i]+1, uc_a2p_indices[ uc_p2a_indices[i] ]+1 ))
      i += 1
 
   if actions.minimise != "off":
