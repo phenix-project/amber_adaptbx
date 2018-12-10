@@ -1,6 +1,7 @@
 # LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep
 
 import os
+import shutil
 import sys
 import iotbx.pdb
 import StringIO
@@ -1078,6 +1079,8 @@ def run(rargs):
     #  rename the files to the canonical three we want.  (Do this here,
     #    so that these lines can be commented out if debugging is 
     #    required.)
+    shutil.copy('4amber_%s.prmtop' % base, 'preLES.prmtop' )
+    shutil.copy('4amber_%s.rst7' % base, 'preLES.rst7' )
     os.rename('4amber_%s.LES.prmtop' % base,'4amber_%s.prmtop' % base)
     os.rename('4amber_%s.LES.rst7' % base, '4amber_%s.rst7' % base)
     os.rename('4phenix_%s.LES.pdb' % base, '4phenix_%s.pdb' % base)
