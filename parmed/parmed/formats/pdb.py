@@ -515,7 +515,7 @@ class PDBFile(object):
                         continue # Skip the rest of this record
                     aname = line[12:16].strip()
                     altloc = line[16].strip()
-                    rname = line[17:21].strip()
+                    rname = line[17:20].strip()
                     chain = line[21].strip()
                     try:
                         resid = int(line[22:26])
@@ -544,8 +544,12 @@ class PDBFile(object):
                             la.altloc != altloc or la.residue.name != rname or
                             la.residue.chain != chain or
                             la.residue.insertion_code != icode):
-                        warnings.warn('ANISOU record does not match previous '
-                                      'atom', PDBWarning)
+                        #warnings.warn('ANISOU record does not match previous '
+                        #              'atom', PDBWarning)
+                        print( "ANISOU mismatch: %d %s %s %s" %
+                            ( atnum, aname, altloc, rname) )
+                        print( "                 %d %s %s %s" %
+                            ( la.number, la.name, la.altloc, la.residue.name) )
                         continue
                     la.anisou = np.array([u11/1e4, u22/1e4, u33/1e4,
                                           u12/1e4, u13/1e4, u23/1e4])
