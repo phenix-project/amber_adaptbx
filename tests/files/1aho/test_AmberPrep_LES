@@ -23,4 +23,6 @@ status=$(($status + $?))
 ./dacdif les/addles.in addles.in
 status=$(($status + $?))
 
+/bin/rm -f 1aho_4tleap_renum.txt
+
 exit $status

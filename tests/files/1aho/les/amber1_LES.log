@@ -1,10 +1,10 @@
-# Date 2018-11-28 Time 09:25:47 EST -0500 (1543415147.78 s)
+# Date 2018-12-11 Time 13:57:19 EST -0500 (1544554639.47 s)
 #phil __OFF__
 
 Command line arguments: "les/4phenix_1aho.pdb" "1aho.mtz" "c_beta_restraints=False" "discard_psi_phi=False" "refinement.input.xray_data.r_free_flags.generate=True" "strategy=individual_sites" "refinement.main.number_of_macro_cycles=1" "use_amber=True" "amber.topology_file_name=les/4amber_1aho.prmtop" "amber.coordinate_file_name=les/4amber_1aho.rst7" "amber.order_file_name=les/4amber_1aho.order" "print_amber_energies=True" "prefix=amber" "serial=1" "write_geo=False" "--overwrite" "cdl=True"
 
 USER = case
-PID = 66649
+PID = 81080
 
 -------------------------------------------------------------------------------
   PHENIX: Python-based Hierarchical ENvironment for Integrated Xtallography
@@ -292,7 +292,7 @@ All atoms refined with f_prime=0 and f_double_prime=0.
       
   Number of custom bonds: simple=0, symmetry=0
   Time building additional restraints: 0.32
-  Conformation dependent library (CDL) restraints added in 22.6 milliseconds
+  Conformation dependent library (CDL) restraints added in 22.1 milliseconds
   
   Time building geometry restraints manager: 0.36 seconds
 
@@ -552,7 +552,7 @@ Look at refinement.ncs for more NCS related parameters.
 Writing effective parameters to file:
   /Users/case/phenix_svnf/modules/amber_adaptbx/tests/files/1aho/amber_001.eff
 
-CPU time processing inputs: 5.53
+CPU time processing inputs: 6.04
 
 
 ============================ Non-default parameters ===========================
@@ -973,7 +973,7 @@ leading digit, like 1_, means number of macro-cycle
         end: 0.1901 0.1974 0.014  1.83   0.0  57.8  12.0 387      0.131
 ------------------------------------------------------------------------
 
-CPU time actual refinement: 18.85
+CPU time actual refinement: 18.82
 
 
 ============================== Exporting results ==============================
@@ -1001,22 +1001,22 @@ Writing default parameters for subsequent refinement:
     mask                            = 0.00   
     f_calc                          = 0.00   
     alpha_beta                      = 0.02   
-    target                          = 0.06   
+    target                          = 0.03   
     gradients_wrt_atomic_parameters = 0.00   
     fmodel                         = 0.00   
-    r_factors                      = 0.01   
-    phase_errors                   = 0.69   
-    foms                           = 0.00   
-    TOTAL for micro-tasks          = 0.78   
+    r_factors                      = 0.00   
+    phase_errors                   = 0.65   
+    foms                           = 0.01   
+    TOTAL for micro-tasks          = 0.71   
 NUMBER OF MASK CALCS=  0
-Total CPU time: 37.86 seconds
-from_scatterers_fft:    40 calls, 1.94 s
-gradients_fft:          30 calls, 1.86 s
+Total CPU time: 38.76 seconds
+from_scatterers_fft:    40 calls, 1.84 s
+gradients_fft:          30 calls, 1.89 s
 
 =========================== phenix.refine: finished ===========================
 
-# Date 2018-11-28 Time 09:26:25 EST -0500 (1543415185.61 s)
-wall clock time: 38.71 s
+# Date 2018-12-11 Time 13:57:58 EST -0500 (1544554678.65 s)
+wall clock time: 40.11 s
 
 Start R-work = 0.2150, R-free = 0.2135
 Final R-work = 0.1901, R-free = 0.1974
