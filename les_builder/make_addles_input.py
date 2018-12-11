@@ -26,6 +26,7 @@ def get_LES_residue_dict(parm):
   holder = {}
   holderbb = {}  # flag for backbone alternates
   holderca = {}  # flag for side-chain alternates that include CA
+  holdercb = {}  # flag for side-chain alternates that include CB
   holder_atoms = {}  # place to store atom names in this residue that
                      # have alternate locations
   for atom in parm.atoms:
@@ -39,7 +40,9 @@ def get_LES_residue_dict(parm):
         holderbb[atom.residue.idx+1] = 1
       if atom.name in ["CA" ]:
         holderca[atom.residue.idx+1] = 1
-  return holder, holderbb, holderca, holder_atoms
+      if atom.name in ["CB" ]:
+        holdercb[atom.residue.idx+1] = 1
+  return holder, holderbb, holderca, holdercb, holder_atoms
   
 def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   root_name = os.path.basename(pdb_fn).split('.')[0]
@@ -76,7 +79,7 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   header = '\n'.join((line.strip() for line in header.split('\n')))
   commands.append(header.strip())
   
-  (holder, holderbb, holderca, holder_atoms) = get_LES_residue_dict(parm)
+  (holder, holderbb, holderca, holdercb, holder_atoms) = get_LES_residue_dict(parm)
   
   for chain_id in range(n_asu):
     commands.append('~ protein chain: {}'.format(chain_id))
@@ -84,11 +87,13 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
     for resid in sorted(holder.keys()):
       n_conformers = holder[resid] + 1
       if resid in holderbb.keys():
-        line_template = 'spac numc={numc} pick #mon {resid} {resid} done'
+        line_template = 'spac numc={numc} pick #cca {resid} {resid} done'
       elif resid in holderca.keys():
-        line_template = 'spac numc={numc} pick #sic {resid} {resid} done'
-      else:
+        line_template = 'spac numc={numc} pick #sia {resid} {resid} done'
+      elif resid in holdercb.keys():
         line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
+      else:
+        line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
       commands.append(line_template.format(numc=n_conformers,
                                            resid=resid+chain_id*n_asu_residues))
       commands.append("~ " + holder_atoms[resid])
