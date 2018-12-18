@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import parmed
 import iotbx.pdb
 
@@ -25,8 +26,8 @@ def get_LES_residue_dict(parm):
   """
   holder = {}
   holderbb = {}  # flag for backbone alternates
-  holderca = {}  # flag for side-chain alternates that include CA
   holdercb = {}  # flag for side-chain alternates that include CB
+  holdercg = {}  # flag for side-chain alternates that include CG or OG
   holder_atoms = {}  # place to store atom names in this residue that
                      # have alternate locations
   for atom in parm.atoms:
@@ -38,11 +39,38 @@ def get_LES_residue_dict(parm):
          holder_atoms[atom.residue.idx+1] = atom.residue.name + ": " + atom.name
       if atom.name in ["N", "C", "O" ]:
         holderbb[atom.residue.idx+1] = 1
-      if atom.name in ["CA" ]:
-        holderca[atom.residue.idx+1] = 1
-      if atom.name in ["CB" ]:
-        holdercb[atom.residue.idx+1] = 1
-  return holder, holderbb, holderca, holdercb, holder_atoms
+
+      elif atom.name in ["CB" ]:
+        # print "found CB altlocs in residue %d" % int(atom.residue.idx+1)
+        # print atom.other_locations.keys() 
+        #  better to loop over keys: following assumes second altloc is 'B'
+        # print "parent:  %8.3f  %8.3f  %8.3f" % ( atom.xx, atom.xy, atom.xz )
+        # print "child :  %8.3f  %8.3f  %8.3f" % ( 
+        #         atom.other_locations["B"].xx,
+        #         atom.other_locations["B"].xy,
+        #         atom.other_locations["B"].xz )
+        cbdist = math.sqrt( (atom.xx - atom.other_locations["B"].xx)**2 +
+                            (atom.xy - atom.other_locations["B"].xy)**2 +
+                            (atom.xz - atom.other_locations["B"].xz)**2 )
+        # print "distance: %8.3f" % cbdist
+        holdercb[atom.residue.idx+1] = cbdist
+
+      elif atom.name in ["CG", "OG", "CG1", "CG2" ]:
+        # print "found CG altlocs in residue %d" % int(atom.residue.idx+1)
+        # print atom.other_locations.keys() 
+        #  better to loop over keys: following assumes second altloc is 'B'
+        # print "parent:  %8.3f  %8.3f  %8.3f" % ( atom.xx, atom.xy, atom.xz )
+        # print "child :  %8.3f  %8.3f  %8.3f" % ( 
+        #         atom.other_locations["B"].xx,
+        #         atom.other_locations["B"].xy,
+        #         atom.other_locations["B"].xz )
+        cgdist = math.sqrt( (atom.xx - atom.other_locations["B"].xx)**2 +
+                            (atom.xy - atom.other_locations["B"].xy)**2 +
+                            (atom.xz - atom.other_locations["B"].xz)**2 )
+        # print "distance: %8.3f" % cgdist
+        holdercg[atom.residue.idx+1] = cgdist
+
+  return holder, holderbb, holdercb, holdercg, holder_atoms
   
 def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   root_name = os.path.basename(pdb_fn).split('.')[0]
@@ -79,19 +107,27 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   header = '\n'.join((line.strip() for line in header.split('\n')))
   commands.append(header.strip())
   
-  (holder, holderbb, holderca, holdercb, holder_atoms) = get_LES_residue_dict(parm)
+  (holder, holderbb, holdercb, holdercg, holder_atoms) = get_LES_residue_dict(parm)
   
   for chain_id in range(n_asu):
-    commands.append('~ protein chain: {}'.format(chain_id))
+    commands.append('~ protein chain: {}'.format(chain_id+1))
   
     for resid in sorted(holder.keys()):
       n_conformers = holder[resid] + 1
       if resid in holderbb.keys():
         line_template = 'spac numc={numc} pick #cca {resid} {resid} done'
-      elif resid in holderca.keys():
-        line_template = 'spac numc={numc} pick #sia {resid} {resid} done'
       elif resid in holdercb.keys():
-        line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
+        # choose #sid if all CB atoms are within 0.15 Ang
+        if holdercb[resid] > 0.15:
+           line_template = 'spac numc={numc} pick #cca {resid} {resid} done'
+        else:
+           line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
+      elif resid in holdercg.keys():
+        # choose #sig if all CG atoms are within 0.15 Ang
+        if holdercg[resid] > 0.15:
+           line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
+        else:
+           line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
       else:
         line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
       commands.append(line_template.format(numc=n_conformers,

@@ -45,11 +45,23 @@ def get_amber_struct_object(params):
       raise AttributeError(
           'Setting amber restraint for pysander does not work with AmberTools <= 16')
 
+  amber_structs.qm_inp=amber_structs.sander_engine.QmInputOptions()
+  if amber_params.qmmask:
+     amber_structs.inp.ifqnt=1
+     amber_structs.qm_inp.qm_theory = 'PM6'
+     amber_structs.qm_inp.qmmask = amber_params.qmmask
+     amber_structs.qm_inp.qmcut = 8.0
+     amber_structs.qm_inp.qmcharge= amber_params.qmcharge
+     amber_structs.qm_inp.diag_routine=1
+  else:
+     amber_structs.inp.ifqnt=0
+
   amber_structs.sander_engine.setup(
       amber_structs.parm,
       amber_structs.parm.coordinates,
       amber_structs.parm.box,
-      amber_structs.inp
+      amber_structs.inp,
+      amber_structs.qm_inp
   )
 
   if amber_params.order_file_name is not None:

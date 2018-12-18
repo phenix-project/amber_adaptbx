@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "running 1 cycle of coordinate refinement on 1aho:"
+echo "running 1 cycle of coordinate refinement on 1aho using qm/mm:"
 
 phenix.refine  \
    non-les/4phenix_1aho.pdb 1aho.mtz \
@@ -14,14 +14,15 @@ phenix.refine  \
    amber.order_file_name=non-les/4amber_1aho.order \
    print_amber_energies=True \
    prefix=amber serial=1 \
-   write_geo=False --overwrite cdl=True > amber1.log 
+   amber.qmmask=':1'  amber.qmcharge=1 \
+   write_geo=False --overwrite cdl=True > amber1_qmmm.log 
 
-tail -2 amber1.log > tail.log
-./dacdif -a 0.002 non-les/tail.log tail.log
+tail -2 amber1_qmmm.log > tail_qmmm.log
+./dacdif -a 0.005 non-les/tail_qmmm.log tail_qmmm.log
 status=$?
 
 if [ $status -ne 0 ]; then
-   echo "(The expected full log file is in non-les/amber1.log)"
+   echo "(The expected full log file is in non-les/amber1_qmmm.log)"
 fi
 
 /bin/rm -f amber_data.mtz amber_001.* amber_002.def

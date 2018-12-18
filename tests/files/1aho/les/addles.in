@@ -4,28 +4,28 @@ file wprm name=(4amber_1aho.LES.prmtop) wovr
 file wcrd name=(4amber_1aho.LES.rst7) wovr
 action
 omas
-~ protein chain: 0
+~ protein chain: 1
 spac numc=2 pick #cca 12 12 done
 ~ CYS: N CA C O CB SG
 spac numc=2 pick #sid 24 24 done
 ~ GLU: CB CG CD OE1 OE2
 spac numc=2 pick #cca 61 61 done
 ~ CYS: N CA C O CB SG
-~ protein chain: 1
+~ protein chain: 2
 spac numc=2 pick #cca 203 203 done
 ~ CYS: N CA C O CB SG
 spac numc=2 pick #sid 215 215 done
 ~ GLU: CB CG CD OE1 OE2
 spac numc=2 pick #cca 252 252 done
 ~ CYS: N CA C O CB SG
-~ protein chain: 2
+~ protein chain: 3
 spac numc=2 pick #cca 394 394 done
 ~ CYS: N CA C O CB SG
 spac numc=2 pick #sid 406 406 done
 ~ GLU: CB CG CD OE1 OE2
 spac numc=2 pick #cca 443 443 done
 ~ CYS: N CA C O CB SG
-~ protein chain: 3
+~ protein chain: 4
 spac numc=2 pick #cca 585 585 done
 ~ CYS: N CA C O CB SG
 spac numc=2 pick #sid 597 597 done

@@ -54,8 +54,6 @@ def initialize_order_converter(self):
   # subsequent geometry_manager objects will share the same `order_converter`
   # TODO: refactor
   if self.amber_structs.order_map_file_name is not None and self.amber_structs.order_converter is not None:
-    # read order_converter from file
-    print 'reading order mapping from file {}'.format(self.amber_structs.order_map_file_name)
     geometry_manager.order_converter = self.amber_structs.order_converter
   else:
     #

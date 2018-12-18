@@ -51,7 +51,9 @@ class geometry_manager(object):
                      crystal_symmetry,
                      log=None,
                      print_amber_energies=False,
-                     compute_gradients=False):
+                     compute_gradients=False,
+                     qmmask='',
+                     ):
     # if log is None: assert 0
     # Expand sites_cart to unit cell
     sites_cart_uc = expand_coord_to_unit_cell(self.sites_cart, crystal_symmetry)
@@ -83,7 +85,7 @@ class geometry_manager(object):
     nmphi = ptrfunc('nphih') + ptrfunc('nphia')
     result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
                                 ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
-                                nbond, nangl, nmphi]
+                                ene.scf, nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
     if log is None:
       log = sys.stdout
@@ -98,24 +100,27 @@ class geometry_manager(object):
       for i in range(9):
         if i: _outl(result.energy_components[i])
         else: _outl(result.residual_sum)
-      print >>log, """  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s""" % (
+      if qmmask:
+         print >>log, """  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s SCF: %5s""" % (
           outl[0],
-          result.energy_components[6],
-          outl[1],
           result.energy_components[7],
-          outl[2],
+          outl[1],
           result.energy_components[8],
+          outl[2],
+          result.energy_components[9],
+          outl[3],
+          outl[4],
+          outl[5],
+          outl[6])
+      else:
+         print >>log, """  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s""" % (
+          outl[0],
+          result.energy_components[7],
+          outl[1],
+          result.energy_components[8],
+          outl[2],
+          result.energy_components[9],
           outl[3],
           outl[4],
           outl[5])
-    #print result.bond_deviations(self.sites_cart,
-    #                             self.amber_structs.parm,
-    #                             ignore_hd=False,
-    #                             verbose=1,
-    #)
-    #print result.angle_deviations(self.sites_cart,
-    #                             self.amber_structs.parm,
-    #                             ignore_hd=False,
-    #                             verbose=1,
-    #)
     return result
