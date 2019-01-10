@@ -4,7 +4,7 @@
           -------------------------------------------------------
 
 
-|   Executable path: /home/case/amber_phenix-0.7/bin/sander
+|   Executable path: /home/case/ambermini/bin/sander
 | Working directory: /Users/case/phenix_svnf/modules/amber_adaptbx/tests/files/1aho
 |          Hostname: Unknown
   [-O]verwriting output
@@ -46,7 +46,7 @@ Initial minimization
 | peek_ewald_inpcrd: Box info found
 |Largest sphere to fit in unit cell has radius =    15.050
 | New format PARM file being parsed.
-| Version =    1.000 Date = 12/18/18 Time = 12:23:49
+| Version =    1.000 Date = 01/09/19 Time = 21:05:13
  NATOM  =    5312 NTYPES =      16 NBONH =    3336 MBONA  =    2040
  NTHETH =    4068 MTHETA =    2760 NPHIH =    8584 MPHIA  =    8488
  NHPARM =       0 NPARM  =       0 NNB   =   22756 NRES   =     764
@@ -144,44 +144,44 @@ Ewald parameters:
 
 
 
- BOND    =      315.3562  ANGLE   =     3912.8077  DIHED      =     2701.5643
+ BOND    =      315.2742  ANGLE   =     3912.8077  DIHED      =     2701.5643
  VDWAALS =  3204672.8553  EEL     =   -19219.2109  HBOND      =        0.0000
  1-4 VDW =     1456.5446  1-4 EEL =    11401.8064  RESTRAINT  =        0.0000
 
 
 
- BOND    =      322.1619  ANGLE   =     3912.7762  DIHED      =     2701.5637
- VDWAALS =  2087208.9648  EEL     =   -19268.2139  HBOND      =        0.0000
+ BOND    =      318.8429  ANGLE   =     3912.7762  DIHED      =     2701.5637
+ VDWAALS =  2087209.0161  EEL     =   -19268.2138  HBOND      =        0.0000
  1-4 VDW =     1456.5422  1-4 EEL =    11401.8053  RESTRAINT  =        0.0214
- EAMBER  =  2087735.6002
+ EAMBER  =  2087732.3327
 
 
 
- BOND    =      644.2563  ANGLE   =     3911.7106  DIHED      =     2701.5461
- VDWAALS =   385694.9103  EEL     =   -19532.2467  HBOND      =        0.0000
+ BOND    =      487.9155  ANGLE   =     3911.7108  DIHED      =     2701.5461
+ VDWAALS =   385696.1048  EEL     =   -19532.2438  HBOND      =        0.0000
  1-4 VDW =     1456.4631  1-4 EEL =    11401.7680  RESTRAINT  =        1.1156
- EAMBER  =   386278.4076
+ EAMBER  =   386123.2644
 
 
 
- BOND    =     3828.9158  ANGLE   =     3272.9401  DIHED      =     2691.0207
- VDWAALS =     6479.4492  EEL     =   -19446.7274  HBOND      =        0.0000
- 1-4 VDW =     1408.6371  1-4 EEL =    11376.7308  RESTRAINT  =       31.4865
- EAMBER  =     9610.9662
+ BOND    =     3456.7757  ANGLE   =     3255.3944  DIHED      =     2690.7562
+ VDWAALS =     5568.9591  EEL     =   -19496.2044  HBOND      =        0.0000
+ 1-4 VDW =     1407.4130  1-4 EEL =    11375.7482  RESTRAINT  =       34.1226
+ EAMBER  =     8258.8421
 
 
 
- BOND    =     1018.9296  ANGLE   =      803.1619  DIHED      =     2671.2218
- VDWAALS =     -450.4123  EEL     =   -20771.5549  HBOND      =        0.0000
- 1-4 VDW =     1128.9498  1-4 EEL =    11242.8197  RESTRAINT  =      107.8903
- EAMBER  =    -4356.8845
+ BOND    =      536.3181  ANGLE   =      631.8330  DIHED      =     2678.7331
+ VDWAALS =     -888.4223  EEL     =   -21495.9696  HBOND      =        0.0000
+ 1-4 VDW =     1072.7590  1-4 EEL =    11213.2470  RESTRAINT  =      127.5911
+ EAMBER  =    -6251.5016
 
 
 
- BOND    =      249.1871  ANGLE   =      595.3111  DIHED      =     2679.4061
- VDWAALS =     -994.5342  EEL     =   -21589.4877  HBOND      =        0.0000
- 1-4 VDW =     1057.4001  1-4 EEL =    11204.0321  RESTRAINT  =      136.3348
- EAMBER  =    -6798.6854
+ BOND    =      303.9696  ANGLE   =      506.9573  DIHED      =     2685.8559
+ VDWAALS =    -1321.5658  EEL     =   -22684.5564  HBOND      =        0.0000
+ 1-4 VDW =     1000.6063  1-4 EEL =    11168.8130  RESTRAINT  =      171.4031
+ EAMBER  =    -8339.9201
 
 
 
@@ -191,44 +191,53 @@ Ewald parameters:
 
 
 
- BOND    =      249.1871  ANGLE   =      595.3111  DIHED      =     2679.4061
- VDWAALS =     -994.5342  EEL     =   -21589.4877  HBOND      =        0.0000
- 1-4 VDW =     1057.4001  1-4 EEL =    11204.0321  RESTRAINT  =      136.3348
- EAMBER  =    -6798.6854
+ BOND    =      303.9696  ANGLE   =      506.9573  DIHED      =     2685.8559
+ VDWAALS =    -1321.5658  EEL     =   -22684.5564  HBOND      =        0.0000
+ 1-4 VDW =     1000.6063  1-4 EEL =    11168.8130  RESTRAINT  =      171.4031
+ EAMBER  =    -8339.9201
 
 --------------------------------------------------------------------------------
    5.  TIMINGS
 --------------------------------------------------------------------------------
 
-|    Read coords time           0.00 ( 0.11% of Total)
-|                Build the list             0.06 (88.77% of List )
-|                Other                      0.01 (11.23% of List )
-|             List time                  0.06 ( 4.44% of Nonbo)
-|                   Short_ene time             1.13 (99.43% of Direc)
-|                   Other                      0.01 ( 0.57% of Direc)
-|                Direct Ewald time          1.14 (84.19% of Ewald)
-|                Adjust Ewald time          0.03 ( 2.15% of Ewald)
-|                   Fill Bspline coeffs        0.01 ( 7.25% of Recip)
-|                   Fill charge grid           0.02 (12.82% of Recip)
-|                   Scalar sum                 0.03 (16.11% of Recip)
-|                   Grad sum                   0.04 (24.50% of Recip)
-|                   FFT time                   0.07 (39.30% of Recip)
+|    Read coords time           0.00 ( 0.10% of Total)
+|                Build the list             0.06 (88.03% of List )
+|                Other                      0.01 (11.97% of List )
+|             List time                  0.06 ( 4.49% of Nonbo)
+|                   Short_ene time             1.12 (99.45% of Direc)
+|                   Other                      0.01 ( 0.55% of Direc)
+|                Direct Ewald time          1.13 (83.82% of Ewald)
+|                Adjust Ewald time          0.03 ( 2.10% of Ewald)
+|                   Fill Bspline coeffs        0.01 ( 6.07% of Recip)
+|                   Fill charge grid           0.02 (13.08% of Recip)
+|                   Scalar sum                 0.03 (16.46% of Recip)
+|                   Grad sum                   0.04 (24.54% of Recip)
+|                   FFT time                   0.07 (39.83% of Recip)
 |                   Other                      0.00 ( 0.02% of Recip)
-|                Recip Ewald time           0.17 (12.67% of Ewald)
+|                Recip Ewald time           0.18 (13.19% of Ewald)
 |                Virial junk                0.00 ( 0.06% of Ewald)
-|                Other                      0.01 ( 0.93% of Ewald)
-|             Ewald time                 1.35 (95.56% of Nonbo)
-|          Nonbond force              1.41 (93.61% of Force)
-|          Bond/Angle/Dihedral        0.09 ( 6.27% of Force)
+|                Other                      0.01 ( 0.82% of Ewald)
+|             Ewald time                 1.34 (95.50% of Nonbo)
+|          Nonbond force              1.41 (93.75% of Force)
+|          Bond/Angle/Dihedral        0.09 ( 6.13% of Force)
 |          Other                      0.00 ( 0.12% of Force)
-|       Force time                 1.51 (100.0% of Runmd)
-|    Runmd Time                 1.51 (83.48% of Total)
+|       Force time                 1.50 (100.0% of Runmd)
+|    Runmd Time                 1.50 (82.81% of Total)
 | Total time                 1.81 (100.0% of ALL  )
 
 | Number of list builds   :          2
 
 | Highest rstack allocated:     273718
 | Highest istack allocated:       5312
-|           Job began  at 12:23:50.432  on 12/18/2018
-|           Setup done at 12:23:50.473  on 12/18/2018
-|           Run   done at 12:23:52.243  on 12/18/2018
+|           Job began  at 21:05:14.370  on 01/09/2019
+|           Setup done at 21:05:14.412  on 01/09/2019
+|           Run   done at 21:05:16.181  on 01/09/2019
+
+|3D-RISM memory allocation summary
+|Type          Maximum        Current   
+|Integer       0.00000 GB     0.00000 GB
+|Real          0.00000 GB     0.00000 GB
+|Logical       0.00000 GB     0.00000 GB
+|Character     0.00000 GB     0.00000 GB
+|---------------------------------------
+|Total         0.00000 GB     0.00000 GB
