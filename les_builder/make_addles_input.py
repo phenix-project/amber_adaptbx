@@ -146,14 +146,14 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
            line_template = 'spac numc={numc} pick #sia {resid} {resid} done'
         else:
            line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
-      elif resid in holdercg.keys():
-        # choose #sig if all CG atoms are within 0.15 Ang
-        if holdercg[resid] > 0.15:
-           line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
-        else:
-           line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
-      elif not resid in holderbb:
-        line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
+      #elif resid in holdercg.keys():
+      #  # choose #sig if all CG atoms are within 0.15 Ang
+      #  if holdercg[resid] > 0.15:
+      #     line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
+      #  else:
+      #     line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
+      #elif not resid in holderbb:
+      #  line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
 
       if line_template:
          commands.append(line_template.format(numc=n_conformers,
