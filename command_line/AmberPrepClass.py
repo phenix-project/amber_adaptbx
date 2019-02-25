@@ -255,7 +255,8 @@ class AmberPrepRunner:
   def asu_parm7_to_4phenix_pdb(self, pdb_filename):
     '''
     Combine information in xxxx_asu.{prmtop,rst7} with that in the input
-       pdb file to create 4phenix_xxxx.pdb; (uses parmed)
+       pdb file to create 4phenix_xxxx.pdb; (uses parmed); also create
+       b4phenix_xxxx.pdb, almost the same, except with Amber residue names
 
     We want each atom in the 4phenix_xxxx.pdb file to have an occupancy
     that is the sum of the occupancies of the all the alternate conformers
@@ -314,6 +315,11 @@ class AmberPrepRunner:
 
     parm.write_pdb(pdb_filename, standard_resnames=True, renumber=False,
         write_anisou=True)
+
+    # second copy, with Amber resnames:
+    pdb_filenameb = "b" + pdb_filename
+    parm.write_pdb(pdb_filenameb, standard_resnames=False, renumber=False,
+        write_anisou=False)
 
   def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file, 
                               template_pdb, outpdb):
@@ -607,24 +613,17 @@ class AmberPrepRunner:
           use_amber_unitcell=False):
 
     #-----------------------------------------------------------------
-    # Step 1: add SYMTRY/CRYST1 to 4phenix_xxxx.pdb -> xxxx_4UnitCell.pdb
+    # Step 1: Use b4phenix_xxxx.pdb  to create xxxx_4UnitCell.pdb
     #-----------------------------------------------------------------
 
     uc_pdb_file = "%s_4UnitCell.pdb" % self.base
     with open(uc_pdb_file, "wb") as fout:
       with open(self.pdb_filename) as fin:
-
-        # lines = fin.readlines()
-        # cryst1card = [line for line in lines if "CRYST1" in line or "SMTRY" in line]
-        # if len(cryst1card) < 1:
-        #   raise Sorry("CRYST1 record required in input pdb file")
-        # fout.write(cryst1card)
-
         for line in fin:
           if "CRYST1" in line or "SMTRY" in line:
             fout.write(line)
 
-      with open("4phenix_%s.pdb" % self.base) as fin:
+      with open("b4phenix_%s.pdb" % self.base) as fin:
         for line in fin:
           if not "CRYST1" in line and not "ANISOU" in line:
             fout.write(line)
@@ -816,6 +815,7 @@ class AmberPrepRunner:
               '%sab.rst7',
               '4amber_%s.pdb',
               '4amber_%s.LES.pdb',
+              'b4phenix_%s.pdb',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
