@@ -270,7 +270,7 @@ class AmberPrepRunner:
 
     #  Note: here self.pdb_filename is typically the input pdb file
     template_parm = parmed.load_file(self.pdb_filename)
-    parm = parmed.load_file("%s_asu.prmtop" % self.base, 
+    parm = parmed.load_file("%s_asu.prmtop" % self.base,
                          xyz="%s_asu.rst7" % self.base )
 
     # following kludge is needed to get got atom numbers; not needed if
@@ -281,9 +281,9 @@ class AmberPrepRunner:
     # update occupancy to take into account alternate locations:
     for atom in template_parm.atoms:
       if atom.other_locations:
-        # if atom has alternative locations, ParmEd saves them to 
+        # if atom has alternative locations, ParmEd saves them to
         # other_locations (dict)
-        atom.occupancy += sum(a.occupancy for _, 
+        atom.occupancy += sum(a.occupancy for _,
                               a in atom.other_locations.items())
 
     # transfer occupancy and bfactor for heavy atoms;
@@ -294,12 +294,12 @@ class AmberPrepRunner:
       residue.chain = template_residue.chain
       residue.insertion_code = template_residue.insertion_code
 
-      # for each residue, sort atom by name to make sure we get the same 
+      # for each residue, sort atom by name to make sure we get the same
       #   atom order between the two parms
-      template_heavy_atoms = sorted((atom for atom in template_residue.atoms 
+      template_heavy_atoms = sorted((atom for atom in template_residue.atoms
                                    if atom.atomic_number > 1),
                                    key=lambda x : x.name)
-      heavy_atoms = sorted((atom for atom in residue.atoms 
+      heavy_atoms = sorted((atom for atom in residue.atoms
                                    if atom.atomic_number > 1),
                                    key=lambda x : x.name)
       for template_atom, atom in zip(template_heavy_atoms, heavy_atoms):
@@ -353,7 +353,7 @@ class AmberPrepRunner:
     #asu_parm = parmed.load_file( pdb_filename )
 
     # transfer occupancy and bfactor for heavy atoms;
-    for template_residue, residue in zip(template_parm.residues, 
+    for template_residue, residue in zip(template_parm.residues,
                                          asu_parm.residues):
 
       # transfer residue numbers, chainId's, and insertion codes:
@@ -361,7 +361,7 @@ class AmberPrepRunner:
       residue.chain = template_residue.chain
       residue.insertion_code = template_residue.insertion_code
 
-      # for each residue, sort atom by name to make sure we get the same 
+      # for each residue, sort atom by name to make sure we get the same
       #   atom order between the two parms
       #   TODO: handle extra atoms for LES (may not be needed?)
       template_atoms = sorted((atom for atom in template_residue.atoms),
@@ -566,7 +566,7 @@ class AmberPrepRunner:
         "%s_%s" % (self.base, output_base) ) )
     f.write('quit\n')
     f.close()
- 
+
     #
     # strangely tleap appends to the logfile so must delete first
     #
@@ -639,7 +639,7 @@ class AmberPrepRunner:
                    use_amber_unitcell=use_amber_unitcell)
 
     #-----------------------------------------------------------------
-    # Step 3: run xxxx_4tleap_uc1.pdb back through pdb4amber to get new 
+    # Step 3: run xxxx_4tleap_uc1.pdb back through pdb4amber to get new
     #         lists that describe gaps and SS bonds.  Output will be
     #         xxxx_4tleap_uc.pdb
     #         Note: don't need to call reduce this time around.
@@ -726,7 +726,7 @@ class AmberPrepRunner:
           input_file,
           self.final_prmtop_file,
           self.final_rst7_file,
-          self.base, 
+          self.base,
           self.final_rst7_file,
           output_rst7_file
       )
@@ -1079,7 +1079,7 @@ def run(rargs):
                     use_reduce=actions.use_reduce)
 
     #  rename the files to the canonical three we want.  (Do this here,
-    #    so that these lines can be commented out if debugging is 
+    #    so that these lines can be commented out if debugging is
     #    required.)
     shutil.copy('4amber_%s.prmtop' % base, 'preLES.prmtop' )
     shutil.copy('4amber_%s.rst7' % base, 'preLES.rst7' )
@@ -1094,7 +1094,7 @@ def run(rargs):
   pdb_inp =  pdb.input('4phenix_%s.pdb' % base)
   hierarchy = pdb_inp.construct_hierarchy()
   sites_cart = hierarchy.atoms().extract_xyz()
-  parm = parmed.load_file("4amber_%s.prmtop" % base, 
+  parm = parmed.load_file("4amber_%s.prmtop" % base,
                           xyz="4amber_%s.rst7" % base )
   print parm
   asu_n_atoms = len(sites_cart)
@@ -1134,10 +1134,10 @@ def run(rargs):
   # the two column values, then col1[p] = a and col2[a] = p.
   #
   #  So: by my(?) logic, column 1 is p2a (use p to get a), and
-  #  column 2 is a2p (use a to get p).  However, the code seems to use the 
+  #  column 2 is a2p (use a to get p).  However, the code seems to use the
   #  opposite nomenclature.
 
-  #  Now: put in a consistency check: for each index i, 
+  #  Now: put in a consistency check: for each index i,
   #      p2a[ a2p[i] ] = i;   a2p[ p2a[i] ] = i
 
   i = 0
@@ -1158,7 +1158,7 @@ def run(rargs):
                       minimization_options=actions.minimization_options)
 
     #  rename the files to the canonical three we want.  (Do this here,
-    #    so that these lines can be commented out if debugging is 
+    #    so that these lines can be commented out if debugging is
     #    required.)
     os.rename('4amber_%s.min.rst7' % base, '4amber_%s.rst7' % base)
     os.rename('4phenix_%s.min.pdb' % base, '4phenix_%s.pdb' % base)

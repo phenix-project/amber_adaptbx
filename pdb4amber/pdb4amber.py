@@ -4,7 +4,11 @@ import math
 import subprocess
 from itertools import chain
 import argparse
-import parmed
+from libtbx.utils import Sorry
+try:
+    import parmed
+except ImportError, e:
+    raise Sorry('  Amber env. var. AMBERHOME should be set')
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -62,7 +66,7 @@ class AmberPDBFixer(object):
         ----------
         mask_list: List[Tuple[int, str]]
             [(1, 'ARG'),]
-        
+
         Notes
         -----
         Should also use `add_hydrogen` and `add_missing_atoms`
@@ -109,7 +113,7 @@ class AmberPDBFixer(object):
 
     def assign_histidine(self):
         ''' Assign correct name for Histidine based on the atom name
-    
+
         Returns
         -------
         parm : updated `parm`
@@ -167,7 +171,7 @@ class AmberPDBFixer(object):
 
     def constph(self):
         """ Update AS4, GL4, HIP for constph.
-    
+
         Returns
         -------
         parm : updated `parm`
@@ -194,7 +198,7 @@ class AmberPDBFixer(object):
 
         #  N.B.: following only finds gaps in protein chains!
         for i, atom in enumerate(parm.atoms):
-            # TODO: if using 'CH3', this will be failed with 
+            # TODO: if using 'CH3', this will be failed with
             # ACE ALA ALA ALA NME system
             # if atom.name in ['CA', 'CH3'] and atom.residue.name in RESPROT:
             if atom.name in [
@@ -240,7 +244,7 @@ class AmberPDBFixer(object):
 
     def find_disulfide(self):
         """ return set of cys-cys pairs
-    
+
         Returns
         -------
         cys_cys_set : Set[List[int, int]]
@@ -268,7 +272,7 @@ class AmberPDBFixer(object):
 
     def rename_cys_to_cyx(self, cys_cys_set):
         """ Rename CYS to CYX of having S-S bond.
-    
+
         Parameters
         ----------
         cys_cys_set : Set[List[int, int]]
@@ -290,11 +294,11 @@ class AmberPDBFixer(object):
 
     def add_hydrogen(self, no_reduce_db=False):
         ''' Use reduce program to add hydrogen
-    
+
         Parameters
         ----------
         obj: file object or parmed.Structure or its derived class
-    
+
         Returns
         -------
         parm : parmed.Structure
@@ -369,7 +373,7 @@ class AmberPDBFixer(object):
         with open(basename + '_renum.txt', 'w') as fh:
             for residue in self.parm.residues:
                 fh.write("%3s %5s %2s     %3s %5s\n" %
-                         (residue.name, residue.number, residue.chain, 
+                         (residue.name, residue.number, residue.chain,
                           residue.name, residue.idx + 1))
 
     def _write_pdb_to_stringio(self,
