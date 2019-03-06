@@ -24,6 +24,6 @@ if [ $status -ne 0 ]; then
    echo "(The expected full log file is in les/amber1_LES.log)"
 fi
 
-/bin/rm -f amber_data.mtz amber_001.{log,mtz,pdb,eff} amber_002.def
+/bin/rm -f amber_data.mtz amber_001.* amber_002.def
 
 exit $status
