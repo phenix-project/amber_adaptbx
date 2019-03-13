@@ -8,7 +8,7 @@ from libtbx.utils import Sorry
 try:
     import parmed
 except ImportError, e:
-    raise Sorry('  Amber env. var. AMBERHOME should be set')
+    raise Sorry('  cannot import parmed')
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -318,7 +318,8 @@ class AmberPDBFixer(object):
             fileobj = StringIO()
             self.write_pdb(fileobj)
             fileobj.seek(0)
-            reduce = os.path.join(os.getenv('AMBERHOME', ''), 'bin', 'reduce')
+            reduce = os.path.join(os.getenv('LIBTBX_BUILD'), 'build',
+                 'reduce', 'exe', 'reduce')
             if not os.path.exists(reduce):
                 reduce = 'reduce'
             if no_reduce_db:
