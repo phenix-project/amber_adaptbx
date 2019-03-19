@@ -28,7 +28,7 @@ def get_LES_residue_dict(parm):
   holderbb = {}  # flag for N,H,C,O
   holderca = {}  # flag for CA alternates
   holdercb = {}  # flag for side-chain alternates that include CB
-  holdercg = {}  # flag for side-chain alternates that include CG or OG
+  holdercg = {}  # flag for side-chain alternates beyond CB
   holder_atoms = {}  # place to store atom names in this residue that
                      # have alternate locations
   for atom in parm.atoms:
@@ -72,20 +72,10 @@ def get_LES_residue_dict(parm):
         holder_atoms[atom.residue.idx+1] += "%8.3f" % cbdist
         holdercb[atom.residue.idx+1] = cbdist
 
-      elif atom.name in ["CG", "OG", "CG1", "CG2" ]:
-        # print "found CG altlocs in residue %d" % int(atom.residue.idx+1)
-        for key in atom.other_locations:
-           cgdist = math.sqrt( (atom.xx - atom.other_locations[key].xx)**2 +
-                               (atom.xy - atom.other_locations[key].xy)**2 +
-                               (atom.xz - atom.other_locations[key].xz)**2 )
-           # print "parent: %8.3f %8.3f %8.3f" % ( atom.xx, atom.xy, atom.xz )
-           # print "child : %8.3f %8.3f %8.3f" % ( 
-           #         atom.other_locations[key].xx,
-           #         atom.other_locations[key].xy,
-           #         atom.other_locations[key].xz )
-           # print "distance: %8.3f" % cgdist
-           break
-        holder_atoms[atom.residue.idx+1] += "%8.3f" % cgdist
+      else:
+        # print "found CG+ altlocs in residue %d" % int(atom.residue.idx+1)
+        cgdist = 99.0   # placeholder
+        # holder_atoms[atom.residue.idx+1] += "%8.3f" % cgdist
         holdercg[atom.residue.idx+1] = cgdist
 
   return holder, holderbb, holderca, holdercb, holdercg, holder_atoms
@@ -130,30 +120,35 @@ def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
   for chain_id in range(n_asu):
     commands.append('~ protein chain: {}'.format(chain_id+1))
   
+    # Here are the rules suggested in Jane Richardson's email of 17 Mar 19:
+    #
+    #  * If Calpha has alternates, or if Cbeta has alternates >= 0.15A apart,
+    #    then include the entire residue plus the preceding CO and the 
+    #    following NH as atoms with alternate conformations.
+    #
+    #  * If Cbeta has alternates < 0.15A apart, then start alternates at 
+    #    Cbeta and include the rest of the sidechain.
+    #
+    #  * If an N, C, or O atom has alternates within a given peptide, 
+    #    then define alternates for them all and for the H.
+    #
+    #  * (added by DAC): If alternates start beyond Cbeta, start at
+    #    Cbeta anyway, and include the rest of the sidechain
+
     for resid in sorted(holder.keys()):
       n_conformers = holder[resid] + 1
       line_template = ''
       if resid in holderca.keys():
-        # choose #sia if all CA atoms are within 0.15 Ang, and there are
-        # no backbone alternates:
-        if holderca[resid] > 0.15 or resid in holderbb:
+        line_template = 'spac numc={numc} pick #cca {resid} {resid} done'
+      elif resid in holdercb.keys():
+        if holdercb[resid] > 0.15:
            line_template = 'spac numc={numc} pick #cca {resid} {resid} done'
         else:
-           line_template = 'spac numc={numc} pick #sia {resid} {resid} done'
-      elif resid in holdercb.keys():
-        # choose #sid if all CB atoms are within 0.15 Ang
-        if holdercb[resid] > 0.15:
-           line_template = 'spac numc={numc} pick #sia {resid} {resid} done'
-        else:
            line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
-      #elif resid in holdercg.keys():
-      #  # choose #sig if all CG atoms are within 0.15 Ang
-      #  if holdercg[resid] > 0.15:
-      #     line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
-      #  else:
-      #     line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
-      #elif not resid in holderbb:
-      #  line_template = 'spac numc={numc} pick #sig {resid} {resid} done'
+      elif resid in holdercg.keys():
+        line_template = 'spac numc={numc} pick #sid {resid} {resid} done'
+      # elif resid in holderbb.keys():
+      #   line_template = 'spac numc={numc} pick #bb {resid} {resid} done'
 
       if line_template:
          commands.append(line_template.format(numc=n_conformers,
