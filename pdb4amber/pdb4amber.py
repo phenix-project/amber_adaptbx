@@ -312,7 +312,7 @@ class AmberPDBFixer(object):
             with open(fname, 'a'):
                 os.utime(fname, times)
 
-        try:
+        if 1: #try:
             if no_reduce_db:
                 touch('./dummydb')
             fileobj = StringIO()
@@ -321,7 +321,13 @@ class AmberPDBFixer(object):
             reduce = os.path.join(os.getenv('LIBTBX_BUILD'), 'build',
                  'reduce', 'exe', 'reduce')
             if not os.path.exists(reduce):
-                reduce = 'reduce'
+                reduce = 'phenix.reduce'
+            print 'reduce',reduce
+            cmd = [
+                        reduce, '-BUILD', '-NUC', '-NOFLIP', '-DB ./dummydb',
+                        '-'
+                    ]
+            print ' '.join(cmd)
             if no_reduce_db:
                 process = subprocess.Popen(
                     [
@@ -349,7 +355,7 @@ class AmberPDBFixer(object):
             pdbh = StringIO(out)
             # not using load_file since it does not read StringIO
             self.parm = parmed.read_PDB(pdbh)
-        finally:
+        else: #finally:
             fileobj.close()
             if no_reduce_db:
                 os.unlink('./dummydb')

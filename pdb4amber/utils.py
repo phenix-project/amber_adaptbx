@@ -27,8 +27,8 @@ def tempfolder():
 
 
 def amberbin(program_str):
-    amberhome = os.environ.get('AMBERHOME', '')
-    program = os.path.join(amberhome, 'bin', program_str)
+    program = os.path.join( os.enivron['LIBTBX_BUILD'], '..',
+        'conda_base', 'bin', program_str)
     if os.path.exists(program):
         return program
     else:

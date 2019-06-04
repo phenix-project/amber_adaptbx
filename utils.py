@@ -76,11 +76,6 @@ class extreme(dict):
 
 def print_cmd(cmd, verbose=False):
   print "\n~> %s\n" % cmd
-  if verbose:
-    print '\nAMBERHOME: %s' % os.environ.get("AMBERHOME", None)
-    path = os.environ.get("PATH", None)
-    print '\nPATH: %s' % ('\n    : '.join(path.split(":")))
-
 
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()
@@ -348,7 +343,9 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
       if 'REMARK 290   SMTRY' not in fh.read():
         print('UnitCell program requires pdb file to have "REMARK 290   SMTRY" line')
         raise ValueError('Should use option: use_amber_unitcell=False')
-    cmd = "UnitCell -p %s -o %s" % (asu_pdb_file, output_file)
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+                  'bin', 'UnitCell' )
+    cmd += " -p %s -o %s" % (asu_pdb_file, output_file)
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
     ero.show_stdout()

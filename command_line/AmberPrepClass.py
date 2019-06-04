@@ -12,11 +12,6 @@ import libtbx.phil.command_line
 from libtbx import easy_run
 from elbow.command_line import builder
 
-# try: import pdb4amber
-# except ImportError:
-#   raise Sorry('  Import error - Please check that AMBERHOME is set correctly: %s' % (
-#     os.environ.get('AMBERHOME', None)))
-
 from amber_adaptbx import pdb4amber
 
 from amber_adaptbx import amber_library_server
@@ -208,11 +203,6 @@ def check_required_output_filenames(filenames=None,
 
 def print_cmd(cmd, verbose=False):
   print "\n| ~> %s\n" % cmd
-  if verbose:
-    print '\nAMBERHOME: %s' % os.environ.get("AMBERHOME", None)
-    path = os.environ.get("PATH", None)
-    print '\nPATH: %s' % ('\n    : '.join(path.split(":")))
-
 
 def get_chemical_components_file_name(code):
   cc_dir = libtbx.env.dist_path("chem_data", default=None)
@@ -486,18 +476,7 @@ class AmberPrepRunner:
     f = file(tleap_input_file, "wb")
     f.write('logFile %s\n' % logfile)
 
-    amber_dir = os.environ["AMBERHOME"]
-
-    # Following should be true in AmberTools14/15:
-    if(os.path.isfile(os.path.join(amber_dir,
-                                   'dat',
-                                   'leap',
-                                   'cmd',
-                                   'leaprc.ff14SB',
-                                   ))):
-      raise Sorry('Amber environment appears to be older than AmberTools16; quitting')
-
-    # Now we can assume that we are dealing with AmberTools16 or later:
+    amber_dir = os.path.join( os.environ["LIBTBX_BUILD"] , ".." , "conda_base" )
 
     if(os.path.isfile(os.path.join(amber_dir, 'dat', 'leap', 'cmd',
                                    'leaprc.phenix',))):
@@ -572,7 +551,8 @@ class AmberPrepRunner:
     #
     if os.path.exists(logfile):
       os.remove(logfile)
-    cmd = os.path.join( os.environ["AMBERHOME"],'bin','tleap' )
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..',
+             'conda_base', 'bin', 'tleap' )
     cmd += ' -f %s' % tleap_input_file
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
@@ -596,7 +576,8 @@ class AmberPrepRunner:
     assert self.cryst1
     uc = self.cryst1.unit_cell().parameters()
     # note: dangerous to use same file for input and output here?
-    cmd = os.path.join( os.environ["AMBERHOME"],'bin','ChBox' )
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+            'bin','ChBox' )
     cmd += " -c %s_%s.rst7 -o %s_%s.rst7" % (self.base,
                                                  output_base,
                                                  self.base,
@@ -719,7 +700,8 @@ class AmberPrepRunner:
       f = open('%s_%s.in' % (self.base, mintype), 'wb')
       f.write(inputs[mintype])
       f.close()
-      cmd = os.path.join( os.environ["AMBERHOME"],'bin','sander' )
+      cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+             'bin','sander' )
       cmd += '%s -O -i %s -p %s -c %s -o %s.min.out \
            -ref %s -r %s' % (
           LEStype,
@@ -850,7 +832,8 @@ def _run_antechamber_ccif(residue_name,
 
   ccif = get_chemical_components_file_name(residue_name)
   cmds = []
-  cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+          'bin','antechamber' )
   cmd += ' -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
       -s 2 -pf y -c bcc -at gaff2' % (ccif, residue_name, residue_name)
   if use_am1_and_maxcyc_zero:
@@ -868,7 +851,8 @@ def _run_antechamber_ccif(residue_name,
       if line.find('Error') > -1:
         raise Sorry(line)
 
-  cmd = os.path.join( os.environ["AMBERHOME"],'bin','parmchk2' )
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+        'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name,
                                                            residue_name)
   print_cmd(cmd)
@@ -948,7 +932,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
   print mol.DisplayBrief()
 
   cmds = []
-  cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+       'bin','antechamber' )
   cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, residue_name, mol.charge, mol.multiplicity)
@@ -956,7 +941,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
     cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
-    cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+        'bin','antechamber' )
     cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, mol.charge, mol.multiplicity)
@@ -973,7 +959,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
       if line.find('Error') > -1:
         raise Sorry(line)
 
-  cmd = os.path.join( os.environ["AMBERHOME"],'bin','parmchk2' )
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+        'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name, residue_name)
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)

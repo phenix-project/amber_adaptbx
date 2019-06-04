@@ -97,7 +97,8 @@ class LESBuilder(object):
       fn = self.addles_input_file
       self._check_valid_addles_input(fn)
       print('\n--> Using provided addles input: {}'.format(fn))
-    command_addles = os.path.join( os.environ["AMBERHOME"],'bin','addles' )
+    command_addles = os.path.join( os.environ["LIBTBX_BUILD"],
+           '..', 'conda_base', 'bin','addles' )
     command_addles += ' <{} > addles.log'.format(fn)
     print "\n| ~> %s\n" % command_addles
     easy_run.fully_buffered(command_addles)
@@ -190,7 +191,8 @@ class LESBuilder(object):
       if use_reduce:
          touch('./dummydb')
          self.new_pdb_with_H = self.base + '_uc_H.pdb'
-         cmd = os.path.join( os.environ["AMBERHOME"],'bin','reduce' )
+         cmd = os.path.join( os.environ["LIBTBX_BUILD"], 'reduce', 
+              'exe','reduce' )
          cmd += ' -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
              self.unitcell_pdb_file, self.new_pdb_with_H)
          print "\n| ~> %s\n" % cmd
