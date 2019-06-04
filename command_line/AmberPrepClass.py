@@ -28,6 +28,7 @@ master_phil_string = """
     {
       pdb_file_name = None
         .type = path
+        .short_caption = Model input
       nproc = 1
         .type = int
         .short_caption = Number processes to use
@@ -38,6 +39,12 @@ master_phil_string = """
           .type = choice
           .caption = Control to first input chosen for antechamber
       }
+      elbow_input_file_name = None
+        .type = path
+        .short_caption = Chemical info for a single ligand to create Amber files
+      ligand_id = LIG
+        .type = str
+        .short_caption = Three-letter for ligand
     }
     actions
     {
@@ -311,7 +318,7 @@ class AmberPrepRunner:
     parm.write_pdb(pdb_filenameb, standard_resnames=False, renumber=False,
         write_anisou=False)
 
-  def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file, 
+  def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file,
                               template_pdb, outpdb):
     '''
     Combine information in {parm7,rst7} with that in the template
@@ -860,6 +867,44 @@ def _run_antechamber_ccif(residue_name,
 
   # should there be a check for output???
 
+def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
+  # a very dull problem
+  if hasattr(mol, "restraint_class"): del mol.restraint_class
+  mol.OptimiseHydrogens()
+  mol.WritePDB('4antechamber_%s.pdb' % residue_name,
+               pymol_pdb_bond_order=False,
+               )
+  mol.WriteTriposMol2('4antechamber_%s.mol2' % code)
+  mol.Multiplicitise()
+  if verbose: print mol.DisplayBrief()
+
+def _run_antechamber():
+  cmds = []
+  cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+  cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
+      -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
+      % (residue_name, residue_name, mol.charge, mol.multiplicity)
+  if use_am1_and_maxcyc_zero:
+    cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
+  cmds.append(cmd)
+  if not use_am1_and_maxcyc_zero:
+    cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+    cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
+      -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
+      % (residue_name, mol.charge, mol.multiplicity)
+    cmds.append(cmd)
+
+  for cmd in cmds:
+    print_cmd(cmd)
+    ero = easy_run.fully_buffered(cmd)
+    stdo = StringIO.StringIO()
+    ero.show_stdout(out=stdo)
+    for line in stdo.getvalue().splitlines():
+      if line.find('APS') > -1:
+        print line
+      if line.find('Error') > -1:
+        raise Sorry(line)
+
 def _run_elbow_antechamber(pdb_hierarchy,
                            residue_name,
                            use_am1_and_maxcyc_zero=True,
@@ -925,45 +970,37 @@ def _run_elbow_antechamber(pdb_hierarchy,
     for atom1, atom2 in rc:
       atom1.name = atom2.name
 
-  mol.WritePDB('4antechamber_%s.pdb' % residue_name,
-               pymol_pdb_bond_order=False,
-               )
-  mol.Multiplicitise()
-  print mol.DisplayBrief()
+  _write_anterchamber_input_from_elbow_molecule(mol)
 
-  cmds = []
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
-       'bin','antechamber' )
-  cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
-      % (residue_name, residue_name, mol.charge, mol.multiplicity)
-  if use_am1_and_maxcyc_zero:
-    cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
-  cmds.append(cmd)
-  if not use_am1_and_maxcyc_zero:
-    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
-        'bin','antechamber' )
-    cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
-      % (residue_name, mol.charge, mol.multiplicity)
-    cmds.append(cmd)
-
-  for cmd in cmds:
-    print_cmd(cmd)
-    ero = easy_run.fully_buffered(cmd)
-    stdo = StringIO.StringIO()
-    ero.show_stdout(out=stdo)
-    for line in stdo.getvalue().splitlines():
-      if line.find('APS') > -1:
-        print line
-      if line.find('Error') > -1:
-        raise Sorry(line)
+  _run_antechamber()
 
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
         'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name, residue_name)
   print_cmd(cmd)
   easy_run.fully_buffered(cmd)
+
+def _run_elbow(residue_name, args, kwds, debug=False):
+  import pickle
+  if debug:
+    pf = "%s.pickle" % residue_name
+    if os.path.exists(pf):
+      f = file(pf, "rb")
+      mol = pickle.load(f)
+      f.close()
+    else:
+      kwds['no_output'] = True
+      mol = builder.run(*args, **kwds)
+      mol.WritePickle()
+
+def create_amber_files_for_ligand(params):
+  args = tuple([])
+  kwds = {'filename' : params.inputs.elbow_input_file_name,
+          'id'       : params.inputs.ligand_id,
+          'silent'   : True,
+         }
+  _run_elbow(args, kwds, debug=True)
+  assert 0
 
 def run(rargs):
   working_params = setup_options_args(rargs)
@@ -972,6 +1009,10 @@ def run(rargs):
   base = get_output_preamble(working_params)
   amber_prep_runner = AmberPrepRunner(base, LES=actions.LES)
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
+
+  if working_params.inputs.elbow_input_file_name:
+    print working_params.inputs.elbow_input_file_name
+    create_amber_files_for_ligand(params)
 
   # basename = os.path.basename(inputs.pdb_file_name)
   # amber_prep_runner.curate_model(remove_alt_confs=True)
