@@ -24,7 +24,7 @@ master_phil_string = """
   amber_prep
     .caption = Prepare Amber files
   {
-    input
+    inputs
     {
       pdb_file_name = None
         .type = path
@@ -118,7 +118,7 @@ def setup_parser():
 
 
 def get_output_preamble(params):
-  preamble = params.amber_prep.input.pdb_file_name
+  preamble = params.amber_prep.inputs.pdb_file_name
   if params.amber_prep.output.file_name:
     preamble = params.amber_prep.output.file_name
   preamble = os.path.basename(preamble)
@@ -166,7 +166,7 @@ def setup_options_args(rargs):
   assert len(pdbs) == 1
   # working_phil.show()
   working_params = working_phil.extract()
-  working_params.amber_prep.input.pdb_file_name = pdbs[0]
+  working_params.amber_prep.inputs.pdb_file_name = pdbs[0]
   # check_working_params(working_params)
   preamble = get_output_preamble(working_params)
   # print "  Writing effective parameters to %s.eff\n" % preamble
@@ -583,7 +583,7 @@ class AmberPrepRunner:
     assert self.cryst1
     uc = self.cryst1.unit_cell().parameters()
     # note: dangerous to use same file for input and output here?
-    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
             'bin','ChBox' )
     cmd += " -c %s_%s.rst7 -o %s_%s.rst7" % (self.base,
                                                  output_base,
@@ -707,7 +707,7 @@ class AmberPrepRunner:
       f = open('%s_%s.in' % (self.base, mintype), 'wb')
       f.write(inputs[mintype])
       f.close()
-      cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+      cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
              'bin','sander' )
       cmd += '%s -O -i %s -p %s -c %s -o %s.min.out \
            -ref %s -r %s' % (
@@ -839,7 +839,7 @@ def _run_antechamber_ccif(residue_name,
 
   ccif = get_chemical_components_file_name(residue_name)
   cmds = []
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
           'bin','antechamber' )
   cmd += ' -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
       -s 2 -pf y -c bcc -at gaff2' % (ccif, residue_name, residue_name)
@@ -858,7 +858,7 @@ def _run_antechamber_ccif(residue_name,
       if line.find('Error') > -1:
         raise Sorry(line)
 
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
         'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name,
                                                            residue_name)
@@ -974,7 +974,7 @@ def _run_elbow_antechamber(pdb_hierarchy,
 
   _run_antechamber()
 
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
         'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name, residue_name)
   print_cmd(cmd)
@@ -1004,14 +1004,14 @@ def create_amber_files_for_ligand(params):
 
 def run(rargs):
   working_params = setup_options_args(rargs)
-  inputs = working_params.amber_prep.input
+  inputs = working_params.amber_prep.inputs
   actions = working_params.amber_prep.actions
   base = get_output_preamble(working_params)
   amber_prep_runner = AmberPrepRunner(base, LES=actions.LES)
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
 
-  if working_params.inputs.elbow_input_file_name:
-    print working_params.inputs.elbow_input_file_name
+  if working_params.amber_prep.inputs.elbow_input_file_name:
+    print working_params.amber_prep.inputs.elbow_input_file_name
     create_amber_files_for_ligand(params)
 
   # basename = os.path.basename(inputs.pdb_file_name)
@@ -1097,7 +1097,7 @@ def run(rargs):
     print "\n=================================================="
     print "Building the LES prmtop and rst7 files"
     print "=================================================="
-    pdb_file_name = working_params.amber_prep.input.pdb_file_name
+    pdb_file_name = working_params.amber_prep.inputs.pdb_file_name
     les_builder = LESBuilder(
         pdb_file_name,
         prmtop=amber_prep_runner.non_les_prmtop_file_name,
