@@ -633,10 +633,14 @@ class AmberPrepRunner:
     #         Note: don't need to call reduce this time around.
     #-----------------------------------------------------------------
 
+    print "\n=================================================="
+    print "Running pdb4amber on %s" % tleap_pdb_file1
+    print "=================================================="
+
     tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
     ns_names, gaplist, sslist = pdb4amber.run(
         tleap_pdb_file, tleap_pdb_file1, arg_elbow=True,
-        arg_logfile=sys.stderr,
+        arg_logfile=sys.stdout,
         arg_conect=False,
     )
 
@@ -880,7 +884,8 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
 
 def _run_antechamber():
   cmds = []
-  cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
+          'bin','antechamber' )
   cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, residue_name, mol.charge, mol.multiplicity)
@@ -888,7 +893,8 @@ def _run_antechamber():
     cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
-    cmd = os.path.join( os.environ["AMBERHOME"],'bin','antechamber' )
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
+          'bin','antechamber' )
     cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (residue_name, mol.charge, mol.multiplicity)
@@ -1032,7 +1038,7 @@ def run(rargs):
                                             inputs.pdb_file_name,
                                             arg_elbow=True,
                                             arg_reduce=actions.use_reduce,
-                                            arg_logfile=sys.stderr,
+                                            arg_logfile=sys.stdout,
                                             arg_conect=False,
                                             arg_no_reduce_db=True,
                                             )
