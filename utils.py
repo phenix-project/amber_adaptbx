@@ -359,8 +359,19 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
     ph_p1 = ph.expand_to_p1(crystal_symmetry=cs)
     abc = cs.unit_cell().parameters()[:6]
     cs_p1 = cctbx.crystal.symmetry(abc, "P 1")
-    ph_p1.write_pdb_file(output_file, crystal_symmetry=cs_p1)
-
+    tmp_file = output_file + 'xxx'
+    ph_p1.write_pdb_file(tmp_file, crystal_symmetry=cs_p1)
+    # make column 21 blank, since parmed is pretty strict about this:
+    fout = file(output_file,"wb")
+    with open(tmp_file) as fin:
+       for line in fin:
+          if line[0:4] == "ATOM" or line[0:6] == "HETATM" \
+             or line[0:6] == "ANISOU":
+             fout.write( line[0:20] + " " + line[21:] )
+          else:
+             fout.write(line)
+    os.remove(tmp_file)
+       
 
 # atom ordering
 from collections import OrderedDict
