@@ -875,20 +875,21 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   # a very dull problem
   if hasattr(mol, "restraint_class"): del mol.restraint_class
   mol.OptimiseHydrogens()
-  mol.WritePDB('4antechamber_%s.pdb' % residue_name,
+  print(dir(mol))
+  mol.WritePDB('4antechamber_%s.pdb' % mol.residue_name,
                pymol_pdb_bond_order=False,
                )
-  mol.WriteTriposMol2('4antechamber_%s.mol2' % code)
+  mol.WriteTriposMol2('4antechamber_%s.mol2' % mol.residue_name)
   mol.Multiplicitise()
   if verbose: print mol.DisplayBrief()
 
-def _run_antechamber():
+def _run_antechamber(mol, use_am1_and_maxcyc_zero=True):
   cmds = []
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
           'bin','antechamber' )
   cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
-      % (residue_name, residue_name, mol.charge, mol.multiplicity)
+      % (mol.residue_name, mol.residue_name, mol.charge, mol.multiplicity)
   if use_am1_and_maxcyc_zero:
     cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)
@@ -897,7 +898,7 @@ def _run_antechamber():
           'bin','antechamber' )
     cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
-      % (residue_name, mol.charge, mol.multiplicity)
+      % (mol.residue_name, mol.charge, mol.multiplicity)
     cmds.append(cmd)
 
   for cmd in cmds:
@@ -978,7 +979,7 @@ def _run_elbow_antechamber(pdb_hierarchy,
 
   _write_anterchamber_input_from_elbow_molecule(mol)
 
-  _run_antechamber()
+  _run_antechamber(mol, use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero)
 
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
         'bin','parmchk2' )
