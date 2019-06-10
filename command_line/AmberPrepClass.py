@@ -321,57 +321,55 @@ class AmberPrepRunner:
   def uc_parm7_to_4phenix_pdb(self, parm7_file, rst7_file,
                               template_pdb, outpdb):
     '''
-    Combine information in {parm7,rst7} with that in the template
-       pdb file to create 4phenix_xxxx.pdb; (uses parmed)
-    Original application was that parm7/rst7 came from initial minimization;
-       but they could come from any type of Amber run
+    Combine information in {parm7,rst7} with that in the template_pdb
+       file (usually 4phenix_xxxx.pdb created in les_builder) to create 
+       outpdb (usually over-writing the template_pdb file)
 
     Note:  the atom order in outpdb will be the "Amber" atom order; use phenix
     routines after this to convert to phenix atom order.
 
-    Note also: there is a lot of duplication between this routine and code
-    in asu_parm7_to_4phenix_pdb()
+    Further note: the template_pdb has to have exactly the same order of
+    atoms as does the rst7 file.  This should/will be the case when
+    les_builder is creating the template_pdb file, but is potentially
+    fragile: this routine just inserts the coordinates from the rst7
+    file into consecutive atoms in the template pdb file.
     '''
 
-    template_parm = parmed.load_file(template_pdb)
-    parm = parmed.load_file( parm7_file, xyz=rst7_file )
+    rst7h = open(rst7_file,"r")
+    line = rst7h.readline()   # title
+    line = rst7h.readline()   # natom
+    nat = int(line[0:6])
+    x = []
+    y = []
+    z = []
+    for iat in range(0,int(nat/2),2):
+       line = rst7h.readline()
+       x.append(line[ 0: 8])
+       y.append(line[12:20])
+       z.append(line[24:32])
+       x.append(line[36:44])
+       y.append(line[48:56])
+       z.append(line[60:68])
+    if nat%2 == 1:    # grab the last coordinate:
+       line = rst7h.readline()
+       x.append(line[ 0: 8])
+       y.append(line[12:20])
+       z.append(line[24:32])
 
-    # truncate to unit cell:
-    n_asu_residue = len(template_parm.residues)
-    selection = ':1-{}'.format(n_asu_residue)
-    asu_parm = parm[selection]
-    asu_parm.box = parm.box
-    asu_parm.space_group = parm.space_group
-    asu_parm.symmetry = parm.symmetry
+    rst7h.close()
 
-    # following kludge is needed to get got atom numbers; not needed if
-    #   conversion to phenix order is done right after this
-    #asu_parm.write_pdb( pdb_filename )
-    #asu_parm = parmed.load_file( pdb_filename )
+    iat = 0
+    th = open(template_pdb,"r")
+    outh = open(outpdb, "w" )
+    for line in th:
+       if line[0:4] == "ATOM" or line[0:6] == "HETATM":
+          outh.write(line[0:30] + x[iat] + y[iat] + z[iat] + line[54:])
+          iat = iat + 1
+       else:
+          outh.write(line)
 
-    # transfer occupancy and bfactor for heavy atoms;
-    for template_residue, residue in zip(template_parm.residues,
-                                         asu_parm.residues):
-
-      # transfer residue numbers, chainId's, and insertion codes:
-      residue.number = template_residue.number
-      residue.chain = template_residue.chain
-      residue.insertion_code = template_residue.insertion_code
-
-      # for each residue, sort atom by name to make sure we get the same
-      #   atom order between the two parms
-      #   TODO: handle extra atoms for LES (may not be needed?)
-      template_atoms = sorted((atom for atom in template_residue.atoms),
-                                   key=lambda x : x.name)
-      atoms = sorted((atom for atom in residue.atoms),
-                                   key=lambda x : x.name)
-      for template_atom, atom in zip(template_atoms, atoms):
-        atom.occupancy = template_atom.occupancy
-        atom.bfactor = template_atom.bfactor
-        atom.anisou = template_atom.anisou
-
-    asu_parm.write_pdb(outpdb, standard_resnames=True, renumber=False,
-        write_anisou=True)
+    th.close()
+    outh.close()
 
   def return_protein_chain_gaps(self):
     assert self.pdb_hierarchy
@@ -735,13 +733,6 @@ class AmberPrepRunner:
                     "4phenix_%s.pdb" % self.base ,
                     output_pdb_file )
 
-      pdb_inp = iotbx.pdb.input(file_name=output_pdb_file )
-      pdb_h = pdb_inp.construct_hierarchy(sort_atoms=True)
-      pdb_h.write_pdb_file(file_name=output_pdb_file,
-                           append_end=True,
-                           crystal_symmetry=self.pdb_inp.crystal_symmetry(),
-                           )
-
     return 0
 
   def check_special_positions(self):
@@ -786,6 +777,7 @@ class AmberPrepRunner:
       reduce_lesbuilder.log
       reduce.log
       addles.log
+      dummydb
       """
     import glob
 
@@ -1084,14 +1076,6 @@ def run(rargs):
   phenix_file = '4phenix_%s.pdb' % amber_prep_runner.base
   amber_prep_runner.asu_parm7_to_4phenix_pdb(phenix_file)
 
-  # N.B: above 4phenix file does not have the phenix atom order inside
-  #    residues: pass this through a phenix hierarchy function to get that.
-  pdb_post = iotbx.pdb.input(file_name=phenix_file)
-  pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=True)
-  pdb_h_post.write_pdb_file(file_name=phenix_file,
-            append_end=True,
-            crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
-
   print "\n============================================================"
   print "Preparing unit cell files: 4amber_%s.prmtop and 4amber_%s.rst7" % (base, base)
   print "============================================================"
@@ -1197,6 +1181,15 @@ def run(rargs):
     #    required.)
     os.rename('4amber_%s.min.rst7' % base, '4amber_%s.rst7' % base)
     os.rename('4phenix_%s.min.pdb' % base, '4phenix_%s.pdb' % base)
+
+    # N.B: above 4phenix file does not have the phenix atom order inside
+    #    residues: pass this through a phenix hierarchy function to get that.
+    phenix_file = '4phenix_%s.pdb' % base
+    pdb_post = iotbx.pdb.input(file_name=phenix_file)
+    pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=True)
+    pdb_h_post.write_pdb_file(file_name=phenix_file,
+              append_end=True,
+              crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
 
   amber_prep_runner.check_special_positions()
 
