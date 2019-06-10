@@ -8,28 +8,28 @@ omas
 spac numc=2 pick #cca 12 12 done
 ~ CYS: N CA   0.327 C O CB   0.615 SG
 spac numc=2 pick #sid 24 24 done
-~ GLU: CB   0.097 CG   2.326 CD OE1 OE2
+~ GLU: CB   0.097 CG CD OE1 OE2
 spac numc=2 pick #cca 61 61 done
 ~ CYS: N CA   0.299 C O CB   0.628 SG
 ~ protein chain: 2
 spac numc=2 pick #cca 203 203 done
 ~ CYS: N CA   0.327 C O CB   0.615 SG
 spac numc=2 pick #sid 215 215 done
-~ GLU: CB   0.097 CG   2.326 CD OE1 OE2
+~ GLU: CB   0.097 CG CD OE1 OE2
 spac numc=2 pick #cca 252 252 done
 ~ CYS: N CA   0.299 C O CB   0.628 SG
 ~ protein chain: 3
 spac numc=2 pick #cca 394 394 done
 ~ CYS: N CA   0.327 C O CB   0.615 SG
 spac numc=2 pick #sid 406 406 done
-~ GLU: CB   0.097 CG   2.326 CD OE1 OE2
+~ GLU: CB   0.097 CG CD OE1 OE2
 spac numc=2 pick #cca 443 443 done
 ~ CYS: N CA   0.299 C O CB   0.628 SG
 ~ protein chain: 4
 spac numc=2 pick #cca 585 585 done
 ~ CYS: N CA   0.327 C O CB   0.615 SG
 spac numc=2 pick #sid 597 597 done
-~ GLU: CB   0.097 CG   2.326 CD OE1 OE2
+~ GLU: CB   0.097 CG CD OE1 OE2
 spac numc=2 pick #cca 634 634 done
 ~ CYS: N CA   0.299 C O CB   0.628 SG
 *EOD

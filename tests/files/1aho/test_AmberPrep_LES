@@ -14,7 +14,7 @@ status=$?
 status=$(($status + $?))
 ./dacdif les/4amber_1aho.order 4amber_1aho.order
 status=$(($status + $?))
-./dacdif -a 0.0001 les/4amber_1aho.rst7 4amber_1aho.rst7
+./dacdif -a 0.003 les/4amber_1aho.rst7 4amber_1aho.rst7
 status=$(($status + $?))
 ./dacdif les/1aho.min.out 1aho.min.out
 status=$(($status + $?))
