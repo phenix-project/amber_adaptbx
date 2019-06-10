@@ -312,13 +312,33 @@ class AmberPDBFixer(object):
             with open(fname, 'a'):
                 os.utime(fname, times)
 
-        if 1: #try:
+        from mmtbx.utils import run_reduce_with_timeout
+
+        parameters = '-BUILD -NUC -NOFLIP'
+        if no_reduce_db:
+          touch('./dummydb')
+          parameters += ' -DB ./dummydb'
+        parameters += ' -'
+
+        fileobj = StringIO()
+        self.write_pdb(fileobj)
+        fileobj.seek(0)
+
+        reduce_out = run_reduce_with_timeout(
+          parameters = parameters,
+          stdin_lines = fileobj.read(),
+          )
+        # self.parm = parmed.read_PDB(reduce_out.show_stdout())
+        return self
+
+    def old(self, no_reduce_db):
+        try:
             if no_reduce_db:
                 touch('./dummydb')
             fileobj = StringIO()
             self.write_pdb(fileobj)
             fileobj.seek(0)
-            reduce = os.path.join(os.getenv('LIBTBX_BUILD'), 
+            reduce = os.path.join(os.getenv('LIBTBX_BUILD'),
                  'reduce', 'exe', 'reduce')
             if not os.path.exists(reduce):
                 reduce = 'phenix.reduce'
@@ -352,8 +372,11 @@ class AmberPDBFixer(object):
                 fh.write(err)
             pdbh = StringIO(out)
             # not using load_file since it does not read StringIO
+            print '-'*80
+            print pdbh
+            print '-'*80
             self.parm = parmed.read_PDB(pdbh)
-        else: #finally:
+        finally:
             fileobj.close()
             if no_reduce_db:
                 os.unlink('./dummydb')
