@@ -148,13 +148,8 @@ class LESBuilder(object):
 
     final_parm.write_pdb( final_pdb_asu_file,
              standard_resnames=True, renumber=False, write_anisou=True )
-
-    # run through phenix heierarchy to get atoms sorted phenix-style:
-    pdb_input = iotbx.pdb.input(final_pdb_asu_file)
-    pdb_hierarchy = pdb_input.construct_hierarchy(sort_atoms=True)
-    pdb_hierarchy.write_pdb_file(file_name=final_pdb_asu_file,
-            append_end=True,
-            crystal_symmetry=pdb_input.crystal_symmetry() )
+    # Note: conversion to phenix-order (sort_atoms=True) used to be
+    #    done here, but is now done in AmberPrepClass
 
   def _check_valid_addles_input(self, fn):
     assert os.path.exists(fn), 'make sure {} exists'.format(fn)
