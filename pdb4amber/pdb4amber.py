@@ -318,16 +318,14 @@ class AmberPDBFixer(object):
             fileobj = StringIO()
             self.write_pdb(fileobj)
             fileobj.seek(0)
-            reduce = os.path.join(os.getenv('LIBTBX_BUILD'), 'build',
+            reduce = os.path.join(os.getenv('LIBTBX_BUILD'), 
                  'reduce', 'exe', 'reduce')
             if not os.path.exists(reduce):
                 reduce = 'phenix.reduce'
-            print 'reduce',reduce
             cmd = [
                         reduce, '-BUILD', '-NUC', '-NOFLIP', '-DB ./dummydb',
                         '-'
                     ]
-            print ' '.join(cmd)
             if no_reduce_db:
                 process = subprocess.Popen(
                     [
