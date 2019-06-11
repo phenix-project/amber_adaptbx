@@ -1181,14 +1181,14 @@ def run(rargs):
     os.rename('4amber_%s.min.rst7' % base, '4amber_%s.rst7' % base)
     os.rename('4phenix_%s.min.pdb' % base, '4phenix_%s.pdb' % base)
 
-    # N.B: above 4phenix file does not have the phenix atom order inside
-    #    residues: pass this through a phenix hierarchy function to get that.
-    phenix_file = '4phenix_%s.pdb' % base
-    pdb_post = iotbx.pdb.input(file_name=phenix_file)
-    pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=True)
-    pdb_h_post.write_pdb_file(file_name=phenix_file,
-              append_end=True,
-              crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
+  # N.B: above 4phenix file does not have the phenix atom order inside
+  #    residues: pass this through a phenix hierarchy function to get that.
+  phenix_file = '4phenix_%s.pdb' % base
+  pdb_post = iotbx.pdb.input(file_name=phenix_file)
+  pdb_h_post = pdb_post.construct_hierarchy(sort_atoms=True)
+  pdb_h_post.write_pdb_file(file_name=phenix_file,
+            append_end=True,
+            crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
 
   amber_prep_runner.check_special_positions()
 
