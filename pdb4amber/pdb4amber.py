@@ -327,8 +327,14 @@ class AmberPDBFixer(object):
         reduce_out = run_reduce_with_timeout(
           parameters = parameters,
           stdin_lines = fileobj.read(),
+          stdout_splitlines = False,
           )
-        # self.parm = parmed.read_PDB(reduce_out.show_stdout())
+        assert reduce_out.return_code==0
+
+        pdbh = StringIO()
+        pdbh.write(reduce_out.stdout_buffer)
+        pdbh.seek(0)
+        self.parm = parmed.read_PDB(pdbh)
         return self
 
     def old(self, no_reduce_db):
