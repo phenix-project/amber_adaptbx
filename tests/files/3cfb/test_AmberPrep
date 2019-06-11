@@ -8,6 +8,7 @@
 #           slightly different results
 
 echo "Running non-LES test on 3cfb:"
+unset AMBER_LIBRARY_DIR
 phenix.AmberPrep 3cfb.pdb use_reduce=False > non-les.log 2>&1
 
 status=0
@@ -47,6 +48,6 @@ status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
 status=$(($status + $?))
 
-/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb 4amber_3cfb.rst7
+/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb
 
 exit $status

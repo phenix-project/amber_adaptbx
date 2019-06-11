@@ -1,5 +1,9 @@
 
 ==================================================
+Running pdb4amber on 3cfb.pdb
+==================================================
+
+==================================================
 Summary of pdb4amber for: 3cfb.pdb
 ===================================================
 
@@ -55,10 +59,6 @@ The alternate coordinates have been discarded.
 Only the first occurrence for each atom was kept.
 
 ==================================================
-Running pdb4amber on 3cfb.pdb
-==================================================
-
-==================================================
 Setting up library files for non-standard residues
 ==================================================
 
@@ -66,22 +66,41 @@ Setting up library files for non-standard residues
 Running elbow/antechamber for GOL 
 ==================================================
 
-MoleculeClass :  C: 3  O: 3 (CHEMICAL COMPONENTS format)
-	14 atoms
-	13 bonds
-	21 angles
-	27 dihedrals
-	0 rings (groups, rings, atoms) 0 0
-	0 chirals
-
-~> antechamber -i 4antechamber_GOL.pdb -fi pdb -o GOL.mol2 -fo mol2       -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_GOL.pdb -fi pdb -o GOL.mol2 -fo mol2       -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
 
 
-~> parmchk2 -s 2 -i GOL.mol2 -f mol2 -o GOL.frcmod
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i GOL.mol2 -f mol2 -o GOL.frcmod
 
 
 ==================================================
 Running elbow/antechamber for SPB 
+==================================================
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_SPB.pdb -fi pdb -o SPB.mol2 -fo mol2       -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i SPB.mol2 -f mol2 -o SPB.frcmod
+
+
+==================================================
+Preparing asu files and 4phenix_3cfb.pdb
+==================================================
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 3cfb_asu_tleap_input_run
+
+Checking output filenames
+  file : 3cfb_asu.prmtop
+  file : 3cfb_asu.rst7
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 3cfb_asu.rst7 -o 3cfb_asu.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
+
+
+============================================================
+Preparing unit cell files: 4amber_3cfb.prmtop and 4amber_3cfb.rst7
+============================================================
+
+==================================================
+Running pdb4amber on 3cfb_4tleap_uc1.pdb
 ==================================================
 
 ==================================================
@@ -130,51 +149,21 @@ None
 
 None
 
-MoleculeClass :  C:19  N: 1  O: 3 (CHEMICAL COMPONENTS format)
-	41 atoms
-	42 bonds
-	69 angles
-	98 dihedrals
-	2 rings (groups, rings, atoms) 2 12
-	0 chirals
-
-~> antechamber -i 4antechamber_SPB.pdb -fi pdb -o SPB.mol2 -fo mol2       -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
-
-
-~> parmchk2 -s 2 -i SPB.mol2 -f mol2 -o SPB.frcmod
-
-
-==================================================
-Preparing asu files and 4phenix_3cfb.pdb
-==================================================
-
-~> tleap -f 3cfb_asu_tleap_input_run
-
-Checking output filenames
-  file : 3cfb_asu.prmtop
-  file : 3cfb_asu.rst7
-
-~> ChBox -c 3cfb_asu.rst7 -o 3cfb_asu.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
-
-
-============================================================
-Preparing unit cell files: 4amber_3cfb.prmtop and 4amber_3cfb.rst7
-============================================================
-
-~> tleap -f 3cfb_uc_tleap_input_run
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 3cfb_uc_tleap_input_run
 
 Checking output filenames
   file : 3cfb_uc.prmtop
   file : 3cfb_uc.rst7
 
-~> ChBox -c 3cfb_uc.rst7 -o 3cfb_uc.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 3cfb_uc.rst7 -o 3cfb_uc.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
 
 4amber_3cfb.prmtop
 checking special positions in 4phenix_3cfb.pdb
 
 ==================================================
-Done.  Three new files have been made:
+Done.  Four new files have been made:
       4phenix_3cfb.pdb
+      4amber_3cfb.rst7
       4amber_3cfb.prmtop
       4amber_3cfb.order
 ==================================================
@@ -183,6 +172,7 @@ Example
 
   phenix.refine 4phenix_3cfb.pdb use_amber=True \
     amber.topology_file_name=4amber_3cfb.prmtop \
+    amber.coordinate_file_name=4amber_3cfb.rst7 \
     amber.order_file_name=4amber_3cfb.order \
     ....(other refinement keywords here).....
 
