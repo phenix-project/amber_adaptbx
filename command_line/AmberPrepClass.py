@@ -322,7 +322,7 @@ class AmberPrepRunner:
                               template_pdb, outpdb):
     '''
     Combine information in {parm7,rst7} with that in the template_pdb
-       file (usually 4phenix_xxxx.pdb created in les_builder) to create 
+       file (usually 4phenix_xxxx.pdb created in les_builder) to create
        outpdb (usually over-writing the template_pdb file)
 
     Note:  the atom order in outpdb will be the "Amber" atom order; use phenix
@@ -867,7 +867,6 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   # a very dull problem
   if hasattr(mol, "restraint_class"): del mol.restraint_class
   mol.OptimiseHydrogens()
-  print(dir(mol))
   mol.WritePDB('4antechamber_%s.pdb' % mol.residue_name,
                pymol_pdb_bond_order=False,
                )
