@@ -1,8 +1,11 @@
 
 ==================================================
+Running pdb4amber on 1dy5.pdb
+==================================================
+
+==================================================
 Summary of pdb4amber for: 1dy5.pdb
 ===================================================
-REDUCE returned non-zero exit status: See reduce_info.log for more details
 
 ----------Chains
 The following (original) chains have been found:
@@ -12,7 +15,44 @@ B
 ---------- Alternate Locations (Original Residues!))
 
 The following residues had alternate locations:
-None
+GLU_9
+GLN_11
+SER_15
+SER_21
+MET_29
+SER_32
+ASN_34
+ARG_39
+PRO_42
+VAL_43
+SER_50
+SER_59
+LYS_66
+MET_79
+ASP_83
+SER_90
+ASN_103
+LYS_104
+ILE_107
+GLU_133
+SER_139
+SER_145
+MET_153
+SER_156
+ASN_158
+PRO_166
+VAL_167
+SER_174
+SER_183
+LYS_190
+SER_201
+MET_203
+ARG_209
+GLU_210
+LYS_215
+LYS_228
+ILE_231
+ASN_237
 
 ---------- Gaps (Renumbered Residues!)
 gap of 4.373036 A between LYS 66 and GLY 68
@@ -22,10 +62,8 @@ gap of 4.508257 A between LYS 190 and GLY 192
 
 LYS_155 misses 2 heavy atom(s)
 LYS_161 misses 4 heavy atom(s)
-
-==================================================
-Running pdb4amber on 1dy5.pdb
-==================================================
+The alternate coordinates have been discarded.
+Only the first occurrence for each atom was kept.
 
 ==================================================
 Setting up library files for non-standard residues
@@ -35,42 +73,53 @@ Setting up library files for non-standard residues
 Running elbow/antechamber for IPA 
 ==================================================
 
-MoleculeClass :  C: 3  O: 1 (CHEMICAL COMPONENTS format)
-	12 atoms
-	11 bonds
-	19 angles
-	21 dihedrals
-	0 rings (groups, rings, atoms) 0 0
-	0 chirals
-
-| ~> /home/case/amber_phenix-1.0/bin/antechamber -i 4antechamber_IPA.pdb -fi pdb -o IPA.mol2 -fo mol2       -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_IPA.pdb -fi pdb -o IPA.mol2 -fo mol2       -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
 
 
-| ~> /home/case/amber_phenix-1.0/bin/parmchk2 -s 2 -i IPA.mol2 -f mol2 -o IPA.frcmod
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i IPA.mol2 -f mol2 -o IPA.frcmod
 
 
 ==================================================
 Running elbow/antechamber for SO4 
 ==================================================
 
-MoleculeClass :  O: 4  S: 1 (CHEMICAL COMPONENTS format)
-	5 atoms
-	4 bonds
-	6 angles
-	0 dihedrals
-	0 rings (groups, rings, atoms) 0 0
-	0 chirals
-
-| ~> /home/case/amber_phenix-1.0/bin/antechamber -i 4antechamber_SO4.pdb -fi pdb -o SO4.mol2 -fo mol2       -nc -2 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_SO4.pdb -fi pdb -o SO4.mol2 -fo mol2       -nc -2 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
 
 
-| ~> /home/case/amber_phenix-1.0/bin/parmchk2 -s 2 -i SO4.mol2 -f mol2 -o SO4.frcmod
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i SO4.mol2 -f mol2 -o SO4.frcmod
 
 IAS.lib is present. Skipping elbow/antechamber run for this residue.
 
 
 ==================================================
 Running elbow/antechamber for ACT 
+==================================================
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_ACT.pdb -fi pdb -o ACT.mol2 -fo mol2       -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i ACT.mol2 -f mol2 -o ACT.frcmod
+
+
+==================================================
+Preparing asu files and 4phenix_1dy5.pdb
+==================================================
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 1dy5_asu_tleap_input_run
+
+Checking output filenames
+  file : 1dy5_asu.prmtop
+  file : 1dy5_asu.rst7
+
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
+
+
+============================================================
+Preparing unit cell files: 4amber_1dy5.prmtop and 4amber_1dy5.rst7
+============================================================
+
+==================================================
+Running pdb4amber on 1dy5_4tleap_uc1.pdb
 ==================================================
 
 ==================================================
@@ -103,44 +152,13 @@ gap of 4.508257 A between LYS 834 and GLY 836
 
 None
 
-MoleculeClass :  C: 2  O: 2 (CHEMICAL COMPONENTS format)
-	7 atoms
-	6 bonds
-	9 angles
-	6 dihedrals
-	0 rings (groups, rings, atoms) 0 0
-	0 chirals
-
-| ~> /home/case/amber_phenix-1.0/bin/antechamber -i 4antechamber_ACT.pdb -fi pdb -o ACT.mol2 -fo mol2       -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
-
-
-| ~> /home/case/amber_phenix-1.0/bin/parmchk2 -s 2 -i ACT.mol2 -f mol2 -o ACT.frcmod
-
-
-==================================================
-Preparing asu files and 4phenix_1dy5.pdb
-==================================================
-
-| ~> /home/case/amber_phenix-1.0/bin/tleap -f 1dy5_asu_tleap_input_run
-
-Checking output filenames
-  file : 1dy5_asu.prmtop
-  file : 1dy5_asu.rst7
-
-| ~> /home/case/amber_phenix-1.0/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
-
-
-============================================================
-Preparing unit cell files: 4amber_1dy5.prmtop and 4amber_1dy5.rst7
-============================================================
-
-| ~> /home/case/amber_phenix-1.0/bin/tleap -f 1dy5_uc_tleap_input_run
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 1dy5_uc_tleap_input_run
 
 Checking output filenames
   file : 1dy5_uc.prmtop
   file : 1dy5_uc.rst7
 
-| ~> /home/case/amber_phenix-1.0/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
 
 4amber_1dy5.prmtop
 
@@ -148,7 +166,7 @@ Checking output filenames
 Minimizing input coordinates.
 ==================================================
 
-| ~> /home/case/amber_phenix-1.0/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
+| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
 
 checking special positions in 4phenix_1dy5.pdb
 

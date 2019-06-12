@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "running 1 cycle of coordinate refinement on 1dy5:"
 
@@ -25,6 +25,6 @@ if [ $status -ne 0 ]; then
    echo "(The expected full log file is in non-les/amber1.log)"
 fi
 
-/bin/rm -f amber_001.{log,mtz,pdb,eff} amber_data.mtz amber_002.def
+/bin/rm -f amber_001.{cif,log,mtz,pdb,eff} amber_data.mtz amber_002.def
 
 exit $status
