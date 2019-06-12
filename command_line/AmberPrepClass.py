@@ -757,6 +757,7 @@ class AmberPrepRunner:
       4tleap_uc_sslink
       4tleap_sslink
       4tleap_uc.pdb
+      4tleap_renum.txt
       preLES.prmtop
       preLES.rst7
       asu.prmtop
