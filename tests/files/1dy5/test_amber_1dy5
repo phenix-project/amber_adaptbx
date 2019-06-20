@@ -5,11 +5,14 @@
 #  a xxx.lib file either in the current directory or in the amber
 #  library
 
+export BOOST_ADAPTBX_FPE_DEFAULT=1
+export BOOST_ADAPTBX_SIGNALS_DEFAULT=1
+
 ./test_AmberPrep
 status=$?
 
-./test_phenix.refine
-status=$(($status + $?))
+#./test_phenix.refine
+#status=$(($status + $?))
 
 if false; then
 
@@ -20,7 +23,5 @@ if false; then
    status=$(($status + $?))
 
 fi
-
-/bin/rm -f 1dy5_4tleap_renum.txt
 
 exit $status

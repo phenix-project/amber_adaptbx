@@ -13,7 +13,7 @@ phenix.AmberPrep 3cfb.pdb use_reduce=False > non-les.log 2>&1
 
 status=0
 
-./dacdif -a 0.002 non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
+./dacdif non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
 status=$(($status + $?))
 ./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
 status=$(($status + $?))
@@ -48,6 +48,6 @@ status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
 status=$(($status + $?))
 
-/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb
+/bin/rm -f GOL.cif SPB.cif GOL.pdb SPB.pdb 4amber_3cfb.rst7
 
 exit $status

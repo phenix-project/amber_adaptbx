@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#  run several simple tests of Amber preparation and refinement on 3cfb:
+#  this exercise the ability to handle non-standard ligands
+
+unset AMBER_LIBRARY_DIR
+/bin/rm -rf SPB.mol2 GOL.mol2
+
+./test_AmberPrep
+status=$?
+
+#./test_phenix.refine
+#status=$(($status + $?))
+
+#./test_AmberPrep_LES
+#status=$(($status + $?))
+
+#./test_phenix.refine_LES
+#status=$(($status + $?))
+
+/bin/rm -f amber_002.def 
+
+exit $status
