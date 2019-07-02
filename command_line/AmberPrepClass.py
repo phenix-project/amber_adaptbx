@@ -871,7 +871,9 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   mol.WritePDB('4antechamber_%s.pdb' % mol.residue_name,
                pymol_pdb_bond_order=False,
                )
+  del mol.files_written[-1]
   mol.WriteTriposMol2('4antechamber_%s.mol2' % mol.residue_name)
+  del mol.files_written[-1]
   mol.Multiplicitise()
   if verbose: print mol.DisplayBrief()
 
@@ -903,6 +905,26 @@ def _run_antechamber(mol, use_am1_and_maxcyc_zero=True):
         print line
       if line.find('Error') > -1:
         raise Sorry(line)
+
+def _run_parmchk2(mol):
+  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
+        'bin','parmchk2' )
+  cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (mol.residue_name,
+                                                    mol.residue_name)
+  print_cmd(cmd)
+  easy_run.fully_buffered(cmd)
+  return '%s.frcmod' % mol.residue_name
+
+def _tidy_directory(mol):
+  filenames = ['sqm.in',
+               'sqm.out',
+               'sqm.pdb',
+              ]
+  filenames.append('4antechamber_%s.pdb' % mol.residue_name)
+  filenames.append('4antechamber_%s.mol2' % mol.residue_name)
+  for filename in filenames:
+    if os.path.exists(filename):
+      os.remove(filename)
 
 def _run_elbow_antechamber(pdb_hierarchy,
                            residue_name,
@@ -970,16 +992,24 @@ def _run_elbow_antechamber(pdb_hierarchy,
       atom1.name = atom2.name
 
   _write_anterchamber_input_from_elbow_molecule(mol)
-
   _run_antechamber(mol, use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero)
+  rc = _run_parmchk2(mol)
+  return rc
 
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-        'bin','parmchk2' )
-  cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name, residue_name)
-  print_cmd(cmd)
-  easy_run.fully_buffered(cmd)
+def run_antechamber(mol, use_am1_and_maxcyc_zero=True):
+  '''
+  Created for use from eLBOW
+  '''
+  assert mol.residue_name
+  _write_anterchamber_input_from_elbow_molecule(mol)
+  _run_antechamber(mol,
+                   use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero)
+  rc = _run_parmchk2(mol)
+  _tidy_directory(mol)
+  return rc
 
 def _run_elbow(residue_name, args, kwds, debug=False):
+  assert 0
   import pickle
   if debug:
     pf = "%s.pickle" % residue_name
@@ -993,6 +1023,7 @@ def _run_elbow(residue_name, args, kwds, debug=False):
       mol.WritePickle()
 
 def create_amber_files_for_ligand(params):
+  assert 0
   args = tuple([])
   kwds = {'filename' : params.inputs.elbow_input_file_name,
           'id'       : params.inputs.ligand_id,
