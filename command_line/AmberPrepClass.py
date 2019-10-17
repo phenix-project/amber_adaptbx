@@ -498,6 +498,7 @@ class AmberPrepRunner:
     f.write('source leaprc.gaff2\n')
     f.write('set default nocenter on\n')
     f.write('set default reorder_residues %s\n' % reorder_residues)
+    f.write('set default PBRadii mbondi3\n')
 
     #  mechanism for user modifications:
     if os.path.isfile('myleaprc'):
