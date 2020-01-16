@@ -265,15 +265,14 @@ class AmberPrepRunner:
     routines after this to conver to phenix atom order.
     '''
 
-    #  Note: here self.pdb_filename is typically the input pdb file
-    template_parm = parmed.load_file(self.pdb_filename)
+    template_parm = parmed.read_PDB(self.pdb_filename)
     parm = parmed.load_file("%s_asu.prmtop" % self.base,
                          xyz="%s_asu.rst7" % self.base )
 
-    # following kludge is needed to get got atom numbers; not needed if
+    # following kludge is needed to get atom numbers; not needed if
     #   conversion to phenix order is done right after this
     # parm.write_pdb( pdb_filename )
-    # parm = parmed.load_file( pdb_filename )
+    # parm = parmed.read_PDB( pdb_filename )
 
     # update occupancy to take into account alternate locations:
     for atom in template_parm.atoms:
