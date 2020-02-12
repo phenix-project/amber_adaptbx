@@ -72,7 +72,7 @@ HEAVY_ATOM_DICT = {
 RESPROT = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
            'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP',
            'TYR', 'VAL', 'HID', 'HIE', 'HIN', 'HIP', 'CYX', 'ASH', 'GLH',
-           'LYH', 'ACE', 'NME', 'GL4', 'AS4')
+           'LYH', 'ACE', 'NME', 'GL4', 'AS4', 'MSE')
 
 RESNA = ('C', 'G', 'U', 'A', 'DC', 'DG', 'DT', 'DA', 'OHE', 'C5', 'G5', 'U5',
          'A5', 'C3', 'G3', 'U3', 'A3', 'DC5', 'DG5', 'DT5', 'DA5', 'DC3',
