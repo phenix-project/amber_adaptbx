@@ -27,9 +27,8 @@ if PY3:
 else:
     string_types = basestring
 
-# TODO: include in ParmEd?
 from .residue import (
-    RESPROT,
+    RESPROT, RESPROTE, 
     AMBER_SUPPORTED_RESNAMES,
     HEAVY_ATOM_DICT, )
 
@@ -200,14 +199,14 @@ class AmberPDBFixer(object):
         for i, atom in enumerate(parm.atoms):
             # TODO: if using 'CH3', this will be failed with
             # ACE ALA ALA ALA NME system
-            # if atom.name in ['CA', 'CH3'] and atom.residue.name in RESPROT:
+            # if atom.name in ['CA', 'CH3'] and atom.residue.name in RESPROTE:
             if atom.name in [
                     'CA',
-            ] and atom.residue.name in RESPROT:
+            ] and atom.residue.name in RESPROTE:
                 CA_atoms.append(i)
-            if atom.name == 'C' and atom.residue.name in RESPROT:
+            if atom.name == 'C' and atom.residue.name in RESPROTE:
                 C_atoms.append(i)
-            if atom.name == 'N' and atom.residue.name in RESPROT:
+            if atom.name == 'N' and atom.residue.name in RESPROTE:
                 N_atoms.append(i)
 
         nca = len(CA_atoms)

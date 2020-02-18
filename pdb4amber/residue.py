@@ -33,7 +33,7 @@
 #
 
 __all__ = [
-    'RESPROT', 'RESNA', 'RESSOLV', 'RESSUGAR', 'AMBER_SUPPORTED_RESNAMES'
+    'RESPROT', 'RESPROTE', 'RESNA', 'RESSOLV', 'RESSUGAR', 'AMBER_SUPPORTED_RESNAMES'
 ]
 
 # 
@@ -72,7 +72,7 @@ HEAVY_ATOM_DICT = {
 RESPROT = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
            'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP',
            'TYR', 'VAL', 'HID', 'HIE', 'HIN', 'HIP', 'CYX', 'ASH', 'GLH',
-           'LYH', 'ACE', 'NME', 'GL4', 'AS4', 'MSE')
+           'LYH', 'ACE', 'NME', 'GL4', 'AS4')
 
 RESNA = ('C', 'G', 'U', 'A', 'DC', 'DG', 'DT', 'DA', 'OHE', 'C5', 'G5', 'U5',
          'A5', 'C3', 'G3', 'U3', 'A3', 'DC5', 'DG5', 'DT5', 'DA5', 'DC3',
@@ -239,3 +239,15 @@ RESSUGAR = (
 
 # AMBER_SUPPORTED_RESNAMES = set(RESPROT + RESNA + RESSOLV + RESSUGAR)
 AMBER_SUPPORTED_RESNAMES = set(RESPROT + RESNA + RESSOLV)
+
+#  For correct protein gap detection, we need to extend the RESPROT set:
+#  RESPROT itself give residue names that are included in
+#  leaprc.protein.xxxx.  To this, we need to add other residues that
+#  might be in the amber_library, such as MSE.  Not yet sure how to do
+#  this in general...
+
+RESPROTE = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
+           'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP',
+           'TYR', 'VAL', 'HID', 'HIE', 'HIN', 'HIP', 'CYX', 'ASH', 'GLH',
+           'LYH', 'ACE', 'NME', 'GL4', 'AS4', 'MSE')
+
