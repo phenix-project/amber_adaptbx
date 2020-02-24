@@ -1244,7 +1244,7 @@ def run(rargs):
   outl += "    ....(other refinement keywords here)....."
   outl += "\n\n\n"
   print outl
-  return amber_prep_runner.final_pdb_file_4phenix
+  return amber_prep_runner
 
 if __name__ == "__main__":
   args = sys.argv[1:]

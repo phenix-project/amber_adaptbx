@@ -49,7 +49,7 @@ class LESBuilder(object):
                       (You can use AmberPrep to prepare this prmtop file)
   rst7_file         : str, corresponding rst7 filename
   unitcell_pdb_file : str or None, default None
-    fully atom unitcell pdb filename. If given, LESBuilder will use it. 
+    fully atom unitcell pdb filename. If given, LESBuilder will use it.
     If not, it will call build_unitcell method from amber_adaptbx.utils.
   addles_input_file  : str, default ''
     addles input filename. If given, use this file instead of making a new one
@@ -107,8 +107,13 @@ class LESBuilder(object):
     """label_alternates + update LES coordinates
     """
     uc_parm = parmed.load_file(self.new_pdb_with_H)
-    parm = parmed.load_file('4amber_' + self.base + '.LES.prmtop',
-                            '4amber_' + self.base + '.LES.rst7')
+    prmtop = '4amber_' + self.base + '.LES.prmtop'
+    if not os.path.exists(prmtop):
+      prmtop = '4amber_' + self.base.split('.')[0] + '.LES.prmtop'
+    rst7 = '4amber_' + self.base + '.LES.rst7'
+    if not os.path.exists(rst7):
+      prmtop = '4amber_' + self.base.split('.')[0] + '.LES.rst7'
+    parm = parmed.load_file(prmtop, rst7)
     # add space group
     parm.space_group = self.space_group
     parm.symmetry = self.symmetry
@@ -141,7 +146,7 @@ class LESBuilder(object):
         atom.bfactor = atom.bond_partners[0].bfactor
 
     # restore original residue numbers
-    for residue, template_residue in zip(final_parm.residues, 
+    for residue, template_residue in zip(final_parm.residues,
                                          orig_pdb_parm.residues):
       residue.number = template_residue.number
       residue.chain = template_residue.chain
@@ -186,7 +191,7 @@ class LESBuilder(object):
       if use_reduce:
          touch('./dummydb')
          self.new_pdb_with_H = self.base + '_uc_H.pdb'
-         cmd = os.path.join( os.environ["LIBTBX_BUILD"], 'reduce', 
+         cmd = os.path.join( os.environ["LIBTBX_BUILD"], 'reduce',
               'exe','reduce' )
          cmd += ' -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
              self.unitcell_pdb_file, self.new_pdb_with_H)
@@ -204,7 +209,7 @@ class LESBuilder(object):
     # fix previous step: need to update rst7 coordinates since addles
     # uses the same coordinates for alternative atoms.
     # Also correctly label atom and residue names.============================
-    #   (updates 4amber_xxxx.LES.rst7 in place; also creates 
+    #   (updates 4amber_xxxx.LES.rst7 in place; also creates
     #    4amber_xxxx.LES.pdb for use in the next step)
     self.update_LES_coordinates_from_uc()
 
