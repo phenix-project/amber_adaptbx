@@ -23,14 +23,14 @@ def repo_dir(verbose=False):
   env_dir = os.environ.get("AMBER_LIBRARY_DIR", None)
   if env_dir is not None:
     return env_dir
-  install_dir = os.path.join(parent_dir, "chem_data", "amber_library")
+  install_dir = os.path.join(parent_dir, "amber_library")
   if os.path.exists(install_dir):
     return install_dir
   if verbose:
     print """
     Couldn't find amberlibrary
       1. Set AMBER_LIBRARY_DIR in environment
-      2. Add/link to $PHENIX/chem_data
+      2. Add/link to $PHENIX/modules
     """
   return None
 
