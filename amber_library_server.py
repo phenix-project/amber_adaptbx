@@ -9,6 +9,7 @@ def is_energy_outlier(residue_name):
   if rd is None:
     return None
   outliers = os.path.join(rd, "outliers_min_energy.dat")
+  if not os.path.exists(outliers): return False
   f = file(outliers, "rb")
   lines = f.readlines()
   f.close()
