@@ -81,7 +81,7 @@ def get_LES_residue_dict(parm):
   return holder, holderbb, holderca, holdercb, holdercg, holder_atoms
   
 def addles_input(pdb_fn='2igd.pdb', prmtop=None, rst7_file=None):
-  root_name = os.path.basename(pdb_fn).split('.')[0]
+  root_name = '.'.join(os.path.basename(pdb_fn).split('.')[:-1])
   uc_parm = root_name + 'a.parm7' if prmtop is None else prmtop
   uc_rst7 = root_name + 'a.rst7' if rst7_file is None else rst7_file
   
