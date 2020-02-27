@@ -10,6 +10,8 @@ from libtbx.utils import Sorry
 import libtbx.load_env
 import libtbx.phil.command_line
 from libtbx import easy_run
+from libtbx import runtime_utils
+
 from elbow.command_line import builder
 
 from amber_adaptbx import pdb4amber
@@ -29,15 +31,13 @@ master_phil_string = """
       pdb_file_name = None
         .type = path
         .short_caption = Model input
-      nproc = 1
-        .type = int
-        .short_caption = Number processes to use
       antechamber
         .caption = Options for Amber program antechamber
       {
         prefer_input_method = chemical_component *elbow Auto
           .type = choice
-          .caption = Control to first input chosen for antechamber
+          .short_caption = Ligand data for input to antechamber
+          .caption = Chemical_Component_entry eLBOW Auto
       }
       elbow_input_file_name = None
         .type = path
@@ -45,6 +45,10 @@ master_phil_string = """
       ligand_id = LIG
         .type = str
         .short_caption = Three-letter for ligand
+      output_dir = None
+        .type = path
+        .style = output_dir noauto
+        .short_caption = Output directory
     }
     actions
     {
@@ -54,14 +58,17 @@ master_phil_string = """
         .type = str
         .caption = add more amber options for minimization for amber minimization. If not specified, use default values
         .help = add more amber options for minimization for amber minimization. If not specified, use default values
+        .style = hidden
       clean = True
         .type = bool
       redq = False
         .type = bool
         .caption = Use reduced-charge Amber force field
         .help = Use reduced-charge Amber force field
+        .style = hidden
       LES = False
         .type = bool
+        .short_caption = Include alternative locations in refinement
       use_reduce = True
         .type = bool
         .caption = Run reduce on the input pdb file to place hydrogens
@@ -70,18 +77,22 @@ master_phil_string = """
         .type = bool
         .caption = Load GLYCAM carbohydrate force field
         .help = Load GLYCAM carbohydrate force field
+        .style = hidden
       addles_input = ''
         .type = str
         .caption = User specify addles input filename. Optional.
         .help = User specify addles input filename. Optional.
+        .style = hidden
       use_amber_unitcell = False
         .type = bool
         .help = 'If True, use UnitCell from Amber; else use expand_to_p1()'
+        .style = hidden
     }
     output
     {
       file_name = None
         .type = path
+        .caption = Preamble for output file names
     }
   }
   """
@@ -92,7 +103,11 @@ master_params = master_phil_string  # need for auto documentation
 master_phil = phil.parse(master_phil_string,
                          process_includes=True,
                          )
-
+# needed by GUI
+def validate_params(params):
+  if not params.amber_prep.inputs.pdb_file_name:
+    raise Sorry('Must supply a PDB model')
+  return True
 
 def setup_parser():
   from libtbx.option_parser import OptionParser
@@ -116,7 +131,6 @@ def setup_parser():
                     )
   return parser
 
-
 def get_output_preamble(params):
   preamble = params.amber_prep.inputs.pdb_file_name
   if params.amber_prep.output.file_name:
@@ -124,7 +138,6 @@ def get_output_preamble(params):
   preamble = os.path.basename(preamble)
   preamble = preamble.replace(".pdb", "")
   return preamble
-
 
 def setup_options_args(rargs):
   rargs = list(rargs)
@@ -139,7 +152,6 @@ def setup_options_args(rargs):
   if len(args) == 0:
     parser.print_help()
     sys.exit()
-
   #
   argument_interpreter = libtbx.phil.command_line.argument_interpreter(
       master_phil=master_phil,
@@ -163,10 +175,11 @@ def setup_options_args(rargs):
       phil_args.append(arg)
       phils.append(argument_interpreter.process(arg))
   working_phil = master_phil.fetch(sources=phils)
-  assert len(pdbs) == 1
+  # assert len(pdbs) == 1, '%s %s' % (len(pdbs), pdbs)
   # working_phil.show()
   working_params = working_phil.extract()
-  working_params.amber_prep.inputs.pdb_file_name = pdbs[0]
+  if pdbs:
+    working_params.amber_prep.inputs.pdb_file_name = pdbs[0]
   # check_working_params(working_params)
   preamble = get_output_preamble(working_params)
   # print "  Writing effective parameters to %s.eff\n" % preamble
@@ -1032,7 +1045,7 @@ def create_amber_files_for_ligand(params):
   _run_elbow(args, kwds, debug=True)
   assert 0
 
-def run(rargs):
+def run(rargs=None):
   working_params = setup_options_args(rargs)
   inputs = working_params.amber_prep.inputs
   actions = working_params.amber_prep.actions
@@ -1073,7 +1086,7 @@ def run(rargs):
 
   amber_prep_runner.process_ligands(
       ns_names,
-      nproc=inputs.nproc,
+      # nproc=inputs.nproc,
       prefer_input_method=inputs.antechamber.prefer_input_method,
   )
   #
@@ -1246,7 +1259,25 @@ def run(rargs):
   print outl
   return amber_prep_runner
 
+def finish_job(result):
+  output_files = []
+  for attr, desc in {
+                     'final_pdb_file_4phenix': 'Model file for Phenix',
+                     'final_prmtop_file'     : 'Parameter file',
+                     'final_rst7_file'       : 'Coordinate file (rst7)',
+                     'final_order_file'      : 'Atom order file',
+                     }.items():
+    output_files.append((getattr(result, attr), desc))
+  print os.getcwd()
+  return (output_files, [])
+
+class launcher (runtime_utils.target_with_save_result) :
+  def run (self) :
+    os.makedirs(self.output_dir)
+    os.chdir(self.output_dir)
+    return run(rargs=self.args)
+
 if __name__ == "__main__":
   args = sys.argv[1:]
   del sys.argv[1:]
-  run(args)
+  run(rargs=args)
