@@ -682,6 +682,7 @@ class AmberPrepRunner:
 
     os.rename('%s_uc.rst7' % self.base, '4amber_%s.rst7' % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
+    os.rename( tleap_pdb_file, '%s_uc.pdb' % self.base )
 
   def run_minimise(self, mintype=None, minimization_options=''):
     assert self.base
@@ -769,7 +770,6 @@ class AmberPrepRunner:
       4tleap_uc_renum.txt
       4tleap_uc_sslink
       4tleap_sslink
-      4tleap_uc.pdb
       4tleap_renum.txt
       preLES.prmtop
       preLES.rst7
@@ -809,7 +809,6 @@ class AmberPrepRunner:
       os.remove(filename)
     for s in ['%s.eff',
               '%s_curated.pdb',
-              '%s_uc.pdb',
               '%s_uc_H.pdb',
               '%sab.rst7',
               '4amber_%s.pdb',
