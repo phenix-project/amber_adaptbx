@@ -1,6 +1,7 @@
 # Romain M. Wolf, NIBR Basel, December 2013
 # with revisions by Pawel Janowski & Jason Swails, Rutgers U., Feb. 2014
 #    & Jan. 2015
+# Mods by David A Case and Nigel W Moriarty 2020
 
 #  Copyright (c) 2013, Novartis Institutes for BioMedical Research Inc.
 #  All rights reserved.
@@ -36,7 +37,7 @@ __all__ = [
     'RESPROT', 'RESPROTE', 'RESNA', 'RESSOLV', 'RESSUGAR', 'AMBER_SUPPORTED_RESNAMES'
 ]
 
-# 
+#
 HEAVY_ATOM_DICT = {
     'ALA': 5,
     'ARG': 11,
@@ -250,4 +251,16 @@ RESPROTE = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
            'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP',
            'TYR', 'VAL', 'HID', 'HIE', 'HIN', 'HIP', 'CYX', 'ASH', 'GLH',
            'LYH', 'ACE', 'NME', 'GL4', 'AS4', 'MSE')
+
+# Automatic creation and addition of amino acids
+import automatic_residue
+RESPROTE = tuple(list(RESPROTE)+automatic_residue.RESPROTE)
+
+def main():
+  print RESPROTE
+  print dir(automatic_residue)
+
+
+if __name__ == '__main__':
+  main()
 

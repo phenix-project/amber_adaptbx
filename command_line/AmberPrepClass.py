@@ -889,13 +889,21 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   mol.Multiplicitise()
   if verbose: print mol.DisplayBrief()
 
-def _run_antechamber(mol, use_am1_and_maxcyc_zero=True):
+def _run_antechamber(mol,
+                     use_am1_and_maxcyc_zero=True,
+                     use_mol2=False,
+                     ):
   cmds = []
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
           'bin','antechamber' )
-  cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
-      -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
-      % (mol.residue_name, mol.residue_name, mol.charge, mol.multiplicity)
+  if use_mol2:
+    cmd += ' -i 4antechamber_%s.mol2 -fi mol2 -o %s.mol2 -fo mol2 \
+        -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
+        % (mol.residue_name, mol.residue_name, mol.charge, mol.multiplicity)
+  else: # PDB
+    cmd += ' -i 4antechamber_%s.pdb -fi pdb -o %s.mol2 -fo mol2 \
+        -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
+        % (mol.residue_name, mol.residue_name, mol.charge, mol.multiplicity)
   if use_am1_and_maxcyc_zero:
     cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
   cmds.append(cmd)

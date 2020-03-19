@@ -199,13 +199,10 @@ class manager(standard_manager):
 
   def select_OLD(self, selection=None, iselection=None):
     self.selection_count+=1
-    print('select',self.select, self.selection_count)
     result = self.standard_geometry_restraints_manager.select(selection=selection,
                                                               iselection=iselection)
-    print(result)
     self._helper(result)
     # self.standard_geometry_restraints_manager = result
-    print('return self')
     return self
 
   def cleanup_amber(self):
