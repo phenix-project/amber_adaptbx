@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 from StringIO import StringIO
 import sys
 
+from libtbx.utils import Sorry
 from scitbx.array_family import flex
 from libtbx import adopt_init_args
 from libtbx.str_utils import make_header
@@ -81,9 +82,15 @@ class manager(standard_manager):
   def initialisation(self, params, log=None):
     make_header("Initializing AMBER", out=log)
     print("  topology    : %s" % params.amber.topology_file_name, file=log)
+    if not params.amber.topology_file_name:
+      raise Sorry('no filename for topology file provided')
     print("  atom order  : %s" % params.amber.order_file_name, file=log)
+    if not params.amber.order_file_name:
+      raise Sorry('no filename for order file provided')
     if params.amber.coordinate_file_name:
       print("  coordinates : %s" % params.amber.coordinate_file_name, file=log)
+      if not params.amber.coordinate_file_name:
+        raise Sorry('no filename for coordinate file provided')
 
   def energies_sites(self,
                      sites_cart,
