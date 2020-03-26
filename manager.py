@@ -105,6 +105,7 @@ class manager(standard_manager):
                      extension_objects=[],
                      site_labels=None,
                      log=None):
+    delta_time_limit=10
     result = standard_manager.energies_sites(
       self,
       sites_cart,
@@ -178,16 +179,10 @@ class manager(standard_manager):
         else: _outl(result.residual_sum)
       if not self.last_time:
         self.last_time = time.time()
-      delta_time = time.time()-self.last_time
-      energies = '%12s %12s %12s %12s %12s %12s %5.1f' % (outl[0],
-                                                          outl[1],
-                                                          outl[2],
-                                                          outl[3],
-                                                          outl[4],
-                                                          outl[5],
-                                                          delta_time,
-                                                          )
-      if delta_time>delta_time_limit:
+        delta_time = 0
+      else:
+        delta_time = time.time()-self.last_time
+      if delta_time>delta_time_limit or delta_time<1e-6:
         headers = [' Amber total',
                    '   bonds    ',
                    '   angles   ',
@@ -201,10 +196,19 @@ class manager(standard_manager):
                                           'n=%d' % result.energy_components[7],
                                           'n=%d' % result.energy_components[8],
                                           )
-        # show_stack()
         self.last_time = time.time()
+        delta_time = time.time()-self.last_time
+        # show_stack()
         print(heading, file=log)
         print(numbers, file=log)
+      energies = '%12s %12s %12s %12s %12s %12s %5.1f' % (outl[0],
+                                                          outl[1],
+                                                          outl[2],
+                                                          outl[3],
+                                                          outl[4],
+                                                          outl[5],
+                                                          delta_time,
+                                                          )
       print(energies, file=log)
     #print result.bond_deviations(sites_cart,
     #                             self.amber_structs.parm,
