@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 from StringIO import StringIO
-import sys
+import sys, time
 
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
@@ -74,7 +74,7 @@ class manager(standard_manager):
     if self.energy_components is None:
       self.energy_components = flex.double([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
-    self.selection_count = 0
+    self.last_time = None
 
   def __repr__(self):
     return 'Amber manager'
@@ -104,7 +104,6 @@ class manager(standard_manager):
                      external_energy_function=None,
                      extension_objects=[],
                      site_labels=None,
-                     print_amber_energies=False,
                      log=None):
     result = standard_manager.energies_sites(
       self,
@@ -166,28 +165,47 @@ class manager(standard_manager):
     result.bond_residual_sum=result.target
     if log is None:
       log = sys.stdout
-    if print_amber_energies or 1:
+    if self.print_amber_energies:
       import decimal
       outl = []
       def _outl(f):
         if f>1e4:
-          outl.append('%.2E' % decimal.Decimal(f))
+          outl.append('%.1E' % decimal.Decimal(f))
         else:
-          outl.append('%0.2f' % f)
+          outl.append('%0.1f' % f)
       for i in range(9):
         if i: _outl(result.energy_components[i])
         else: _outl(result.residual_sum)
-      print("""  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s""" % (
-          outl[0],
-          result.energy_components[6],
-          outl[1],
-          result.energy_components[7],
-          outl[2],
-          result.energy_components[8],
-          outl[3],
-          outl[4],
-          outl[5]))
-      # show_stack()
+      if not self.last_time:
+        self.last_time = time.time()
+      delta_time = time.time()-self.last_time
+      energies = '%12s %12s %12s %12s %12s %12s %5.1f' % (outl[0],
+                                                          outl[1],
+                                                          outl[2],
+                                                          outl[3],
+                                                          outl[4],
+                                                          outl[5],
+                                                          delta_time,
+                                                          )
+      if delta_time>delta_time_limit:
+        headers = [' Amber total',
+                   '   bonds    ',
+                   '   angles   ',
+                   '  dihedrals ',
+                   '   elec.    ',
+                   '  v.d.Waals ',
+                   ]
+        heading = ' '.join(headers)
+        numbers = '%s %12s %12s %12s ' % (' '*12,
+                                          'n=%d' % result.energy_components[6],
+                                          'n=%d' % result.energy_components[7],
+                                          'n=%d' % result.energy_components[8],
+                                          )
+        # show_stack()
+        self.last_time = time.time()
+        print(heading, file=log)
+        print(numbers, file=log)
+      print(energies, file=log)
     #print result.bond_deviations(sites_cart,
     #                             self.amber_structs.parm,
     #                             ignore_hd=False,
