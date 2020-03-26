@@ -810,6 +810,7 @@ class AmberPrepRunner:
     for s in ['%s.eff',
               '%s_curated.pdb',
               '%s_uc_H.pdb',
+              '%s_uc.pdb',
               '%sab.rst7',
               '4amber_%s.pdb',
               '4amber_%s.LES.pdb',

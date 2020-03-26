@@ -80,7 +80,7 @@ class manager(standard_manager):
     return 'Amber manager'
 
   def initialisation(self, params, log=None):
-    make_header("Initializing AMBER", out=log)
+    make_header("Initializing Amber", out=log)
     print("  topology    : %s" % params.amber.topology_file_name, file=log)
     if not params.amber.topology_file_name:
       raise Sorry('no filename for topology file provided')
@@ -91,6 +91,7 @@ class manager(standard_manager):
       print("  coordinates : %s" % params.amber.coordinate_file_name, file=log)
       if not params.amber.coordinate_file_name:
         raise Sorry('no filename for coordinate file provided')
+    make_header('...', out=log)
 
   def energies_sites(self,
                      sites_cart,
@@ -212,7 +213,8 @@ class manager(standard_manager):
     # self.standard_geometry_restraints_manager = result
     return self
 
-  def cleanup_amber(self):
+  def cleanup(self):
+    make_header('Cleaning up - Amber')
     if self.sander and self.amber_structs:
       if self.amber_structs.is_LES:
         import sanderles; sanderles.cleanup()
