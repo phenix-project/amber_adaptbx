@@ -1,0 +1,282 @@
+ Amber12 Module: addles
+ set up Locally Enhanced Sampling topology
+add_les> file rprm name=(4amber_1aho.prmtop) read
+  The following unit number was assigned    26
+| New format PARM file being parsed.
+| Version =    1.000 Date = 04/29/20 Time = 22:39:57
+ Checking topology sizes against compiled limits
+ Checking topology sizes against compiled limits
+add_les> file rcbd name=(4amber_1aho.rst7) read
+  The following unit number was assigned    27
+Coords, box from unit  27
+                                                                                
+ Reading coordinates from input file
+ Reading box coords from input file
+add_les> file wprm name=(4amber_1aho.LES.prmtop) wovr
+  The following unit number was assigned    28
+add_les> file wcrd name=(4amber_1aho.LES.rst7) wovr
+  The following unit number was assigned    29
+add_les> action
+ Warning- old coordinate file not specified
+ New coordinate file  will not be created
+add_les> omas
+ All masses will be left at initial values
+add_les> ~ protein chain: 1
+add_les> spac numc=2 pick #cca 12 12 done
+ picking from         5312  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5312 particles; currently   5326 particles
+there were   3336 nbonh bonds, now there are   3341
+there were   2040 nbona bonds, now there are   2051
+there were      0 nbper bonds, now there are      0
+there were   4068 ntheth angles, now there are   4082
+there were   2760 ntheta angles, now there are   2778
+there were      0 ngper angles, now there are      0
+there were   8584 nphih torsions, now there are   8623
+there were   8488 nphia torsions, now there are   8571
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.327 C O CB   0.615 SG
+add_les> spac numc=2 pick #sid 24 24 done
+ picking from         5326  particles
+ Picked            8  particles
+ Making            2  copies
+there were   5326 particles; currently   5334 particles
+there were   3341 nbonh bonds, now there are   3345
+there were   2051 nbona bonds, now there are   2055
+there were      0 nbper bonds, now there are      0
+there were   4082 ntheth angles, now there are   4092
+there were   2778 ntheta angles, now there are   2783
+there were      0 ngper angles, now there are      0
+there were   8623 nphih torsions, now there are   8642
+there were   8571 nphia torsions, now there are   8588
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ GLU: CB   0.097 CG CD OE1 OE2
+add_les> spac numc=2 pick #cca 61 61 done
+ picking from         5334  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5334 particles; currently   5348 particles
+there were   3345 nbonh bonds, now there are   3350
+there were   2055 nbona bonds, now there are   2067
+there were      0 nbper bonds, now there are      0
+there were   4092 ntheth angles, now there are   4106
+there were   2783 ntheta angles, now there are   2803
+there were      0 ngper angles, now there are      0
+there were   8642 nphih torsions, now there are   8686
+there were   8588 nphia torsions, now there are   8669
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.299 C O CB   0.628 SG
+add_les> ~ protein chain: 2
+add_les> spac numc=2 pick #cca 203 203 done
+ picking from         5348  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5348 particles; currently   5362 particles
+there were   3350 nbonh bonds, now there are   3355
+there were   2067 nbona bonds, now there are   2078
+there were      0 nbper bonds, now there are      0
+there were   4106 ntheth angles, now there are   4120
+there were   2803 ntheta angles, now there are   2821
+there were      0 ngper angles, now there are      0
+there were   8686 nphih torsions, now there are   8725
+there were   8669 nphia torsions, now there are   8752
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.327 C O CB   0.615 SG
+add_les> spac numc=2 pick #sid 215 215 done
+ picking from         5362  particles
+ Picked            8  particles
+ Making            2  copies
+there were   5362 particles; currently   5370 particles
+there were   3355 nbonh bonds, now there are   3359
+there were   2078 nbona bonds, now there are   2082
+there were      0 nbper bonds, now there are      0
+there were   4120 ntheth angles, now there are   4130
+there were   2821 ntheta angles, now there are   2826
+there were      0 ngper angles, now there are      0
+there were   8725 nphih torsions, now there are   8744
+there were   8752 nphia torsions, now there are   8769
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ GLU: CB   0.097 CG CD OE1 OE2
+add_les> spac numc=2 pick #cca 252 252 done
+ picking from         5370  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5370 particles; currently   5384 particles
+there were   3359 nbonh bonds, now there are   3364
+there were   2082 nbona bonds, now there are   2094
+there were      0 nbper bonds, now there are      0
+there were   4130 ntheth angles, now there are   4144
+there were   2826 ntheta angles, now there are   2846
+there were      0 ngper angles, now there are      0
+there were   8744 nphih torsions, now there are   8788
+there were   8769 nphia torsions, now there are   8850
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.299 C O CB   0.628 SG
+add_les> ~ protein chain: 3
+add_les> spac numc=2 pick #cca 394 394 done
+ picking from         5384  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5384 particles; currently   5398 particles
+there were   3364 nbonh bonds, now there are   3369
+there were   2094 nbona bonds, now there are   2105
+there were      0 nbper bonds, now there are      0
+there were   4144 ntheth angles, now there are   4158
+there were   2846 ntheta angles, now there are   2864
+there were      0 ngper angles, now there are      0
+there were   8788 nphih torsions, now there are   8827
+there were   8850 nphia torsions, now there are   8933
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.327 C O CB   0.615 SG
+add_les> spac numc=2 pick #sid 406 406 done
+ picking from         5398  particles
+ Picked            8  particles
+ Making            2  copies
+there were   5398 particles; currently   5406 particles
+there were   3369 nbonh bonds, now there are   3373
+there were   2105 nbona bonds, now there are   2109
+there were      0 nbper bonds, now there are      0
+there were   4158 ntheth angles, now there are   4168
+there were   2864 ntheta angles, now there are   2869
+there were      0 ngper angles, now there are      0
+there were   8827 nphih torsions, now there are   8846
+there were   8933 nphia torsions, now there are   8950
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ GLU: CB   0.097 CG CD OE1 OE2
+add_les> spac numc=2 pick #cca 443 443 done
+ picking from         5406  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5406 particles; currently   5420 particles
+there were   3373 nbonh bonds, now there are   3378
+there were   2109 nbona bonds, now there are   2121
+there were      0 nbper bonds, now there are      0
+there were   4168 ntheth angles, now there are   4182
+there were   2869 ntheta angles, now there are   2889
+there were      0 ngper angles, now there are      0
+there were   8846 nphih torsions, now there are   8890
+there were   8950 nphia torsions, now there are   9031
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.299 C O CB   0.628 SG
+add_les> ~ protein chain: 4
+add_les> spac numc=2 pick #cca 585 585 done
+ picking from         5420  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5420 particles; currently   5434 particles
+there were   3378 nbonh bonds, now there are   3383
+there were   2121 nbona bonds, now there are   2132
+there were      0 nbper bonds, now there are      0
+there were   4182 ntheth angles, now there are   4196
+there were   2889 ntheta angles, now there are   2907
+there were      0 ngper angles, now there are      0
+there were   8890 nphih torsions, now there are   8929
+there were   9031 nphia torsions, now there are   9114
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.327 C O CB   0.615 SG
+add_les> spac numc=2 pick #sid 597 597 done
+ picking from         5434  particles
+ Picked            8  particles
+ Making            2  copies
+there were   5434 particles; currently   5442 particles
+there were   3383 nbonh bonds, now there are   3387
+there were   2132 nbona bonds, now there are   2136
+there were      0 nbper bonds, now there are      0
+there were   4196 ntheth angles, now there are   4206
+there were   2907 ntheta angles, now there are   2912
+there were      0 ngper angles, now there are      0
+there were   8929 nphih torsions, now there are   8948
+there were   9114 nphia torsions, now there are   9131
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ GLU: CB   0.097 CG CD OE1 OE2
+add_les> spac numc=2 pick #cca 634 634 done
+ picking from         5442  particles
+ Picked           14  particles
+ Making            2  copies
+there were   5442 particles; currently   5456 particles
+there were   3387 nbonh bonds, now there are   3392
+there were   2136 nbona bonds, now there are   2148
+there were      0 nbper bonds, now there are      0
+there were   4206 ntheth angles, now there are   4220
+there were   2912 ntheta angles, now there are   2932
+there were      0 ngper angles, now there are      0
+there were   8948 nphih torsions, now there are   8992
+there were   9131 nphia torsions, now there are   9212
+there were      0 ndper torsions, now there are      0
+processing exclusion list 
+finished creating LES subspace 
+ Checking topology sizes against compiled limits
+add_les> ~ CYS: N CA   0.299 C O CB   0.628 SG
+add_les> *EOD
+ Finished reading subspace definitions. 
+ Looking for unique atom and covalent types
+           3           1   1.0900000000000001        340.00000000000000     
+           4           2   1.0900000000000001        340.00000000000000     
+           6           3   1.0900000000000001        340.00000000000000     
+           9           4   1.0100000000000000        434.00000000000000     
+          11           5   1.0900000000000001        340.00000000000000     
+          13           6   1.0900000000000001        340.00000000000000     
+          15           7   1.0900000000000001        340.00000000000000     
+          17           8   1.0100000000000000        434.00000000000000     
+          20           9   1.0900000000000001        340.00000000000000     
+          23          10   1.0800000000000001        367.00000000000000     
+          25          11  0.95999999999999996        553.00000000000000     
+          34          12   1.0900000000000001        170.00000000000000     
+          13   1.0900000000000001        340.00000000000000     
+          15          14   1.0900000000000001        170.00000000000000     
+          17          15   1.0100000000000000        217.00000000000000     
+          36          16   1.0900000000000001        340.00000000000000     
+          38          17   1.0100000000000000        434.00000000000000     
+          40          18   1.0900000000000001        340.00000000000000     
+          20          19   1.0900000000000001        170.00000000000000     
+          47          20   1.0100000000000000        434.00000000000000     
+          49          21   1.0800000000000001        367.00000000000000     
+          55          22   1.0900000000000001        340.00000000000000     
+          57          23   1.0800000000000001        367.00000000000000     
+          59          24   1.0800000000000001        367.00000000000000     
+          68          25   1.5136000000000001        553.00000000000000     
+          69          26  0.95720000000000005        553.00000000000000     
+ bond with hydrogen:          26
+There were    69 bond types, now there are    83
+There were   156 angle types, now there are   184
+There were   195 dihedral types, now there are   261
+There were    16 atom typesNow there are    24
+MAX # ATOMS IN A SINGLE RESIDUE =      26
+  ATOM  origpt
+ Writing coordinates to output file
+ Writing box coords and angles to output file
+ Successful completion of ADDLES
