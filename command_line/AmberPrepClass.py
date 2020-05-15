@@ -87,6 +87,9 @@ master_phil_string = """
         .type = bool
         .help = 'If True, use UnitCell from Amber; else use expand_to_p1()'
         .style = hidden
+      override_special_positions_stop = False
+        .type = bool
+        .style = hidden
     }
     output
     {
@@ -105,8 +108,21 @@ master_phil = phil.parse(master_phil_string,
                          )
 # needed by GUI
 def validate_params(params):
+  from iotbx import pdb
   if not params.amber_prep.inputs.pdb_file_name:
     raise Sorry('Must supply a PDB model')
+  if not params.amber_prep.actions.override_special_positions_stop:
+    pdb_inp = pdb.input(params.amber_prep.inputs.pdb_file_name)
+    rc = pdb_inp.extract_remark_iii_records(375)
+    if rc:
+      outl = '\n'.join(rc)
+      outl += '''
+
+  Atoms in special positions can cause problems for Phenix-Amber
+
+  Remove offending atoms or set override_special_positions_stop=True to ignore
+  '''
+      raise Sorry(outl)
   return True
 
 def setup_parser():
@@ -1058,6 +1074,7 @@ def run(rargs=None):
   inputs = working_params.amber_prep.inputs
   actions = working_params.amber_prep.actions
   base = get_output_preamble(working_params)
+  validate_params(working_params)
   amber_prep_runner = AmberPrepRunner(base, LES=actions.LES)
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
 
