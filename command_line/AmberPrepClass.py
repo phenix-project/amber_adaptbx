@@ -693,13 +693,13 @@ class AmberPrepRunner:
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
        ntr    = 1, restraint_wt = 50.0, restraintmask ='!@H=',
-       imin   = 1, maxcyc = 1000, ncyc   = 200, ntmin  = 1, ntxo = 1,
+       imin   = 1, maxcyc = 1000, ncyc   = 200, ntxo = 1,
       /
       """,
               "amber_all" : """Initial minimization
       &cntrl
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,
-       imin   = 1, maxcyc = 50, ncyc   = 200, ntmin  = 1, ntxo = 1,
+       imin   = 1, maxcyc = 50, ncyc   = 200, ntxo = 1,
        ntpr=10, ntr=1, restraint_wt=2.0, restraintmask='!@H=',
       /
       """
