@@ -370,7 +370,7 @@ class AmberPrepRunner:
     x = []
     y = []
     z = []
-    for iat in range(0,int(nat/2),2):
+    for iat in range(0,nat,2):
        line = rst7h.readline()
        x.append(line[ 0: 8])
        y.append(line[12:20])
