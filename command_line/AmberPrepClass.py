@@ -73,7 +73,7 @@ master_phil_string = """
         .type = bool
         .caption = Run reduce on the input pdb file to place hydrogens
         .help = Run reduce on the input pdb file to place hydrogens
-      use_glycam = False
+      use_glycam = True
         .type = bool
         .caption = Load GLYCAM carbohydrate force field
         .help = Load GLYCAM carbohydrate force field
@@ -826,7 +826,6 @@ class AmberPrepRunner:
     for s in ['%s.eff',
               '%s_curated.pdb',
               '%s_uc_H.pdb',
-              '%s_uc.pdb',
               '%sab.rst7',
               '4amber_%s.pdb',
               '4amber_%s.LES.pdb',

@@ -238,8 +238,8 @@ RESSUGAR = (
     'ZxD', 'ZxU', 'ZzA', 'ZzB', '0AE', '2AE', '4AE', 'YGa', '0AF', '2AF',
     '4AF', 'YAF', '0dR', '3dR', '4dR', 'WdR')
 
-# AMBER_SUPPORTED_RESNAMES = set(RESPROT + RESNA + RESSOLV + RESSUGAR)
-AMBER_SUPPORTED_RESNAMES = set(RESPROT + RESNA + RESSOLV)
+AMBER_SUPPORTED_RESNAMES = set(RESPROT + RESNA + RESSOLV + RESSUGAR)
+# AMBER_SUPPORTED_RESNAMES = set(RESPROT + RESNA + RESSOLV)
 
 #  For correct protein gap detection, we need to extend the RESPROT set:
 #  RESPROT itself give residue names that are included in
