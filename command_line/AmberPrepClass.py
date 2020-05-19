@@ -350,8 +350,7 @@ class AmberPrepRunner:
                               template_pdb, outpdb):
     '''
     Combine information in {parm7,rst7} with that in the template_pdb
-       file (usually 4phenix_xxxx.pdb created in les_builder) to create
-       outpdb (usually over-writing the template_pdb file)
+       file (usually 4phenix_xxxx.pdb) to create outpdb 
 
     Note:  the atom order in outpdb will be the "Amber" atom order; use phenix
     routines after this to convert to phenix atom order.
@@ -386,9 +385,25 @@ class AmberPrepRunner:
 
     rst7h.close()
 
+    # transfer minimized coordinates to the 4phenix_xxxx.min.pdb file:
+
     iat = 0
     th = open(template_pdb,"r")
     outh = open(outpdb, "w" )
+    for line in th:
+       if line[0:4] == "ATOM" or line[0:6] == "HETATM":
+          outh.write(line[0:30] + x[iat] + y[iat] + z[iat] + line[54:])
+          iat = iat + 1
+       else:
+          outh.write(line)
+
+    th.close()
+    outh.close()
+
+    # transfer minimized coordinates to the b4phenix_xxxx.min.pdb file:
+    iat = 0
+    th = open("b" + template_pdb,"r")
+    outh = open("b" + outpdb, "w" )
     for line in th:
        if line[0:4] == "ATOM" or line[0:6] == "HETATM":
           outh.write(line[0:30] + x[iat] + y[iat] + z[iat] + line[54:])
@@ -698,7 +713,6 @@ class AmberPrepRunner:
 
     os.rename('%s_uc.rst7' % self.base, '4amber_%s.rst7' % self.base)
     os.rename('%s_uc.prmtop' % self.base, '4amber_%s.prmtop' % self.base)
-    os.rename( tleap_pdb_file, '%s_uc.pdb' % self.base )
 
   def run_minimise(self, mintype=None, minimization_options=''):
     assert self.base
@@ -830,6 +844,7 @@ class AmberPrepRunner:
               '4amber_%s.pdb',
               '4amber_%s.LES.pdb',
               'b4phenix_%s.pdb',
+              '%s_4tleap_uc.pdb',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
@@ -1249,6 +1264,7 @@ def run(rargs=None):
     #    required.)
     os.rename('4amber_%s.min.rst7' % base, '4amber_%s.rst7' % base)
     os.rename('4phenix_%s.min.pdb' % base, '4phenix_%s.pdb' % base)
+    os.rename('b4phenix_%s.min.pdb' % base, 'b4phenix_%s.pdb' % base)
 
   # N.B: above 4phenix file does not have the phenix atom order inside
   #    residues: pass this through a phenix hierarchy function to get that.
@@ -1258,6 +1274,16 @@ def run(rargs=None):
   pdb_h_post.write_pdb_file(file_name=phenix_file,
             append_end=True,
             crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
+
+  # pass through phenix routines to get correct symmetry for b4phenix:
+  phenix_file = 'b4phenix_%s.pdb' % base
+  pdb_post = iotbx.pdb.input(file_name=phenix_file)
+  pdb_post.write_pdb_file(file_name=phenix_file,
+            append_end=True,
+            crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
+  # expand the b4phenix_xxxx.pdb file to the full unit cell:
+  build_unitcell('b4phenix_%s.pdb' % base, '%s_uc.pdb' % base, 
+                 use_amber_unitcell=actions.use_amber_unitcell)
 
   amber_prep_runner.check_special_positions()
 
