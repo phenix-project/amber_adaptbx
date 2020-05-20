@@ -520,7 +520,7 @@ class AmberPrepRunner:
             print_cmd('" --- Testing environment ---"', verbose=True)
             raise Sorry('tleap error : "%s"' % line)
 
-    tleap_input_file = "%s_%s_tleap_input_run" % (self.base, output_base)
+    tleap_input_file = "tleap_%s.in" % output_base
     f = file(tleap_input_file, "wb")
     f.write('logFile %s\n' % logfile)
 
@@ -805,12 +805,10 @@ class AmberPrepRunner:
       preLES.rst7
       asu.prmtop
       asu.rst7
-      uc_tleap_input_run
-      asu_tleap_input_run
       4UnitCell.pdb
       leap.log
       tleap_asu.log
-      tleap.in
+      tleap_asu.in
       tleap_uc.log
       sqm.pdb
       sqm.out
