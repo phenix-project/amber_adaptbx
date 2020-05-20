@@ -4,8 +4,8 @@
           -------------------------------------------------------
 
 
-|   Executable path: /home/case/amber_phenix-0.8/bin/sander
-| Working directory: /Users/case/phenix_svnf/modules/amber_adaptbx/tests/files/1aho
+|   Executable path: /Users/case/phenix/build/../conda_base/bin/sander
+| Working directory: /Users/case/phenix/modules/amber_adaptbx/tests/files/1aho
 |          Hostname: Unknown
   [-O]verwriting output
 
@@ -32,7 +32,7 @@ File Assignments:
 Initial minimization                                                           
       &cntrl                                                                   
        ntwx   = 0, ntb    = 1, cut    = 9.0,     nsnb   = 10,                  
-       imin   = 1, maxcyc = 50, ncyc   = 200, ntmin  = 1, ntxo = 1,            
+       imin   = 1, maxcyc = 50, ncyc   = 200, ntxo = 1,                        
        ntpr=10, ntr=1, restraint_wt=2.0, restraintmask='!@H=',                 
       /                                                                        
                                                                                
@@ -46,7 +46,7 @@ Initial minimization
 | peek_ewald_inpcrd: Box info found
 |Largest sphere to fit in unit cell has radius =    15.050
 | New format PARM file being parsed.
-| Version =    1.000 Date = 01/14/19 Time = 11:11:23
+| Version =    1.000 Date = 05/20/20 Time = 11:04:10
  NATOM  =    5312 NTYPES =      16 NBONH =    3336 MBONA  =    2040
  NTHETH =    4068 MTHETA =    2760 NPHIH =    8584 MPHIA  =    8488
  NHPARM =       0 NPARM  =       0 NNB   =   22756 NRES   =     764
@@ -200,35 +200,36 @@ Ewald parameters:
    5.  TIMINGS
 --------------------------------------------------------------------------------
 
-|    Read coords time           0.00 ( 0.10% of Total)
-|                Build the list             0.06 (90.42% of List )
-|                Other                      0.01 ( 9.58% of List )
-|             List time                  0.06 ( 4.45% of Nonbo)
-|                   Short_ene time             1.11 (99.48% of Direc)
-|                   Other                      0.01 ( 0.52% of Direc)
-|                Direct Ewald time          1.12 (83.59% of Ewald)
-|                Adjust Ewald time          0.03 ( 2.10% of Ewald)
-|                   Fill Bspline coeffs        0.01 ( 6.62% of Recip)
-|                   Fill charge grid           0.02 (12.91% of Recip)
-|                   Scalar sum                 0.03 (16.50% of Recip)
-|                   Grad sum                   0.04 (24.29% of Recip)
-|                   FFT time                   0.07 (39.68% of Recip)
-|                   Other                      0.00 ( 0.02% of Recip)
-|                Recip Ewald time           0.18 (13.47% of Ewald)
-|                Virial junk                0.00 ( 0.05% of Ewald)
-|                Other                      0.01 ( 0.79% of Ewald)
-|             Ewald time                 1.33 (95.55% of Nonbo)
-|          Nonbond force              1.40 (93.77% of Force)
-|          Bond/Angle/Dihedral        0.09 ( 6.12% of Force)
-|          Other                      0.00 ( 0.10% of Force)
-|       Force time                 1.49 (100.0% of Runmd)
-|    Runmd Time                 1.49 (82.34% of Total)
-| Total time                 1.81 (100.0% of ALL  )
+|    Read coords time           0.00 ( 0.11% of Total)
+|                Build the list             0.06 (90.32% of List )
+|                Other                      0.01 ( 9.68% of List )
+|             List time                  0.06 ( 4.46% of Nonbo)
+|                   Short_ene time             1.13 (99.38% of Direc)
+|                   Other                      0.01 ( 0.62% of Direc)
+|                Direct Ewald time          1.14 (83.01% of Ewald)
+|                Adjust Ewald time          0.03 ( 2.07% of Ewald)
+|                Self Ewald time            0.00 ( 0.01% of Ewald)
+|                   Fill Bspline coeffs        0.01 ( 5.91% of Recip)
+|                   Fill charge grid           0.03 (13.80% of Recip)
+|                   Scalar sum                 0.03 (14.97% of Recip)
+|                   Grad sum                   0.05 (28.41% of Recip)
+|                   FFT time                   0.07 (36.87% of Recip)
+|                   Other                      0.00 ( 0.04% of Recip)
+|                Recip Ewald time           0.19 (14.08% of Ewald)
+|                Virial junk                0.00 ( 0.06% of Ewald)
+|                Other                      0.01 ( 0.78% of Ewald)
+|             Ewald time                 1.37 (95.54% of Nonbo)
+|          Nonbond force              1.43 (93.81% of Force)
+|          Bond/Angle/Dihedral        0.09 ( 6.08% of Force)
+|          Other                      0.00 ( 0.12% of Force)
+|       Force time                 1.53 (100.0% of Runmd)
+|    Runmd Time                 1.53 (82.94% of Total)
+| Total time                 1.84 (100.0% of ALL  )
 
 | Number of list builds   :          2
 
 | Highest rstack allocated:     273718
 | Highest istack allocated:       5312
-|           Job began  at 11:11:23.967  on 01/14/2019
-|           Setup done at 11:11:24.009  on 01/14/2019
-|           Run   done at 11:11:25.777  on 01/14/2019
+|           Job began  at 11:04:11.449  on 05/20/2020
+|           Setup done at 11:04:11.505  on 05/20/2020
+|           Run   done at 11:04:13.294  on 05/20/2020
