@@ -62,37 +62,31 @@ Only the first occurrence for each atom was kept.
 Setting up library files for non-standard residues
 ==================================================
 
-==================================================
-Running elbow/antechamber for GOL 
-==================================================
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_GOL.pdb -fi pdb -o GOL.mol2 -fo mol2       -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
-
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i GOL.mol2 -f mol2 -o GOL.frcmod
-
+  Residue "GOL" already in amber monomer library. Skipping elbow/antechamber
+    run for this residue.
+        
 
 ==================================================
 Running elbow/antechamber for SPB 
 ==================================================
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_SPB.pdb -fi pdb -o SPB.mol2 -fo mol2       -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+| ~> /Users/case/phenix/build/../conda_base/bin/antechamber -i 4antechamber_SPB.pdb -fi pdb -o SPB.mol2 -fo mol2         -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
 
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i SPB.mol2 -f mol2 -o SPB.frcmod
+| ~> /Users/case/phenix/build/../conda_base/bin/parmchk2 -s 2 -i SPB.mol2 -f mol2 -o SPB.frcmod
 
 
 ==================================================
 Preparing asu files and 4phenix_3cfb.pdb
 ==================================================
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 3cfb_asu_tleap_input_run
+| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 3cfb_asu_tleap_input_run
 
 Checking output filenames
   file : 3cfb_asu.prmtop
   file : 3cfb_asu.rst7
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 3cfb_asu.rst7 -o 3cfb_asu.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
+| ~> /Users/case/phenix/build/../conda_base/bin/ChBox -c 3cfb_asu.rst7 -o 3cfb_asu.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
 
 
 ============================================================
@@ -149,13 +143,13 @@ None
 
 None
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 3cfb_uc_tleap_input_run
+| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 3cfb_uc_tleap_input_run
 
 Checking output filenames
   file : 3cfb_uc.prmtop
   file : 3cfb_uc.rst7
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 3cfb_uc.rst7 -o 3cfb_uc.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
+| ~> /Users/case/phenix/build/../conda_base/bin/ChBox -c 3cfb_uc.rst7 -o 3cfb_uc.rst7 -X 194.707 -Y 61.015 -Z 92.246 -al 90.0 -bt 116.65 -gm 90.0 
 
 4amber_3cfb.prmtop
 checking special positions in 4phenix_3cfb.pdb

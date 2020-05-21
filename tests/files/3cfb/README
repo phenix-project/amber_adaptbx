@@ -9,6 +9,12 @@ Run tests on 3cfb: similar to 1aho, but takes longer :-(
 
 To run the tests:
 
+./test_amber_3cfb
+
+OR, to run individually:
+
 ./test_AmberPrep      (takes 153 sec on dac laptop)
 ./test_phenix.refine  (takes 590 sec on dac laptop)
 
+#  Note: LES tests fail as of May, 2020, since code that creates the
+#  4phenix_3cfb.pdb file doesn't include the insertion codes

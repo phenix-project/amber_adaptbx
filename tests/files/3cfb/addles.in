@@ -1,0 +1,275 @@
+file rprm name=(4amber_3cfb.prmtop) read
+file rcbd name=(4amber_3cfb.rst7) read
+file wprm name=(4amber_3cfb.LES.prmtop) wovr
+file wcrd name=(4amber_3cfb.LES.rst7) wovr
+action
+omas
+~ protein chain: 1
+spac numc=2 pick #cca 25 25 done
+~ SER: N CA   0.102 C O CB   0.161 OG
+spac numc=2 pick #cca 48 48 done
+~ SER: N CA   0.045 C O CB   0.173 OG
+spac numc=2 pick #cca 81 82 done
+~ SER: N CA   0.139 C O CB   0.292 OG
+~ ARG: N CA   0.091 C O CB   0.177 CG CD NE CZ NH1 NH2
+spac numc=2 pick #cca 173 173 done
+~ SER: N CA   0.039 C O CB   0.193 OG
+spac numc=2 pick #cca 181 181 done
+~ SER: N CA   0.046 C O CB   0.240 OG
+spac numc=2 pick #cca 189 189 done
+~ ASP: N CA   0.036 C O CB   0.050 CG OD1 OD2
+spac numc=2 pick #cca 196 196 done
+~ SER: N CA   0.009 C O CB   0.043 OG
+spac numc=2 pick #cca 199 199 done
+~ CYS: N CA   0.119 C O CB   0.465 SG
+spac numc=2 pick #cca 243 243 done
+~ SER: N CA   0.071 C O CB   0.241 OG
+spac numc=2 pick #cca 255 255 done
+~ VAL: N CA   0.095 C O CB   0.202 CG1 CG2
+spac numc=2 pick #cca 257 257 done
+~ GLN: N CA   0.119 C O CB   0.453 CG CD OE1 NE2
+spac numc=2 pick #cca 271 271 done
+~ SER: N CA   0.112 C O CB   0.248 OG
+spac numc=2 pick #cca 305 305 done
+~ SER: N CA   0.055 C O CB   0.364 OG
+spac numc=2 pick #cca 313 313 done
+~ CYS: N CA   0.179 C O CB   0.516 SG
+spac numc=2 pick #cca 331 332 done
+~ SER: N CA   0.072 C O CB   0.147 OG
+~ SER: N CA   0.065 C O CB   0.329 OG
+spac numc=2 pick #cca 451 451 done
+~ SER: N CA   0.239 C O CB   0.415 OG
+spac numc=2 pick #cca 453 453 done
+~ SER: N CA   0.048 C O CB   0.170 OG
+spac numc=2 pick #cca 456 456 done
+~ SER: N CA   0.070 C O CB   0.138 OG
+spac numc=2 pick #cca 463 463 done
+~ SER: N CA   0.253 C O CB   0.741 OG
+spac numc=2 pick #cca 479 479 done
+~ SER: N CA   0.007 C O CB   0.027 OG
+spac numc=2 pick #cca 487 487 done
+~ MET: N CA   0.098 C O CB   0.426 CG SD CE
+spac numc=2 pick #cca 492 492 done
+~ SER: N CA   0.103 C O CB   0.147 OG
+spac numc=2 pick #cca 519 519 done
+~ VAL: N CA   0.035 C O CB   0.251 CG1 CG2
+spac numc=2 pick #cca 604 604 done
+~ SER: N CA   0.041 C O CB   0.187 OG
+spac numc=2 pick #cca 611 611 done
+~ MET: N CA   0.232 C O CB   0.769 CG SD CE
+spac numc=2 pick #cca 620 620 done
+~ ASP: N CA   0.037 C O CB   0.156 CG OD1 OD2
+spac numc=2 pick #cca 630 630 done
+~ CYS: N CA   0.184 C O CB   0.739 SG
+spac numc=2 pick #cca 674 674 done
+~ SER: N CA   0.031 C O CB   0.127 OG
+spac numc=2 pick #cca 686 686 done
+~ VAL: N CA   0.111 C O CB   0.505 CG1 CG2
+spac numc=2 pick #cca 732 732 done
+~ SER: N CA   0.094 C O CB   0.165 OG
+spac numc=2 pick #cca 744 744 done
+~ CYS: N CA   0.161 C O CB   0.496 SG
+spac numc=2 pick #cca 762 762 done
+~ SER: N CA   0.076 C O CB   0.213 OG
+~ protein chain: 2
+spac numc=2 pick #cca 1485 1485 done
+~ SER: N CA   0.102 C O CB   0.161 OG
+spac numc=2 pick #cca 1508 1508 done
+~ SER: N CA   0.045 C O CB   0.173 OG
+spac numc=2 pick #cca 1541 1542 done
+~ SER: N CA   0.139 C O CB   0.292 OG
+~ ARG: N CA   0.091 C O CB   0.177 CG CD NE CZ NH1 NH2
+spac numc=2 pick #cca 1633 1633 done
+~ SER: N CA   0.039 C O CB   0.193 OG
+spac numc=2 pick #cca 1641 1641 done
+~ SER: N CA   0.046 C O CB   0.240 OG
+spac numc=2 pick #cca 1649 1649 done
+~ ASP: N CA   0.036 C O CB   0.050 CG OD1 OD2
+spac numc=2 pick #cca 1656 1656 done
+~ SER: N CA   0.009 C O CB   0.043 OG
+spac numc=2 pick #cca 1659 1659 done
+~ CYS: N CA   0.119 C O CB   0.465 SG
+spac numc=2 pick #cca 1703 1703 done
+~ SER: N CA   0.071 C O CB   0.241 OG
+spac numc=2 pick #cca 1715 1715 done
+~ VAL: N CA   0.095 C O CB   0.202 CG1 CG2
+spac numc=2 pick #cca 1717 1717 done
+~ GLN: N CA   0.119 C O CB   0.453 CG CD OE1 NE2
+spac numc=2 pick #cca 1731 1731 done
+~ SER: N CA   0.112 C O CB   0.248 OG
+spac numc=2 pick #cca 1765 1765 done
+~ SER: N CA   0.055 C O CB   0.364 OG
+spac numc=2 pick #cca 1773 1773 done
+~ CYS: N CA   0.179 C O CB   0.516 SG
+spac numc=2 pick #cca 1791 1792 done
+~ SER: N CA   0.072 C O CB   0.147 OG
+~ SER: N CA   0.065 C O CB   0.329 OG
+spac numc=2 pick #cca 1911 1911 done
+~ SER: N CA   0.239 C O CB   0.415 OG
+spac numc=2 pick #cca 1913 1913 done
+~ SER: N CA   0.048 C O CB   0.170 OG
+spac numc=2 pick #cca 1916 1916 done
+~ SER: N CA   0.070 C O CB   0.138 OG
+spac numc=2 pick #cca 1923 1923 done
+~ SER: N CA   0.253 C O CB   0.741 OG
+spac numc=2 pick #cca 1939 1939 done
+~ SER: N CA   0.007 C O CB   0.027 OG
+spac numc=2 pick #cca 1947 1947 done
+~ MET: N CA   0.098 C O CB   0.426 CG SD CE
+spac numc=2 pick #cca 1952 1952 done
+~ SER: N CA   0.103 C O CB   0.147 OG
+spac numc=2 pick #cca 1979 1979 done
+~ VAL: N CA   0.035 C O CB   0.251 CG1 CG2
+spac numc=2 pick #cca 2064 2064 done
+~ SER: N CA   0.041 C O CB   0.187 OG
+spac numc=2 pick #cca 2071 2071 done
+~ MET: N CA   0.232 C O CB   0.769 CG SD CE
+spac numc=2 pick #cca 2080 2080 done
+~ ASP: N CA   0.037 C O CB   0.156 CG OD1 OD2
+spac numc=2 pick #cca 2090 2090 done
+~ CYS: N CA   0.184 C O CB   0.739 SG
+spac numc=2 pick #cca 2134 2134 done
+~ SER: N CA   0.031 C O CB   0.127 OG
+spac numc=2 pick #cca 2146 2146 done
+~ VAL: N CA   0.111 C O CB   0.505 CG1 CG2
+spac numc=2 pick #cca 2192 2192 done
+~ SER: N CA   0.094 C O CB   0.165 OG
+spac numc=2 pick #cca 2204 2204 done
+~ CYS: N CA   0.161 C O CB   0.496 SG
+spac numc=2 pick #cca 2222 2222 done
+~ SER: N CA   0.076 C O CB   0.213 OG
+~ protein chain: 3
+spac numc=2 pick #cca 2945 2945 done
+~ SER: N CA   0.102 C O CB   0.161 OG
+spac numc=2 pick #cca 2968 2968 done
+~ SER: N CA   0.045 C O CB   0.173 OG
+spac numc=2 pick #cca 3001 3002 done
+~ SER: N CA   0.139 C O CB   0.292 OG
+~ ARG: N CA   0.091 C O CB   0.177 CG CD NE CZ NH1 NH2
+spac numc=2 pick #cca 3093 3093 done
+~ SER: N CA   0.039 C O CB   0.193 OG
+spac numc=2 pick #cca 3101 3101 done
+~ SER: N CA   0.046 C O CB   0.240 OG
+spac numc=2 pick #cca 3109 3109 done
+~ ASP: N CA   0.036 C O CB   0.050 CG OD1 OD2
+spac numc=2 pick #cca 3116 3116 done
+~ SER: N CA   0.009 C O CB   0.043 OG
+spac numc=2 pick #cca 3119 3119 done
+~ CYS: N CA   0.119 C O CB   0.465 SG
+spac numc=2 pick #cca 3163 3163 done
+~ SER: N CA   0.071 C O CB   0.241 OG
+spac numc=2 pick #cca 3175 3175 done
+~ VAL: N CA   0.095 C O CB   0.202 CG1 CG2
+spac numc=2 pick #cca 3177 3177 done
+~ GLN: N CA   0.119 C O CB   0.453 CG CD OE1 NE2
+spac numc=2 pick #cca 3191 3191 done
+~ SER: N CA   0.112 C O CB   0.248 OG
+spac numc=2 pick #cca 3225 3225 done
+~ SER: N CA   0.055 C O CB   0.364 OG
+spac numc=2 pick #cca 3233 3233 done
+~ CYS: N CA   0.179 C O CB   0.516 SG
+spac numc=2 pick #cca 3251 3252 done
+~ SER: N CA   0.072 C O CB   0.147 OG
+~ SER: N CA   0.065 C O CB   0.329 OG
+spac numc=2 pick #cca 3371 3371 done
+~ SER: N CA   0.239 C O CB   0.415 OG
+spac numc=2 pick #cca 3373 3373 done
+~ SER: N CA   0.048 C O CB   0.170 OG
+spac numc=2 pick #cca 3376 3376 done
+~ SER: N CA   0.070 C O CB   0.138 OG
+spac numc=2 pick #cca 3383 3383 done
+~ SER: N CA   0.253 C O CB   0.741 OG
+spac numc=2 pick #cca 3399 3399 done
+~ SER: N CA   0.007 C O CB   0.027 OG
+spac numc=2 pick #cca 3407 3407 done
+~ MET: N CA   0.098 C O CB   0.426 CG SD CE
+spac numc=2 pick #cca 3412 3412 done
+~ SER: N CA   0.103 C O CB   0.147 OG
+spac numc=2 pick #cca 3439 3439 done
+~ VAL: N CA   0.035 C O CB   0.251 CG1 CG2
+spac numc=2 pick #cca 3524 3524 done
+~ SER: N CA   0.041 C O CB   0.187 OG
+spac numc=2 pick #cca 3531 3531 done
+~ MET: N CA   0.232 C O CB   0.769 CG SD CE
+spac numc=2 pick #cca 3540 3540 done
+~ ASP: N CA   0.037 C O CB   0.156 CG OD1 OD2
+spac numc=2 pick #cca 3550 3550 done
+~ CYS: N CA   0.184 C O CB   0.739 SG
+spac numc=2 pick #cca 3594 3594 done
+~ SER: N CA   0.031 C O CB   0.127 OG
+spac numc=2 pick #cca 3606 3606 done
+~ VAL: N CA   0.111 C O CB   0.505 CG1 CG2
+spac numc=2 pick #cca 3652 3652 done
+~ SER: N CA   0.094 C O CB   0.165 OG
+spac numc=2 pick #cca 3664 3664 done
+~ CYS: N CA   0.161 C O CB   0.496 SG
+spac numc=2 pick #cca 3682 3682 done
+~ SER: N CA   0.076 C O CB   0.213 OG
+~ protein chain: 4
+spac numc=2 pick #cca 4405 4405 done
+~ SER: N CA   0.102 C O CB   0.161 OG
+spac numc=2 pick #cca 4428 4428 done
+~ SER: N CA   0.045 C O CB   0.173 OG
+spac numc=2 pick #cca 4461 4462 done
+~ SER: N CA   0.139 C O CB   0.292 OG
+~ ARG: N CA   0.091 C O CB   0.177 CG CD NE CZ NH1 NH2
+spac numc=2 pick #cca 4553 4553 done
+~ SER: N CA   0.039 C O CB   0.193 OG
+spac numc=2 pick #cca 4561 4561 done
+~ SER: N CA   0.046 C O CB   0.240 OG
+spac numc=2 pick #cca 4569 4569 done
+~ ASP: N CA   0.036 C O CB   0.050 CG OD1 OD2
+spac numc=2 pick #cca 4576 4576 done
+~ SER: N CA   0.009 C O CB   0.043 OG
+spac numc=2 pick #cca 4579 4579 done
+~ CYS: N CA   0.119 C O CB   0.465 SG
+spac numc=2 pick #cca 4623 4623 done
+~ SER: N CA   0.071 C O CB   0.241 OG
+spac numc=2 pick #cca 4635 4635 done
+~ VAL: N CA   0.095 C O CB   0.202 CG1 CG2
+spac numc=2 pick #cca 4637 4637 done
+~ GLN: N CA   0.119 C O CB   0.453 CG CD OE1 NE2
+spac numc=2 pick #cca 4651 4651 done
+~ SER: N CA   0.112 C O CB   0.248 OG
+spac numc=2 pick #cca 4685 4685 done
+~ SER: N CA   0.055 C O CB   0.364 OG
+spac numc=2 pick #cca 4693 4693 done
+~ CYS: N CA   0.179 C O CB   0.516 SG
+spac numc=2 pick #cca 4711 4712 done
+~ SER: N CA   0.072 C O CB   0.147 OG
+~ SER: N CA   0.065 C O CB   0.329 OG
+spac numc=2 pick #cca 4831 4831 done
+~ SER: N CA   0.239 C O CB   0.415 OG
+spac numc=2 pick #cca 4833 4833 done
+~ SER: N CA   0.048 C O CB   0.170 OG
+spac numc=2 pick #cca 4836 4836 done
+~ SER: N CA   0.070 C O CB   0.138 OG
+spac numc=2 pick #cca 4843 4843 done
+~ SER: N CA   0.253 C O CB   0.741 OG
+spac numc=2 pick #cca 4859 4859 done
+~ SER: N CA   0.007 C O CB   0.027 OG
+spac numc=2 pick #cca 4867 4867 done
+~ MET: N CA   0.098 C O CB   0.426 CG SD CE
+spac numc=2 pick #cca 4872 4872 done
+~ SER: N CA   0.103 C O CB   0.147 OG
+spac numc=2 pick #cca 4899 4899 done
+~ VAL: N CA   0.035 C O CB   0.251 CG1 CG2
+spac numc=2 pick #cca 4984 4984 done
+~ SER: N CA   0.041 C O CB   0.187 OG
+spac numc=2 pick #cca 4991 4991 done
+~ MET: N CA   0.232 C O CB   0.769 CG SD CE
+spac numc=2 pick #cca 5000 5000 done
+~ ASP: N CA   0.037 C O CB   0.156 CG OD1 OD2
+spac numc=2 pick #cca 5010 5010 done
+~ CYS: N CA   0.184 C O CB   0.739 SG
+spac numc=2 pick #cca 5054 5054 done
+~ SER: N CA   0.031 C O CB   0.127 OG
+spac numc=2 pick #cca 5066 5066 done
+~ VAL: N CA   0.111 C O CB   0.505 CG1 CG2
+spac numc=2 pick #cca 5112 5112 done
+~ SER: N CA   0.094 C O CB   0.165 OG
+spac numc=2 pick #cca 5124 5124 done
+~ CYS: N CA   0.161 C O CB   0.496 SG
+spac numc=2 pick #cca 5142 5142 done
+~ SER: N CA   0.076 C O CB   0.213 OG
+*EOD

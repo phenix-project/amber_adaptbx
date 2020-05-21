@@ -9,8 +9,11 @@ unset AMBER_LIBRARY_DIR
 ./test_AmberPrep
 status=$?
 
-#./test_phenix.refine
-#status=$(($status + $?))
+./test_phenix.refine
+status=$(($status + $?))
+
+#  as of May, 2020, the LES-created PDB files don't handle insertion
+#  codes correctly, so these tests are commented out.
 
 #./test_AmberPrep_LES
 #status=$(($status + $?))
