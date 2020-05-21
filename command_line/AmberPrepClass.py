@@ -806,7 +806,6 @@ class AmberPrepRunner:
       reduce_info.log
       reduce_lesbuilder.log
       reduce.log
-      addles.log
       dummydb
       """
     import glob
