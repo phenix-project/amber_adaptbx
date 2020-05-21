@@ -73,21 +73,15 @@ Setting up library files for non-standard residues
 Running elbow/antechamber for IPA 
 ==================================================
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_IPA.pdb -fi pdb -o IPA.mol2 -fo mol2       -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+| ~> /Users/case/phenix/build/../conda_base/bin/antechamber -i 4antechamber_IPA.pdb -fi pdb -o IPA.mol2 -fo mol2         -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
 
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i IPA.mol2 -f mol2 -o IPA.frcmod
+| ~> /Users/case/phenix/build/../conda_base/bin/parmchk2 -s 2 -i IPA.mol2 -f mol2 -o IPA.frcmod
 
 
-==================================================
-Running elbow/antechamber for SO4 
-==================================================
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_SO4.pdb -fi pdb -o SO4.mol2 -fo mol2       -nc -2 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
-
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i SO4.mol2 -f mol2 -o SO4.frcmod
-
+  Residue "SO4" already in amber monomer library. Skipping elbow/antechamber
+    run for this residue.
+        
 IAS.lib is present. Skipping elbow/antechamber run for this residue.
 
 
@@ -95,23 +89,23 @@ IAS.lib is present. Skipping elbow/antechamber run for this residue.
 Running elbow/antechamber for ACT 
 ==================================================
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/antechamber -i 4antechamber_ACT.pdb -fi pdb -o ACT.mol2 -fo mol2       -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
+| ~> /Users/case/phenix/build/../conda_base/bin/antechamber -i 4antechamber_ACT.pdb -fi pdb -o ACT.mol2 -fo mol2         -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
 
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/parmchk2 -s 2 -i ACT.mol2 -f mol2 -o ACT.frcmod
+| ~> /Users/case/phenix/build/../conda_base/bin/parmchk2 -s 2 -i ACT.mol2 -f mol2 -o ACT.frcmod
 
 
 ==================================================
 Preparing asu files and 4phenix_1dy5.pdb
 ==================================================
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 1dy5_asu_tleap_input_run
+| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 1dy5_asu_tleap_input_run
 
 Checking output filenames
   file : 1dy5_asu.prmtop
   file : 1dy5_asu.rst7
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
+| ~> /Users/case/phenix/build/../conda_base/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
 
 
 ============================================================
@@ -152,13 +146,13 @@ gap of 4.508257 A between LYS 834 and GLY 836
 
 None
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 1dy5_uc_tleap_input_run
+| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 1dy5_uc_tleap_input_run
 
 Checking output filenames
   file : 1dy5_uc.prmtop
   file : 1dy5_uc.rst7
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
+| ~> /Users/case/phenix/build/../conda_base/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
 
 4amber_1dy5.prmtop
 
@@ -166,7 +160,7 @@ Checking output filenames
 Minimizing input coordinates.
 ==================================================
 
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
+| ~> /Users/case/phenix/build/../conda_base/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
 
 checking special positions in 4phenix_1dy5.pdb
 
