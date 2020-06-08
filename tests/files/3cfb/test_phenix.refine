@@ -17,7 +17,7 @@ phenix.refine  \
    write_map_coefficients=False  write_eff_file=False > amber1.log 
 
 tail -2 amber1.log > tail.log
-dacdif non-les/tail.log tail.log
+dacdif -a 1.e-3 non-les/tail.log tail.log
 status=$?
 
 if [ $status -ne 0 ]; then
@@ -25,6 +25,6 @@ if [ $status -ne 0 ]; then
 fi
 
 /bin/rm -f amber_data.mtz amber_phenix_atom_order_map.txt \
-      amber_001.{log,mtz,pdb,eff} amber_002.def 
+      amber_001.{log,mtz,pdb,eff,cif} amber_002.def 
 
 exit $status
