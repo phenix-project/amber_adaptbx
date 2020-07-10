@@ -754,7 +754,7 @@ class AmberPrepRunner:
       f.write(inputs[mintype])
       f.close()
       cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-             'bin','msander' )
+             'bin','sander' )
       cmd += '%s -O -i %s -p %s -c %s -o %s.min.out \
            -ref %s -r %s' % (
           LEStype,
