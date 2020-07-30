@@ -81,16 +81,27 @@ class manager(standard_manager):
 
   def initialisation(self, params, log=None):
     make_header("Initializing Amber", out=log)
+    error = '''
+
+    no filename for %s provided
+
+    use
+
+      %s=<filename>.%s
+
+    '''
     print("  topology    : %s" % params.amber.topology_file_name, file=log)
     if not params.amber.topology_file_name:
-      raise Sorry('no filename for topology file provided')
+      raise Sorry(error % ('topology', 'amber.topology_file_name', 'prmtop'))
+    if params.amber.topology_file_name.endswith('rst7'):
+      raise Sorry('possible wrong format - need .prmtop file')
     print("  atom order  : %s" % params.amber.order_file_name, file=log)
     if not params.amber.order_file_name:
-      raise Sorry('no filename for order file provided')
-    if params.amber.coordinate_file_name:
+      raise Sorry(error % ('order', 'amber.order_file_name', 'order'))
+    if params.amber.coordinate_file_name or 1:
       print("  coordinates : %s" % params.amber.coordinate_file_name, file=log)
       if not params.amber.coordinate_file_name:
-        raise Sorry('no filename for coordinate file provided')
+        raise Sorry(error % ('coordinate', 'amber.coordinate_file_name', 'rst7'))
     make_header('...', out=log)
 
   def energies_sites(self,
