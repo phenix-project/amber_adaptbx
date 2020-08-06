@@ -11,8 +11,8 @@ export BOOST_ADAPTBX_SIGNALS_DEFAULT=1
 ./test_AmberPrep
 status=$?
 
-./test_phenix.refine
-status=$(($status + $?))
+#./test_phenix.refine
+#status=$(($status + $?))
 
 if false; then
 
