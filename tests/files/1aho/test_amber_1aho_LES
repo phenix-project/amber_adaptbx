@@ -4,10 +4,10 @@
 #  This should be a good test case: has disulfide bonds, alternate locations,
 #  more than 1 asu in a unit cell, and an (artificial)  gap.
 
-./test_AmberPrep
-status=$?
+./test_AmberPrep_LES
+status=$(($status + $?))
 
-./test_phenix.refine
+./test_phenix.refine_LES
 status=$(($status + $?))
 
 /bin/rm -f amber_002.def 1aho_4tleap_renum.txt
