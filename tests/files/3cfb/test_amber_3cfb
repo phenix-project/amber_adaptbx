@@ -6,6 +6,9 @@
 unset AMBER_LIBRARY_DIR
 /bin/rm -rf SPB.mol2 GOL.mol2
 
+phenix.pdbtools keep="chain L" 3cfb.pdb
+cp 3cfb_modified.pdb 3cfb.pdb
+
 ./test_AmberPrep
 status=$?
 
@@ -21,6 +24,6 @@ status=$(($status + $?))
 #./test_phenix.refine_LES
 #status=$(($status + $?))
 
-/bin/rm -f amber_002.def 
+/bin/rm -f amber_002.def
 
 exit $status
