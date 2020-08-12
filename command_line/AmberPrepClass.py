@@ -236,9 +236,27 @@ def check_required_output_filenames(filenames=None,
         s += '\n  Check contents of "%s"' % error_display_file
       raise Sorry(s)
 
-
 def print_cmd(cmd, verbose=False):
-  print "\n| ~> %s\n" % cmd
+  """Displays command in prompt like format
+
+  Args:
+      cmd (str): Command
+      verbose (bool, optional): Switch to display or not.
+  """
+  if verbose: print("\n| ~> %s\n" % cmd)
+
+def print_header(text,
+                 log=None,
+                 verbose=True):
+  """Central place for print headers.
+
+  Args:
+      text (str): Header
+      log (None, optional): Log to redirect sys.stdout
+      verbose (bool, optional): Switch to display or not.
+  """
+  if verbose:
+    print('%s\n  %s\n%s' % ('='*80, text, '='*80))
 
 def get_chemical_components_file_name(code):
   cc_dir = libtbx.env.dist_path("chem_data", default=None)
@@ -449,9 +467,6 @@ class AmberPrepRunner:
 
     return 0
 
-  #=================================
-  # prepare tleap input:
-  #=================================
   def run_tleap(self,
                 input_pdb,
                 output_base,
@@ -660,9 +675,7 @@ class AmberPrepRunner:
     #         Note: don't need to call reduce this time around.
     #-----------------------------------------------------------------
 
-    print "\n=================================================="
-    print "Running pdb4amber on %s" % tleap_pdb_file1
-    print "=================================================="
+    print_header("Running pdb4amber on %s" % tleap_pdb_file1)
 
     tleap_pdb_file = "%s_4tleap_uc.pdb" % self.base
     ns_names, gaplist, sslist = pdb4amber.run(
@@ -856,10 +869,16 @@ def _run_antechamber_ccif(residue_name,
                           debug=False):
   '''
   run antechamber from a components.cif file:
+
+  Args:
+      residue_name (str): Description
+      use_am1_and_maxcyc_zero (bool, optional): Description
+      debug (bool, optional): Description
+
+  Raises:
+      Sorry: Description
   '''
-  print "\n=================================================="
-  print "Running antechamber_ccif for %s " % residue_name
-  print "=================================================="
+  print_header("Running antechamber_ccif for %s " % residue_name)
 
   ccif = get_chemical_components_file_name(residue_name)
   cmds = []
@@ -886,7 +905,7 @@ def _run_antechamber_ccif(residue_name,
         'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name,
                                                            residue_name)
-  print_cmd(cmd)
+  print_cmd(cmd, verbose=debug)
   easy_run.fully_buffered(cmd)
 
   # should there be a check for output???
@@ -967,15 +986,22 @@ def _run_elbow_antechamber(pdb_hierarchy,
                            debug=False):
   '''
   run elbow and antechamber
+
+  Args:
+      pdb_hierarchy (PDB hierarchy): Description
+      residue_name (str): Description
+      use_am1_and_maxcyc_zero (bool, optional): Description
+      debug (bool, optional): Description
+
+  Returns:
+      TYPE: Description
   '''
   pdb_mol = get_molecule_from_hierarchy(pdb_hierarchy, residue_name)
   names = []
   for atom in pdb_mol:
     names.append(atom.name.strip())
   pdb_set = set(names)
-  print "\n=================================================="
-  print "Running elbow/antechamber for %s " % residue_name
-  print "=================================================="
+  print_header("Running elbow/antechamber for %s " % residue_name)
   if debug and 0:
     import pickle
     pf = "%s.pickle" % residue_name
@@ -1034,6 +1060,13 @@ def _run_elbow_antechamber(pdb_hierarchy,
 def run_antechamber(mol, use_am1_and_maxcyc_zero=True):
   '''
   Created for use from eLBOW
+
+  Args:
+      mol (eLBOW molecule): Description
+      use_am1_and_maxcyc_zero (bool, optional): Description
+
+  Returns:
+      TYPE: Description
   '''
   assert mol.residue_name
   _write_anterchamber_input_from_elbow_molecule(mol)
@@ -1080,18 +1113,7 @@ def run(rargs=None):
     print working_params.amber_prep.inputs.elbow_input_file_name
     create_amber_files_for_ligand(params)
 
-  # basename = os.path.basename(inputs.pdb_file_name)
-  # amber_prep_runner.curate_model(remove_alt_confs=True)
-  #current_pdb_file_name = basename.replace(
-  #    '.pdb',
-  #    '_curated.pdb',
-  #)
-  #amber_prep_runner.write_pdb_hierarchy(current_pdb_file_name)
-
-  print "\n=================================================="
-  print "Running pdb4amber on %s" % inputs.pdb_file_name
-  print "=================================================="
-
+  print_header("Running pdb4amber on %s" % inputs.pdb_file_name)
   tleap_input_pdb = "%s_4tleap.pdb" % base
   # log = []
   ns_names, gaplist, sslist = pdb4amber.run(tleap_input_pdb,
@@ -1103,19 +1125,14 @@ def run(rargs=None):
                                             arg_no_reduce_db=True,
                                             )
 
-  print "\n=================================================="
-  print "Setting up library files for non-standard residues"
-  print "=================================================="
-
+  print_header("Setting up library files for non-standard residues")
   amber_prep_runner.process_ligands(
       ns_names,
       # nproc=inputs.nproc,
       prefer_input_method=inputs.antechamber.prefer_input_method,
   )
   #
-  print "\n=================================================="
-  print "Preparing asu files and 4phenix_%s.pdb" % base
-  print "=================================================="
+  print_header("Preparing asu files and 4phenix_%s.pdb" % base)
 
   # at this point, we can ignore any gaps found by pdb4amber, since
   #   we are just creating pdb files for phenix (which automatically
@@ -1143,18 +1160,13 @@ def run(rargs=None):
   phenix_file = '4phenix_%s.pdb' % amber_prep_runner.base
   amber_prep_runner.asu_parm7_to_4phenix_pdb(phenix_file)
 
-  print "\n============================================================"
-  print "Preparing unit cell files: 4amber_%s.prmtop and 4amber_%s.rst7" % (base, base)
-  print "============================================================"
-
+  print_header("Preparing unit cell files: 4amber_%(base)s.prmtop and 4amber_%(base)s.rst7" % locals())
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
           use_glycam=actions.use_glycam,
           use_amber_unitcell=actions.use_amber_unitcell)
 
   if actions.LES:
-    print "\n=================================================="
-    print "Building the LES prmtop and rst7 files"
-    print "=================================================="
+    print_header("Building the LES prmtop and rst7 files")
     pdb_file_name = working_params.amber_prep.inputs.pdb_file_name
     les_builder = LESBuilder(
         pdb_file_name,
@@ -1237,9 +1249,7 @@ def run(rargs=None):
      i += 1
 
   if actions.minimise != "off":
-    print "\n=================================================="
-    print "Minimizing input coordinates."
-    print "=================================================="
+    print_header("Minimizing input coordinates.")
     amber_prep_runner.run_minimise(actions.minimise,
                       minimization_options=actions.minimization_options)
 
@@ -1263,14 +1273,13 @@ def run(rargs=None):
   if actions.clean:
     amber_prep_runner.run_clean()
 
-  outl = "\n==================================================\n"
-  outl += "Done.  Four new files have been made:\n"
+  outl = "Done.  Four new files have been made:\n"
   outl += "      %s\n" % amber_prep_runner.final_pdb_file_4phenix
   outl += "      %s\n" % amber_prep_runner.final_rst7_file
   outl += "      %s\n" % amber_prep_runner.final_prmtop_file
   outl += "      %s\n" % amber_prep_runner.final_order_file
-  outl += "==================================================\n\n"
-  outl += "Example\n\n  phenix.refine"
+  print_header(outl)
+  outl = "\nExample\n\n  phenix.refine"
   outl += " %s use_amber=True \\\n" % (
       amber_prep_runner.final_pdb_file_4phenix,
   )
@@ -1279,10 +1288,18 @@ def run(rargs=None):
   outl += "    amber.order_file_name=%s \\\n" % amber_prep_runner.final_order_file
   outl += "    ....(other refinement keywords here)....."
   outl += "\n\n\n"
-  print outl
+  print(outl)
   return amber_prep_runner
 
 def finish_job(result):
+  """Summary
+
+  Args:
+      result (AmberPrep object): Files
+
+  Returns:
+      list: Files for GUI
+  """
   output_files = []
   for attr, desc in {
                      'final_pdb_file_4phenix': 'Model file for Phenix',
@@ -1291,11 +1308,15 @@ def finish_job(result):
                      'final_order_file'      : 'Atom order file',
                      }.items():
     output_files.append((getattr(result, attr), desc))
-  print os.getcwd()
   return (output_files, [])
 
 class launcher (runtime_utils.target_with_save_result) :
   def run (self) :
+    """Needed by GUI
+
+    Returns:
+        TYPE: results
+    """
     os.makedirs(self.output_dir)
     os.chdir(self.output_dir)
     return run(rargs=self.args)
