@@ -76,6 +76,8 @@ class manager(standard_manager):
 
     self.last_time = None
 
+    from libtbx.introspection import show_stack; show_stack()
+
   def __repr__(self):
     return 'Amber manager'
 
@@ -262,4 +264,5 @@ def digester(standard_geometry_restraints_manager,
   agrm = manager(params, log=log)
   for attr, value in vars(sgrm).items():
     setattr(agrm, attr, value)
+  print('agrm', agrm)
   return agrm
