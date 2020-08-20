@@ -62,7 +62,7 @@ class extreme(dict):
       if eq is None:
         eq = getattr(item.type, 'req', None)
       if eq: outl += ' %7.3f' % eq
-      outl += ' %7.3f' % item.model 
+      outl += ' %7.3f' % item.model
       outl += ' %7.3f' % key
       outl += '\n'
     return outl
@@ -291,8 +291,8 @@ def check_file(s, file_name):
 
 def get_amber_structs(parm_file_name, rst_file_name):
   # I do not know where this will be used. Is it old code for mdgx?
-  import boost.python
-  ext = boost.python.import_ext("amber_adaptbx_ext")
+  import boost_adaptbx.boost.python as bp
+  ext = bp.import_ext("amber_adaptbx_ext")
   return ext.uform(parm_file_name, rst_file_name)
 
 def print_sites_cart(sites_cart):
@@ -305,7 +305,7 @@ def write_rst7_from_GeometryManager(geom, crystal_symmetry, filename):
   """
   Parameters
   ----------
-  geom : amber_adaptbx.GeometryManager object 
+  geom : amber_adaptbx.GeometryManager object
   crystal_symmetry : ?
   filename : str
     output rst7 filename
@@ -343,7 +343,7 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
       if 'REMARK 290   SMTRY' not in fh.read():
         print('UnitCell program requires pdb file to have "REMARK 290   SMTRY" line')
         raise ValueError('Should use option: use_amber_unitcell=False')
-    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base', 
+    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
                   'bin', 'UnitCell' )
     cmd += " -p %s -o %s" % (asu_pdb_file, output_file)
     print_cmd(cmd)
@@ -371,7 +371,7 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
           else:
              fout.write(line)
     os.remove(tmp_file)
-       
+
 
 # atom ordering
 from collections import OrderedDict
@@ -412,7 +412,7 @@ def round3(a):
   """
   #  format the input number in the way that would have been done
   #    when 4phenix_xxxx.pdb was made:
-  y = '%8.3f' % a 
+  y = '%8.3f' % a
 
   if y == -0.000:
     # avoid confusion between '-0.000' and '0.000'
@@ -421,7 +421,7 @@ def round3(a):
 
 def make_dict(big_arr):
   """
-  
+
   Examples
   --------
   >>> make_dict([[1.234, 4.56, 7.89],
