@@ -3,10 +3,10 @@
           Amber 18 SANDER                              2018
           -------------------------------------------------------
 
-| Run on 06/08/2020 at 09:14:43
+| Run on 09/16/2020 at 08:45:49
 
-|   Executable path: /home/case/phenix/build/../conda_base/bin/msander.LES
-| Working directory: /home/case/phenix/modules/amber_adaptbx/tests/files/1aho
+|   Executable path: /Users/case/phenix/build/../conda_base/bin/msander.LES
+| Working directory: /Users/case/phenix/modules/amber_adaptbx/tests/files/1aho
 |          Hostname: Unknown
   [-O]verwriting output
 
@@ -91,7 +91,7 @@ Nature and format of input:
 Nature and format of output:
      ntxo    =       1, ntpr    =      10, ntrx    =       1, ntwr    =       1
      iwrap   =       0, ntwx    =       0, ntwv    =       0, ntwe    =       0
-     ioutfm  =       1, ntwprt  =       0, rbornstat=      0
+     ioutfm  =       0, ntwprt  =       0, rbornstat=      0
 
 Potential function:
      ntf     =       1, ntb     =       1, igb     =       0, nsnb    =      10
@@ -221,31 +221,31 @@ Ewald parameters:
    5.  TIMINGS
 --------------------------------------------------------------------------------
 
-|                Build the list             0.14 (94.67% of List )
-|                Other                      0.01 ( 5.33% of List )
-|             List time                  0.15 (10.25% of Nonbo)
-|                   Short_ene time             1.09 (99.09% of Direc)
-|                Direct Ewald time          1.10 (83.78% of Ewald)
-|                Adjust Ewald time          0.04 ( 3.35% of Ewald)
-|                   Fill Bspline coeffs        0.01 ( 5.95% of Recip)
-|                   Fill charge grid           0.03 (19.64% of Recip)
-|                   Scalar sum                 0.01 ( 5.36% of Recip)
-|                   Grad sum                   0.04 (25.60% of Recip)
-|                   FFT time                   0.07 (43.45% of Recip)
-|                Recip Ewald time           0.17 (12.80% of Ewald)
-|             Ewald time                 1.31 (89.75% of Nonbo)
-|          Nonbond force              1.46 (90.03% of Force)
-|          Bond/Angle/Dihedral        0.16 ( 9.97% of Force)
-|       Force time                 1.63 (100.0% of Runmd)
-|    Runmd Time                 1.63 (74.54% of Total)
-|    Other                      0.55 (25.28% of Total)
-| Total time                 2.18 (100.0% of ALL  )
+|                Build the list             0.13 (96.24% of List )
+|                Other                      0.01 ( 3.76% of List )
+|             List time                  0.13 ( 9.54% of Nonbo)
+|                   Short_ene time             1.06 (99.07% of Direc)
+|                Direct Ewald time          1.07 (84.85% of Ewald)
+|                Adjust Ewald time          0.03 ( 2.78% of Ewald)
+|                   Fill Bspline coeffs        0.01 ( 5.81% of Recip)
+|                   Fill charge grid           0.03 (17.42% of Recip)
+|                   Scalar sum                 0.01 ( 5.81% of Recip)
+|                   Grad sum                   0.04 (24.52% of Recip)
+|                   FFT time                   0.07 (46.45% of Recip)
+|                Recip Ewald time           0.16 (12.29% of Ewald)
+|             Ewald time                 1.26 (90.46% of Nonbo)
+|          Nonbond force              1.39 (91.95% of Force)
+|          Bond/Angle/Dihedral        0.12 ( 7.85% of Force)
+|       Force time                 1.52 (100.0% of Runmd)
+|    Runmd Time                 1.52 (80.08% of Total)
+|    Other                      0.38 (19.81% of Total)
+| Total time                 1.89 (100.0% of ALL  )
 
 | Number of list builds   :          4
 
 | Highest rstack allocated:     277606
 | Highest istack allocated:       5456
-|           Job began  at 09:14:43.085  on 06/08/2020
-|           Setup done at 09:14:43.206  on 06/08/2020
-|           Run   done at 09:14:45.266  on 06/08/2020
+|           Job began  at 08:45:49.493  on 09/16/2020
+|           Setup done at 08:45:49.570  on 09/16/2020
+|           Run   done at 08:45:51.387  on 09/16/2020
 |     wallclock() was called    2178 times
