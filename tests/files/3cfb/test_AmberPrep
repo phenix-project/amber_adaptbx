@@ -39,10 +39,10 @@ phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all LES=true > les.log
 
 fi
 
-./dacdif non-les/GOL.mol2 GOL.mol2
-status=$(($status + $?))
-./dacdif non-les/GOL.frcmod GOL.frcmod
-status=$(($status + $?))
+#./dacdif non-les/GOL.mol2 GOL.mol2
+#status=$(($status + $?))
+#./dacdif non-les/GOL.frcmod GOL.frcmod
+#status=$(($status + $?))
 ./dacdif non-les/SPB.mol2 SPB.mol2
 status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
