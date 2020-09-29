@@ -132,7 +132,6 @@ class manager(standard_manager):
       extension_objects=extension_objects,
       site_labels=site_labels,
       )
-    # if log is None: assert 0
     # Expand sites_cart to unit cell
     sites_cart_uc = expand_coord_to_unit_cell(
       sites_cart,
@@ -172,7 +171,6 @@ class manager(standard_manager):
                                 ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
-    from libtbx.introspection import show_stack
     #
     # to usurp a test in statistics.py
     #
@@ -236,15 +234,17 @@ class manager(standard_manager):
     # print(len(result.gradients),list(result.gradients)[:10])
     return result
 
-  def _helper(self, selection):
-    for attr, value in selection.__dict__.items():
-      setattr(self, attr, value)
+  # def _helper(self, selection):
+  #   for attr, value in selection.__dict__.items():
+  #     setattr(self, attr, value)
 
-  def select_OLD(self, selection=None, iselection=None):
-    self.selection_count+=1
-    result = self.standard_geometry_restraints_manager.select(selection=selection,
-                                                              iselection=iselection)
-    self._helper(result)
+  def select(self, selection=None, iselection=None):
+    assert iselection is None
+    if False in selection:
+      result = self.standard_geometry_restraints_manager.select(selection=selection,
+                                                                iselection=iselection)
+      return result
+    # self._helper(result)
     # self.standard_geometry_restraints_manager = result
     return self
 
@@ -264,5 +264,5 @@ def digester(standard_geometry_restraints_manager,
   agrm = manager(params, log=log)
   for attr, value in vars(sgrm).items():
     setattr(agrm, attr, value)
-  print('agrm', agrm)
+  agrm.standard_geometry_restraints_manager = sgrm
   return agrm
