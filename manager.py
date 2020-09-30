@@ -76,8 +76,6 @@ class manager(standard_manager):
 
     self.last_time = None
 
-    from libtbx.introspection import show_stack; show_stack()
-
   def __repr__(self):
     return 'Amber manager'
 
