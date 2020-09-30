@@ -23,6 +23,7 @@ class manager(standard_manager):
   COUNT = 0
   # all objects share the same order_converter
   order_converter = None
+  n_sites_cart = None
 
   def __init__(self,
                # pdb_hierarchy,
@@ -34,7 +35,6 @@ class manager(standard_manager):
                gradients_factory=flex.vec3_double,
                # amber_structs=None,
                log=StringIO()):
-    # super(manager, self).__init__()
     self.gradients_factory = gradients_factory
     # self.number_of_restraints = number_of_restraints
     # self.amber_structs = amber_structs
@@ -150,16 +150,6 @@ class manager(standard_manager):
       gradients = self.gradients_factory(
           flex.double(sites_cart.size() * 3, 0))
     result.gradients=gradients
-    # result = energies(sites_cart,
-    #                   # self.standard_geometry_restraints_manager,
-    #                   compute_gradients=compute_gradients,
-    #                   gradients=gradients,
-    #                   # gradients_size=sites_cart.size(),
-    #                   # gradients_factory=None,
-    #                   normalization=False,
-    #                   )
-
-    # result.number_of_restraints = self.number_of_restraints
     result.residual_sum = ene.tot
     ptrfunc = self.amber_structs.parm.ptr
     nbond = ptrfunc('nbonh') + ptrfunc('nbona')
@@ -207,7 +197,6 @@ class manager(standard_manager):
                                           )
         self.last_time = time.time()
         delta_time = time.time()-self.last_time
-        # show_stack()
         print(heading, file=log)
         print(numbers, file=log)
       energies = '%12s %12s %12s %12s %12s %12s %5.1f' % (outl[0],
@@ -232,18 +221,17 @@ class manager(standard_manager):
     # print(len(result.gradients),list(result.gradients)[:10])
     return result
 
-  # def _helper(self, selection):
-  #   for attr, value in selection.__dict__.items():
-  #     setattr(self, attr, value)
-
   def select(self, selection=None, iselection=None):
-    assert iselection is None
-    if False in selection:
+    if selection is not None: self.n_sites_cart = len(selection)
+    if iselection is not None: assert self.n_sites_cart
+    return_standard_grm = False
+    if selection and False in selection: return_standard_grm = True
+    if iselection and self.n_sites_cart!=len(iselection):
+      return_standard_grm = True
+    if return_standard_grm:
       result = self.standard_geometry_restraints_manager.select(selection=selection,
                                                                 iselection=iselection)
       return result
-    # self._helper(result)
-    # self.standard_geometry_restraints_manager = result
     return self
 
   def cleanup(self):
@@ -260,7 +248,6 @@ def digester(standard_geometry_restraints_manager,
              ):
   sgrm = standard_geometry_restraints_manager
   agrm = manager(params, log=log)
-  for attr, value in vars(sgrm).items():
-    setattr(agrm, attr, value)
+  for attr, value in vars(sgrm).items(): setattr(agrm, attr, value)
   agrm.standard_geometry_restraints_manager = sgrm
   return agrm
