@@ -126,6 +126,11 @@ def validate_params(params):
   return True
 
 def setup_parser():
+  """Command line parser setup
+
+  Returns:
+      parser: CLI parser
+  """
   from libtbx.option_parser import OptionParser
   usage = """
   phenix.AmberPrep 3a37.pdb minimise=amber_all
