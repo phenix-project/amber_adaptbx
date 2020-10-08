@@ -1,7 +1,6 @@
-
-==================================================
-Running pdb4amber on 1fg5.pdb
-==================================================
+================================================================================
+  Running pdb4amber on 1fg5.pdb
+================================================================================
 
 ==================================================
 Summary of pdb4amber for: 1fg5.pdb
@@ -19,35 +18,25 @@ None
 ---------- Mising heavy atom(s)
 
 None
-
-==================================================
-Setting up library files for non-standard residues
-==================================================
+================================================================================
+  Setting up library files for non-standard residues
+================================================================================
 
   Residue "MSE" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
         
-
-==================================================
-Preparing asu files and 4phenix_1fg5.pdb
-==================================================
-
-| ~> /home/case/phenix/build/../conda_base/bin/tleap -f 1fg5_asu_tleap_input_run
-
+================================================================================
+  Preparing asu files and 4phenix_1fg5.pdb
+================================================================================
 Checking output filenames
   file : 1fg5_asu.prmtop
   file : 1fg5_asu.rst7
-
-| ~> /home/case/phenix/build/../conda_base/bin/ChBox -c 1fg5_asu.rst7 -o 1fg5_asu.rst7 -X 95.67 -Y 95.67 -Z 112.93 -al 90.0 -bt 90.0 -gm 90.0 
-
-
-============================================================
-Preparing unit cell files: 4amber_1fg5.prmtop and 4amber_1fg5.rst7
-============================================================
-
-==================================================
-Running pdb4amber on 1fg5_4tleap_uc1.pdb
-==================================================
+================================================================================
+  Preparing unit cell files: 4amber_1fg5.prmtop and 4amber_1fg5.rst7
+================================================================================
+================================================================================
+  Running pdb4amber on 1fg5_4tleap_uc1.pdb
+================================================================================
 
 ==================================================
 Summary of pdb4amber for: 1fg5_4tleap_uc1.pdb
@@ -79,25 +68,19 @@ None
 ---------- Mising heavy atom(s)
 
 None
-
-| ~> /home/case/phenix/build/../conda_base/bin/tleap -f 1fg5_uc_tleap_input_run
-
 Checking output filenames
   file : 1fg5_uc.prmtop
   file : 1fg5_uc.rst7
-
-| ~> /home/case/phenix/build/../conda_base/bin/ChBox -c 1fg5_uc.rst7 -o 1fg5_uc.rst7 -X 95.67 -Y 95.67 -Z 112.93 -al 90.0 -bt 90.0 -gm 90.0 
-
 4amber_1fg5.prmtop
 checking special positions in 4phenix_1fg5.pdb
-
-==================================================
-Done.  Four new files have been made:
+================================================================================
+  Done.  Four new files have been made:
       4phenix_1fg5.pdb
       4amber_1fg5.rst7
       4amber_1fg5.prmtop
       4amber_1fg5.order
-==================================================
+
+================================================================================
 
 Example
 
