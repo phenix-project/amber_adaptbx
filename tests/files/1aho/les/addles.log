@@ -2,8 +2,6 @@
  set up Locally Enhanced Sampling topology
 add_les> file rprm name=(4amber_1aho.prmtop) read
   The following unit number was assigned    26
-| New format PARM file being parsed.
-| Version =    1.000 Date = 04/29/20 Time = 22:39:57
  Checking topology sizes against compiled limits
  Checking topology sizes against compiled limits
 add_les> file rcbd name=(4amber_1aho.rst7) read
@@ -34,7 +32,7 @@ there were   4068 ntheth angles, now there are   4082
 there were   2760 ntheta angles, now there are   2778
 there were      0 ngper angles, now there are      0
 there were   8584 nphih torsions, now there are   8623
-there were   8488 nphia torsions, now there are   8571
+there were   8496 nphia torsions, now there are   8579
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -52,7 +50,7 @@ there were   4082 ntheth angles, now there are   4092
 there were   2778 ntheta angles, now there are   2783
 there were      0 ngper angles, now there are      0
 there were   8623 nphih torsions, now there are   8642
-there were   8571 nphia torsions, now there are   8588
+there were   8579 nphia torsions, now there are   8596
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -70,7 +68,7 @@ there were   4092 ntheth angles, now there are   4106
 there were   2783 ntheta angles, now there are   2803
 there were      0 ngper angles, now there are      0
 there were   8642 nphih torsions, now there are   8686
-there were   8588 nphia torsions, now there are   8669
+there were   8596 nphia torsions, now there are   8677
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -89,7 +87,7 @@ there were   4106 ntheth angles, now there are   4120
 there were   2803 ntheta angles, now there are   2821
 there were      0 ngper angles, now there are      0
 there were   8686 nphih torsions, now there are   8725
-there were   8669 nphia torsions, now there are   8752
+there were   8677 nphia torsions, now there are   8760
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -107,7 +105,7 @@ there were   4120 ntheth angles, now there are   4130
 there were   2821 ntheta angles, now there are   2826
 there were      0 ngper angles, now there are      0
 there were   8725 nphih torsions, now there are   8744
-there were   8752 nphia torsions, now there are   8769
+there were   8760 nphia torsions, now there are   8777
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -125,7 +123,7 @@ there were   4130 ntheth angles, now there are   4144
 there were   2826 ntheta angles, now there are   2846
 there were      0 ngper angles, now there are      0
 there were   8744 nphih torsions, now there are   8788
-there were   8769 nphia torsions, now there are   8850
+there were   8777 nphia torsions, now there are   8858
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -144,7 +142,7 @@ there were   4144 ntheth angles, now there are   4158
 there were   2846 ntheta angles, now there are   2864
 there were      0 ngper angles, now there are      0
 there were   8788 nphih torsions, now there are   8827
-there were   8850 nphia torsions, now there are   8933
+there were   8858 nphia torsions, now there are   8941
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -162,7 +160,7 @@ there were   4158 ntheth angles, now there are   4168
 there were   2864 ntheta angles, now there are   2869
 there were      0 ngper angles, now there are      0
 there were   8827 nphih torsions, now there are   8846
-there were   8933 nphia torsions, now there are   8950
+there were   8941 nphia torsions, now there are   8958
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -180,7 +178,7 @@ there were   4168 ntheth angles, now there are   4182
 there were   2869 ntheta angles, now there are   2889
 there were      0 ngper angles, now there are      0
 there were   8846 nphih torsions, now there are   8890
-there were   8950 nphia torsions, now there are   9031
+there were   8958 nphia torsions, now there are   9039
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -199,7 +197,7 @@ there were   4182 ntheth angles, now there are   4196
 there were   2889 ntheta angles, now there are   2907
 there were      0 ngper angles, now there are      0
 there were   8890 nphih torsions, now there are   8929
-there were   9031 nphia torsions, now there are   9114
+there were   9039 nphia torsions, now there are   9122
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -217,7 +215,7 @@ there were   4196 ntheth angles, now there are   4206
 there were   2907 ntheta angles, now there are   2912
 there were      0 ngper angles, now there are      0
 there were   8929 nphih torsions, now there are   8948
-there were   9114 nphia torsions, now there are   9131
+there were   9122 nphia torsions, now there are   9139
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -235,7 +233,7 @@ there were   4206 ntheth angles, now there are   4220
 there were   2912 ntheta angles, now there are   2932
 there were      0 ngper angles, now there are      0
 there were   8948 nphih torsions, now there are   8992
-there were   9131 nphia torsions, now there are   9212
+there were   9139 nphia torsions, now there are   9220
 there were      0 ndper torsions, now there are      0
 processing exclusion list 
 finished creating LES subspace 
@@ -273,7 +271,7 @@ add_les> *EOD
  bond with hydrogen:          26
 There were    69 bond types, now there are    83
 There were   156 angle types, now there are   184
-There were   195 dihedral types, now there are   261
+There were   196 dihedral types, now there are   262
 There were    16 atom typesNow there are    24
 MAX # ATOMS IN A SINGLE RESIDUE =      26
   ATOM  origpt
