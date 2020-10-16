@@ -44,6 +44,6 @@ status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
 status=$(($status + $?))
 
-/bin/rm -f SPB.cif SPB.pdb 3cfb_uc.pdb
+/bin/rm -f SPB.cif SPB.pdb 3cfb_uc.pdb 4amber_3cfb.rst7 tleap_uc.in
 
 exit $status
