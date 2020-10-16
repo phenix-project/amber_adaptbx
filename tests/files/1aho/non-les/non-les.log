@@ -1,7 +1,6 @@
-
-==================================================
-Running pdb4amber on 1aho.pdb
-==================================================
+================================================================================
+  Running pdb4amber on 1aho.pdb
+================================================================================
 
 ==================================================
 Summary of pdb4amber for: 1aho.pdb
@@ -28,31 +27,21 @@ LYS_30 misses 3 heavy atom(s)
 LYS_50 misses 1 heavy atom(s)
 The alternate coordinates have been discarded.
 Only the first occurrence for each atom was kept.
-
-==================================================
-Setting up library files for non-standard residues
-==================================================
-
-==================================================
-Preparing asu files and 4phenix_1aho.pdb
-==================================================
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 1aho_asu_tleap_input_run
-
+================================================================================
+  Setting up library files for non-standard residues
+================================================================================
+================================================================================
+  Preparing asu files and 4phenix_1aho.pdb
+================================================================================
 Checking output filenames
   file : 1aho_asu.prmtop
   file : 1aho_asu.rst7
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 1aho_asu.rst7 -o 1aho_asu.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
-
-
-============================================================
-Preparing unit cell files: 4amber_1aho.prmtop and 4amber_1aho.rst7
-============================================================
-
-==================================================
-Running pdb4amber on 1aho_4tleap_uc1.pdb
-==================================================
+================================================================================
+  Preparing unit cell files: 4amber_1aho.prmtop and 4amber_1aho.rst7
+================================================================================
+================================================================================
+  Running pdb4amber on 1aho_4tleap_uc1.pdb
+================================================================================
 
 ==================================================
 Summary of pdb4amber for: 1aho_4tleap_uc1.pdb
@@ -82,32 +71,22 @@ gap of 6.778859 A between GLY 632 and ARG 633
 ---------- Mising heavy atom(s)
 
 None
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/tleap -f 1aho_uc_tleap_input_run
-
 Checking output filenames
   file : 1aho_uc.prmtop
   file : 1aho_uc.rst7
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/ChBox -c 1aho_uc.rst7 -o 1aho_uc.rst7 -X 45.9 -Y 40.7 -Z 30.1 -al 90.0 -bt 90.0 -gm 90.0 
-
 4amber_1aho.prmtop
-
-==================================================
-Minimizing input coordinates.
-==================================================
-
-| ~> /home/casegroup/phenix_svn2/build/../conda_base/bin/sander -O -i 1aho_amber_all.in -p 4amber_1aho.prmtop -c 4amber_1aho.rst7 -o 1aho.min.out            -ref 4amber_1aho.rst7 -r 4amber_1aho.min.rst7
-
+================================================================================
+  Minimizing input coordinates.
+================================================================================
 checking special positions in 4phenix_1aho.pdb
-
-==================================================
-Done.  Four new files have been made:
+================================================================================
+  Done.  Four new files have been made:
       4phenix_1aho.pdb
       4amber_1aho.rst7
       4amber_1aho.prmtop
       4amber_1aho.order
-==================================================
+
+================================================================================
 
 Example
 
