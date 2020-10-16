@@ -1,0 +1,15 @@
+#!/bin/sh
+
+#  run several simple tests of Amber preparation and refinement on 1aho:
+#  This should be a good test case: has disulfide bonds, alternate locations,
+#  more than 1 asu in a unit cell, and an (artificial)  gap.
+
+./test_AmberPrep_LES
+status=$(($status + $?))
+
+./test_phenix.refine_LES
+status=$(($status + $?))
+
+/bin/rm -f amber_002.def 1aho_4tleap_renum.txt
+
+exit $status

@@ -10,12 +10,6 @@ status=$?
 ./test_phenix.refine
 status=$(($status + $?))
 
-./test_AmberPrep_LES
-status=$(($status + $?))
-
-./test_phenix.refine_LES
-status=$(($status + $?))
-
 /bin/rm -f amber_002.def 1aho_4tleap_renum.txt
 
 exit $status

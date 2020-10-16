@@ -23,6 +23,7 @@ class manager(standard_manager):
   COUNT = 0
   # all objects share the same order_converter
   order_converter = None
+  n_sites_cart = None
 
   def __init__(self,
                # pdb_hierarchy,
@@ -34,7 +35,6 @@ class manager(standard_manager):
                gradients_factory=flex.vec3_double,
                # amber_structs=None,
                log=StringIO()):
-    # super(manager, self).__init__()
     self.gradients_factory = gradients_factory
     # self.number_of_restraints = number_of_restraints
     # self.amber_structs = amber_structs
@@ -81,16 +81,27 @@ class manager(standard_manager):
 
   def initialisation(self, params, log=None):
     make_header("Initializing Amber", out=log)
+    error = '''
+
+    no filename for %s provided
+
+    use
+
+      %s=<filename>.%s
+
+    '''
     print("  topology    : %s" % params.amber.topology_file_name, file=log)
     if not params.amber.topology_file_name:
-      raise Sorry('no filename for topology file provided')
+      raise Sorry(error % ('topology', 'amber.topology_file_name', 'prmtop'))
+    if params.amber.topology_file_name.endswith('rst7'):
+      raise Sorry('possible wrong format - need .prmtop file')
     print("  atom order  : %s" % params.amber.order_file_name, file=log)
     if not params.amber.order_file_name:
-      raise Sorry('no filename for order file provided')
-    if params.amber.coordinate_file_name:
+      raise Sorry(error % ('order', 'amber.order_file_name', 'order'))
+    if params.amber.coordinate_file_name or 1:
       print("  coordinates : %s" % params.amber.coordinate_file_name, file=log)
       if not params.amber.coordinate_file_name:
-        raise Sorry('no filename for coordinate file provided')
+        raise Sorry(error % ('coordinate', 'amber.coordinate_file_name', 'rst7'))
     make_header('...', out=log)
 
   def energies_sites(self,
@@ -119,7 +130,6 @@ class manager(standard_manager):
       extension_objects=extension_objects,
       site_labels=site_labels,
       )
-    # if log is None: assert 0
     # Expand sites_cart to unit cell
     sites_cart_uc = expand_coord_to_unit_cell(
       sites_cart,
@@ -140,16 +150,6 @@ class manager(standard_manager):
       gradients = self.gradients_factory(
           flex.double(sites_cart.size() * 3, 0))
     result.gradients=gradients
-    # result = energies(sites_cart,
-    #                   # self.standard_geometry_restraints_manager,
-    #                   compute_gradients=compute_gradients,
-    #                   gradients=gradients,
-    #                   # gradients_size=sites_cart.size(),
-    #                   # gradients_factory=None,
-    #                   normalization=False,
-    #                   )
-
-    # result.number_of_restraints = self.number_of_restraints
     result.residual_sum = ene.tot
     ptrfunc = self.amber_structs.parm.ptr
     nbond = ptrfunc('nbonh') + ptrfunc('nbona')
@@ -159,7 +159,6 @@ class manager(standard_manager):
                                 ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
-    from libtbx.introspection import show_stack
     #
     # to usurp a test in statistics.py
     #
@@ -198,7 +197,6 @@ class manager(standard_manager):
                                           )
         self.last_time = time.time()
         delta_time = time.time()-self.last_time
-        # show_stack()
         print(heading, file=log)
         print(numbers, file=log)
       energies = '%12s %12s %12s %12s %12s %12s %5.1f' % (outl[0],
@@ -223,16 +221,17 @@ class manager(standard_manager):
     # print(len(result.gradients),list(result.gradients)[:10])
     return result
 
-  def _helper(self, selection):
-    for attr, value in selection.__dict__.items():
-      setattr(self, attr, value)
-
-  def select_OLD(self, selection=None, iselection=None):
-    self.selection_count+=1
-    result = self.standard_geometry_restraints_manager.select(selection=selection,
-                                                              iselection=iselection)
-    self._helper(result)
-    # self.standard_geometry_restraints_manager = result
+  def select(self, selection=None, iselection=None):
+    if selection is not None: self.n_sites_cart = len(selection)
+    if iselection is not None: assert self.n_sites_cart
+    return_standard_grm = False
+    if selection and False in selection: return_standard_grm = True
+    if iselection and self.n_sites_cart!=len(iselection):
+      return_standard_grm = True
+    if return_standard_grm:
+      result = self.standard_geometry_restraints_manager.select(selection=selection,
+                                                                iselection=iselection)
+      return result
     return self
 
   def cleanup(self):
@@ -249,6 +248,6 @@ def digester(standard_geometry_restraints_manager,
              ):
   sgrm = standard_geometry_restraints_manager
   agrm = manager(params, log=log)
-  for attr, value in vars(sgrm).items():
-    setattr(agrm, attr, value)
+  for attr, value in vars(sgrm).items(): setattr(agrm, attr, value)
+  agrm.standard_geometry_restraints_manager = sgrm
   return agrm

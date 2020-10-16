@@ -6,7 +6,6 @@ from libtbx.utils import Sorry
 # TODO: create writer in another place? where?
 from parmed.amber.netcdffiles import NetCDFTraj
 
-
 def get_amber_struct_object(params):
   amber_params = params.amber
   ridingH = True
@@ -56,13 +55,14 @@ def get_amber_struct_object(params):
   else:
      amber_structs.inp.ifqnt=0
 
-  amber_structs.sander_engine.setup(
+  if not amber_structs.sander_engine.is_setup():
+    amber_structs.sander_engine.setup(
       amber_structs.parm,
       amber_structs.parm.coordinates,
       amber_structs.parm.box,
       amber_structs.inp,
       amber_structs.qm_inp
-  )
+      )
 
   if amber_params.order_file_name is not None:
     order_map_file_name = amber_params.order_file_name

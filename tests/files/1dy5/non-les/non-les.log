@@ -99,7 +99,7 @@ Running elbow/antechamber for ACT
 Preparing asu files and 4phenix_1dy5.pdb
 ==================================================
 
-| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f tleap_asu.in
+| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 1dy5_asu_tleap_input_run
 
 Checking output filenames
   file : 1dy5_asu.prmtop
@@ -146,7 +146,7 @@ gap of 4.508257 A between LYS 834 and GLY 836
 
 None
 
-| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f tleap_uc.in
+| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 1dy5_uc_tleap_input_run
 
 Checking output filenames
   file : 1dy5_uc.prmtop
@@ -160,7 +160,7 @@ Checking output filenames
 Minimizing input coordinates.
 ==================================================
 
-| ~> /Users/case/phenix/build/../conda_base/bin/msander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
+| ~> /Users/case/phenix/build/../conda_base/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
 
 checking special positions in 4phenix_1dy5.pdb
 

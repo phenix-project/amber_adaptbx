@@ -3,61 +3,8 @@ Notes:
 The tests that phenix automatically runs are in 
      $PHENIX/modules/phenix/phenix/command_line/amber_run_tests.py
 
-One can also run these manually:
-
-     cd $PHENIX/modules/amber_adaptbx/tests/files/1aho
-     ./test_AmberPrep
-     ./test_phenix.refine
-     ./test_AmberPrep_LES
-     #  The 3cfb tests take longer to run, and are currently commented out in
-     #    the amber_run_tests.py script
-     cd $PHENIX/modules/amber_adaptbx/tests/files/3cfb
-     ./test_AmberPrep
-
 These are "regression tests" that check that phenix.AmberPrep and
 phenix.refine with useAmber=True continue to give correct results.
 The scripts will write PASSED or FAILED to stdout (along with other
 info), and will return 0 on success on 1 on failure.
 
-==========================================================================
-Descriptions below are for a test suite that Hai Nguyen put together.
-But some of these are now outdated, so they would need some work to
-get working again.  These are more like "unit tests".
-
-1. How to run?
-
-Note: add "-s" if you want to see more verbose
-
-- Run test from anywhere
-    phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/ -m 'medium' -v
-
-- Run a given test
-    phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/ -k name_of_the_method -v
-    e.g: phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/ -k test_build_from_pdb_that_does_not_have_remark_290 -v
-
-- Run test for a given file
-    phenix.python -m pytest /path/to/that/file -v
-    e.g: phenix.python -m pytest $PHENIX/modules/amber_adaptbx/tests/les/test_builder.py -v
-
-2. If you do not want to read lots of stuff, just try
-
-- run most of the tests (recommended):
-
-    make
-
-- run full ong tests (hours):
-
-    make test.all
-
-- To debug, you can run simple test
-
-    phenix.AmberPrep 2igd.pdb LES=True clean=False
-
-3. Further info
-- Check Makefile
-- Check __doc__ in ./run_tests.py
-
-4. To collect all the test names
-
-./run_tests.py --collect-only
-==========================================================================

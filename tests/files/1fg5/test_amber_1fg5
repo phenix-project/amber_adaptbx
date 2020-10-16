@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#  test case to handle MSE, potentially other modified amino acids
+
+echo "Running non-LES test on 1fg5, has MSE"
+phenix.AmberPrep 1fg5.pdb > non-les.log 2>&1
+
+./dacdif non-les/4phenix_1fg5.pdb 4phenix_1fg5.pdb
+status=$?
+./dacdif non-les/4amber_1fg5.prmtop 4amber_1fg5.prmtop
+status=$(($status + $?))
+./dacdif non-les/4amber_1fg5.rst7 4amber_1fg5.rst7
+status=$(($status + $?))
+./dacdif non-les/4amber_1fg5.order 4amber_1fg5.order
+status=$(($status + $?))
+./dacdif non-les/non-les.log non-les.log
+status=$(($status + $?))
+
+exit $status

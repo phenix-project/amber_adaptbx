@@ -21,6 +21,6 @@ status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
 status=$(($status + $?))
 
-/bin/rm -f 1dy5.min.out ACT.* IPA.* SO4.* tleap_uc.in 1dy5_uc.pdb
+/bin/rm -f 1dy5.min.out ACT.* IPA.* SO4.*  1dy5_uc.pdb
 
 exit $status

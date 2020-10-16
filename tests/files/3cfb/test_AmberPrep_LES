@@ -1,0 +1,28 @@
+#!/bin/sh
+
+#  simple test case: has alternate conformers, ss bonds, multiple
+#    chains per unit cell, non-standard residues, insertion codes
+
+#  does not have:  gaps
+#  also of interest: leaving out the use_reduce=False is OK, but gives
+#           slightly different results
+
+# 3cfb test currently (9mar17) exceeds the MAXLESTYP variable in sander
+
+echo "Running LES test on 3cfb:"
+phenix.AmberPrep 3cfb.pdb use_reduce=False LES=true addles_input=addles.in > les.log 2>&1
+
+./dacdif les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
+status=$(($status + $?))
+./dacdif les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
+status=$(($status + $?))
+./dacdif les/4amber_3cfb.order 4amber_3cfb.order
+status=$(($status + $?))
+./dacdif les/addles.log addles.log
+status=$(($status + $?))
+./dacdif les/les.log les.log
+status=$(($status + $?))
+
+/bin/rm -f SPB.cif SPB.pdb 3cfb_uc.pdb 4amber_3cfb.rst7
+
+exit $status
