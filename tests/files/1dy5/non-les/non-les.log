@@ -1,7 +1,6 @@
-
-==================================================
-Running pdb4amber on 1dy5.pdb
-==================================================
+================================================================================
+  Running pdb4amber on 1dy5.pdb
+================================================================================
 
 ==================================================
 Summary of pdb4amber for: 1dy5.pdb
@@ -64,57 +63,33 @@ LYS_155 misses 2 heavy atom(s)
 LYS_161 misses 4 heavy atom(s)
 The alternate coordinates have been discarded.
 Only the first occurrence for each atom was kept.
-
-==================================================
-Setting up library files for non-standard residues
-==================================================
-
-==================================================
-Running elbow/antechamber for IPA 
-==================================================
-
-| ~> /Users/case/phenix/build/../conda_base/bin/antechamber -i 4antechamber_IPA.pdb -fi pdb -o IPA.mol2 -fo mol2         -nc 0 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
-
-
-| ~> /Users/case/phenix/build/../conda_base/bin/parmchk2 -s 2 -i IPA.mol2 -f mol2 -o IPA.frcmod
-
+================================================================================
+  Setting up library files for non-standard residues
+================================================================================
+================================================================================
+  Running elbow/antechamber for IPA 
+================================================================================
 
   Residue "SO4" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
         
 IAS.lib is present. Skipping elbow/antechamber run for this residue.
 
-
-==================================================
-Running elbow/antechamber for ACT 
-==================================================
-
-| ~> /Users/case/phenix/build/../conda_base/bin/antechamber -i 4antechamber_ACT.pdb -fi pdb -o ACT.mol2 -fo mol2         -nc -1 -m 1 -s 2 -pf y -c bcc -at gaff2 -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"
-
-
-| ~> /Users/case/phenix/build/../conda_base/bin/parmchk2 -s 2 -i ACT.mol2 -f mol2 -o ACT.frcmod
-
-
-==================================================
-Preparing asu files and 4phenix_1dy5.pdb
-==================================================
-
-| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 1dy5_asu_tleap_input_run
-
+================================================================================
+  Running elbow/antechamber for ACT 
+================================================================================
+================================================================================
+  Preparing asu files and 4phenix_1dy5.pdb
+================================================================================
 Checking output filenames
   file : 1dy5_asu.prmtop
   file : 1dy5_asu.rst7
-
-| ~> /Users/case/phenix/build/../conda_base/bin/ChBox -c 1dy5_asu.rst7 -o 1dy5_asu.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
-
-
-============================================================
-Preparing unit cell files: 4amber_1dy5.prmtop and 4amber_1dy5.rst7
-============================================================
-
-==================================================
-Running pdb4amber on 1dy5_4tleap_uc1.pdb
-==================================================
+================================================================================
+  Preparing unit cell files: 4amber_1dy5.prmtop and 4amber_1dy5.rst7
+================================================================================
+================================================================================
+  Running pdb4amber on 1dy5_4tleap_uc1.pdb
+================================================================================
 
 ==================================================
 Summary of pdb4amber for: 1dy5_4tleap_uc1.pdb
@@ -145,32 +120,22 @@ gap of 4.508257 A between LYS 834 and GLY 836
 ---------- Mising heavy atom(s)
 
 None
-
-| ~> /Users/case/phenix/build/../conda_base/bin/tleap -f 1dy5_uc_tleap_input_run
-
 Checking output filenames
   file : 1dy5_uc.prmtop
   file : 1dy5_uc.rst7
-
-| ~> /Users/case/phenix/build/../conda_base/bin/ChBox -c 1dy5_uc.rst7 -o 1dy5_uc.rst7 -X 61.314 -Y 37.47 -Z 44.915 -al 90.0 -bt 94.55 -gm 90.0 
-
 4amber_1dy5.prmtop
-
-==================================================
-Minimizing input coordinates.
-==================================================
-
-| ~> /Users/case/phenix/build/../conda_base/bin/sander -O -i 1dy5_amber_all.in -p 4amber_1dy5.prmtop -c 4amber_1dy5.rst7 -o 1dy5.min.out            -ref 4amber_1dy5.rst7 -r 4amber_1dy5.min.rst7
-
+================================================================================
+  Minimizing input coordinates.
+================================================================================
 checking special positions in 4phenix_1dy5.pdb
-
-==================================================
-Done.  Four new files have been made:
+================================================================================
+  Done.  Four new files have been made:
       4phenix_1dy5.pdb
       4amber_1dy5.rst7
       4amber_1dy5.prmtop
       4amber_1dy5.order
-==================================================
+
+================================================================================
 
 Example
 
