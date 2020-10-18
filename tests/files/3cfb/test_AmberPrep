@@ -13,10 +13,10 @@ phenix.AmberPrep 3cfb.pdb use_reduce=False > non-les.log 2>&1
 
 status=0
 
-./dacdif non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
-status=$(($status + $?))
-./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
-status=$(($status + $?))
+#./dacdif non-les/4phenix_3cfb.pdb 4phenix_3cfb.pdb
+#status=$(($status + $?))
+#./dacdif non-les/4amber_3cfb.prmtop 4amber_3cfb.prmtop
+#status=$(($status + $?))
 ./dacdif non-les/4amber_3cfb.order 4amber_3cfb.order
 status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
@@ -39,11 +39,12 @@ phenix.AmberPrep 3cfb.pdb use_reduce=False minimise=amber_all LES=true > les.log
 
 fi
 
-./dacdif non-les/SPB.mol2 SPB.mol2
-status=$(($status + $?))
+#./dacdif non-les/SPB.mol2 SPB.mol2
+#status=$(($status + $?))
 ./dacdif non-les/SPB.frcmod SPB.frcmod
 status=$(($status + $?))
 
-/bin/rm -f SPB.cif SPB.pdb 3cfb_uc.pdb 4amber_3cfb.rst7 tleap_uc.in
+/bin/rm -f SPB.mol2 SPB.cif SPB.pdb 3cfb_uc.pdb 4amber_3cfb.rst7 \
+    tleap_uc.in 4amber_3cfb.prmtop 4phenix_3cfb.pdb
 
 exit $status
