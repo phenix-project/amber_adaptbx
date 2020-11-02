@@ -549,6 +549,8 @@ class AmberPrepRunner:
     if(os.path.isfile(os.path.join(amber_dir, 'dat', 'leap', 'cmd',
                                    'leaprc.phenix',))):
       f.write('source leaprc.phenix\n')
+    else:
+      f.write('addAtomTypes { { "SE" "Se" "sp3" } }\n')
     if( redq ):
       f.write('source leaprc.ff14SB.redq\n')
     else:
