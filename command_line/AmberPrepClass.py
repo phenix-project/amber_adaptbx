@@ -15,6 +15,7 @@ from libtbx import runtime_utils
 from elbow.command_line import builder
 
 from amber_adaptbx import pdb4amber
+from amber_adaptbx.pdb4amber.residue import (RESPROT, RESNA, )
 
 from amber_adaptbx import amber_library_server
 from amber_adaptbx.utils import build_unitcell, \
@@ -437,22 +438,6 @@ class AmberPrepRunner:
     th.close()
     outh.close()
 
-  def return_protein_chain_gaps(self):
-    assert self.pdb_hierarchy
-    from mmtbx import conformation_dependent_library
-    gaps = []
-    for three in conformation_dependent_library.generate_protein_threes(
-        hierarchy=self.pdb_hierarchy,
-        geometry=None,
-        include_non_linked=True,
-    ):
-      if not three.are_linked():
-        print three.show()
-        gaps.append(three)
-    if gaps:
-      return gaps
-    return False
-
   def process_ligands(self,
                       ns_names=[],
                       nproc=1,
@@ -598,7 +583,13 @@ class AmberPrepRunner:
     #
     if gaplist:
       for d, res1, resid1, res2, resid2 in gaplist:
-        f.write('deleteBond x.%d.C x.%d.N\n' % (resid1+1, resid2+1))
+        if res1 in RESPROT and res2 in RESPROT:
+           f.write('deleteBond x.%d.C x.%d.N\n' % (resid1+1, resid2+1))
+        elif res1 in RESNA and res2 in RESNA:
+           f.write("deleteBond x.%d.O3' x.%d.P\n" % (resid1+1, resid2+1))
+        else:
+           print("un-recognized gap: %s %d -- %s %d\n" & (res1, resid1+1,
+                                                          res2, resid2+1) )
     #
     #  process sslist
     #

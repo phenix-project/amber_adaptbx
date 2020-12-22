@@ -16,6 +16,8 @@ The following residues had alternate locations:
 CYS_12
 GLU_24
 CYS_61
+-----------Non-standard-resnames
+
 
 ---------- Gaps (Renumbered Residues!)
 gap of 6.778859 A between GLY 59 and ARG 60
@@ -61,6 +63,8 @@ f
 
 The following residues had alternate locations:
 None
+-----------Non-standard-resnames
+
 
 ---------- Gaps (Renumbered Residues!)
 gap of 6.778859 A between GLY 59 and ARG 60
