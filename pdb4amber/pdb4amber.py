@@ -28,7 +28,7 @@ else:
     string_types = basestring
 
 from .residue import (
-    RESPROT, RESPROTE, 
+    RESPROT, RESPROTE, RESNA, 
     AMBER_SUPPORTED_RESNAMES,
     HEAVY_ATOM_DICT, )
 
@@ -156,7 +156,8 @@ class AmberPDBFixer(object):
             self.write_pdb(in_pdb)
             with open('leap.in', 'w') as fh:
                 fh.write('source leaprc.protein.ff14SB\n')
-                fh.write('source leaprc.dna.bsc1\n')
+                fh.write('source leaprc.DNA.bsc1\n')
+                fh.write('source leaprc.RNA.OL3\n')
                 fh.write('x = loadpdb {}\n'.format(in_pdb))
                 fh.write('savepdb x {}\n'.format(out_pdb))
                 fh.write('quit')
@@ -183,22 +184,18 @@ class AmberPDBFixer(object):
         return self
 
     def find_gaps(self):
-        # TODO: doc
         # report original resnum?
         CA_atoms = []
         C_atoms = []
         N_atoms = []
+        O3_atoms = []
+        P_atoms = []
         gaplist = []
         parm = self.parm
 
-        #  N.B.: following only finds gaps in protein chains!
+        # First, for protein chains:
         for i, atom in enumerate(parm.atoms):
-            # TODO: if using 'CH3', this will be failed with
-            # ACE ALA ALA ALA NME system
-            # if atom.name in ['CA', 'CH3'] and atom.residue.name in RESPROTE:
-            if atom.name in [
-                    'CA',
-            ] and atom.residue.name in RESPROTE:
+            if atom.name == 'CA' and atom.residue.name in RESPROTE:
                 CA_atoms.append(i)
             if atom.name == 'C' and atom.residue.name in RESPROTE:
                 C_atoms.append(i)
@@ -224,6 +221,33 @@ class AmberPDBFixer(object):
             if gap > 2.0:
                 gaprecord = (gap, C_atom.residue.name, C_atom.residue.idx,
                              N_atom.residue.name, N_atom.residue.idx)
+                gaplist.append(gaprecord)
+                ngaps += 1
+
+        # Repeat for nucleic acid chains:
+        for i, atom in enumerate(parm.atoms):
+            if atom.name == "O3'" and atom.residue.name in RESNA:
+                O3_atoms.append(i)
+            if atom.name == 'P' and atom.residue.name in RESNA:
+                P_atoms.append(i)
+
+        np = len(P_atoms)
+
+        for i in range(np - 1):
+            is_ter = parm.atoms[P_atoms[i]].residue.ter
+            if is_ter:
+                continue
+            O3_atom = parm.atoms[O3_atoms[i]]
+            P_atom = parm.atoms[P_atoms[i + 1]]
+
+            dx = float(O3_atom.xx) - float(P_atom.xx)
+            dy = float(O3_atom.xy) - float(P_atom.xy)
+            dz = float(O3_atom.xz) - float(P_atom.xz)
+            gap = math.sqrt(dx * dx + dy * dy + dz * dz)
+
+            if gap > 2.0:
+                gaprecord = (gap, O3_atom.residue.name, O3_atom.residue.idx,
+                             P_atom.residue.name, P_atom.residue.idx)
                 gaplist.append(gaprecord)
                 ngaps += 1
 
@@ -276,7 +300,7 @@ class AmberPDBFixer(object):
             residue = self.parm.residues[index]
             residue.name = 'CYX'
 
-    def find_non_starndard_resnames(self):
+    def find_non_standard_resnames(self):
         ns_names = set()
         for residue in self.parm.residues:
             if len(residue.name) > 3:
@@ -401,9 +425,9 @@ class AmberPDBFixer(object):
 
         with open(basename + '_renum.txt', 'w') as fh:
             for residue in self.parm.residues:
-                fh.write("%3s %5s %2s     %3s %5s\n" %
-                         (residue.name, residue.number, residue.chain,
-                          residue.name, residue.idx + 1))
+                fh.write("%3s %c %5s    %3s %5s\n" %
+                         (residue.name, residue.chain, residue.number, residue.name,
+                          residue.idx + 1))
 
     def _write_pdb_to_stringio(self,
                                cys_cys_atomidx_set=None,
@@ -416,11 +440,6 @@ class AmberPDBFixer(object):
         stringio_file.seek(0)
         lines = stringio_file.readlines()
 
-        if noter:
-            for line in lines:
-                if line.startswith("TER"):
-                    lines.remove(line)
-
         # TODO: update ParmEd?
         if disulfide_conect:
             conect_record = [
@@ -431,9 +450,7 @@ class AmberPDBFixer(object):
             lines[-1] = conect_str + 'END\n'
 
         if noter:
-            for line in lines:
-                if line.startswith("TER"):
-                    lines.remove(line)
+            lines = [line for line in lines if not line.startswith("TER")]
 
         stringio_file_out.writelines(lines)
         stringio_file_out.seek(0)
@@ -457,6 +474,7 @@ class AmberPDBFixer(object):
             for atom in residue.atoms:
                 if atom.other_locations:
                     alt_residues.add(residue)
+
         # chain
         logger.info('\n----------Chains')
         logger.info('The following (original) chains have been found:')
@@ -481,6 +499,7 @@ def run(
         arg_nohyd=False,
         arg_dry=False,
         arg_prot=False,
+        arg_amber_compatible_residues=False,
         arg_strip_atom_mask=None,
         arg_mutate_string=None,
         arg_constph=False,
@@ -547,12 +566,14 @@ def run(
 
     # remove hydrogens if option -y is used:==============================
     if arg_nohyd:
-        pdbfixer.parm.strip('@H=')
+        pdbfixer.parm.strip('@/H')
 
     # find non-standard Amber residues:===================================
     #   TODO: why does the following call discard the return array of
     #         non-standard residue names?
-    ns_names = pdbfixer.find_non_starndard_resnames()
+    ns_names = pdbfixer.find_non_standard_resnames()
+    logger.info("-----------Non-standard-resnames")
+    logger.info(", ".join(ns_names))
 
     ns_mask = ':' + ','.join(ns_names)
     ns_mask_filename = base_filename + '_nonprot.pdb'
@@ -563,11 +584,13 @@ def run(
             fh.write("")
 
     # if arg_elbow:
-    #     ns_names = find_non_starndard_resnames_elbow(parm)
+    #     ns_names = find_non_standard_resnames_elbow(parm)
 
     # keep only protein:==================================================
     if arg_prot:
         pdbfixer.parm.strip('!:' + ','.join(RESPROT))
+    if arg_amber_compatible_residues:
+        pdbfixer.parm.strip('!:' + ','.join(AMBER_SUPPORTED_RESNAMES))
 
     # strip atoms with given mask    =====================================
     if arg_strip_atom_mask is not None:
@@ -733,6 +756,12 @@ def main(argv=None):
         "--prot",
         action="store_true",
         dest="prot",
+        help="keep only protein residues (default: no)")
+    parser.add_argument(
+        "-a",
+        "--amber-compatible-residues",
+        action="store_true",
+        dest="amber_compatible_residues",
         help="keep only Amber-compatible residues (default: no)")
     parser.add_argument(
         "--constantph",
@@ -770,7 +799,7 @@ def main(argv=None):
         "--add-missing-atoms",
         action="store_true",
         dest="add_missing_atoms",
-        help="Use tleap to add missing atoms")
+        help="Use tleap to add missing atoms. (EXPERIMENTAL OPTION)")
     parser.add_argument(
         "--model",
         type=int,
@@ -832,6 +861,7 @@ def main(argv=None):
         arg_strip_atom_mask=opt.strip_atom_mask,
         arg_mutate_string=opt.mutation_string,
         arg_prot=opt.prot,
+        arg_amber_compatible_residues=opt.amber_compatible_residues,
         arg_constph=opt.constantph,
         arg_mostpop=opt.mostpop,
         arg_reduce=opt.reduce,
