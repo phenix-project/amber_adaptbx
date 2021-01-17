@@ -319,10 +319,8 @@ class AmberPrepRunner:
     '''
 
     template_parm = parmed.read_PDB(self.pdb_filename)
-    print("ready for parmed.load_file\n")
     parm = parmed.load_file("%s_asu.prmtop" % self.base,
                          xyz="%s_asu.rst7" % self.base )
-    assert 0
 
     # following kludge is needed to get atom numbers; not needed if
     #   conversion to phenix order is done right after this
@@ -1173,9 +1171,7 @@ def run(rargs=None):
   amber_prep_runner.update_rst7_box("asu")
 
   phenix_file = '4phenix_%s.pdb' % amber_prep_runner.base
-  print("ready for amber_prep_runner.asu_parm7_to_4phenix_pdb\n")
   amber_prep_runner.asu_parm7_to_4phenix_pdb(phenix_file)
-  print("back from amber_prep_runner.asu_parm7_to_4phenix_pdb\n")
 
   print_header("Preparing unit cell files: 4amber_%(base)s.prmtop and 4amber_%(base)s.rst7" % locals())
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,
