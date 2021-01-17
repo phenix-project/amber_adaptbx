@@ -189,7 +189,7 @@ class AmberPDBFixer(object):
         C_atoms = []
         N_atoms = []
         O3_atoms = []
-        P_atoms = []
+        O5_atoms = []
         gaplist = []
         parm = self.parm
 
@@ -228,26 +228,28 @@ class AmberPDBFixer(object):
         for i, atom in enumerate(parm.atoms):
             if atom.name == "O3'" and atom.residue.name in RESNA:
                 O3_atoms.append(i)
-            if atom.name == 'P' and atom.residue.name in RESNA:
-                P_atoms.append(i)
+                # print(i,atom.name,atom.residue.name,atom.residue.number,atom.residue.idx)
+            if atom.name == "O5'" and atom.residue.name in RESNA:
+                O5_atoms.append(i)
+                # print(i,atom.name,atom.residue.name,atom.residue.number,atom.residue.idx)
 
-        np = len(P_atoms)
+        np = len(O5_atoms)
 
         for i in range(np - 1):
-            is_ter = parm.atoms[P_atoms[i]].residue.ter
+            is_ter = parm.atoms[O5_atoms[i]].residue.ter
             if is_ter:
                 continue
             O3_atom = parm.atoms[O3_atoms[i]]
-            P_atom = parm.atoms[P_atoms[i + 1]]
+            O5_atom = parm.atoms[O5_atoms[i + 1]]
 
-            dx = float(O3_atom.xx) - float(P_atom.xx)
-            dy = float(O3_atom.xy) - float(P_atom.xy)
-            dz = float(O3_atom.xz) - float(P_atom.xz)
+            dx = float(O3_atom.xx) - float(O5_atom.xx)
+            dy = float(O3_atom.xy) - float(O5_atom.xy)
+            dz = float(O3_atom.xz) - float(O5_atom.xz)
             gap = math.sqrt(dx * dx + dy * dy + dz * dz)
 
-            if gap > 2.0:
+            if gap > 2.8:
                 gaprecord = (gap, O3_atom.residue.name, O3_atom.residue.idx,
-                             P_atom.residue.name, P_atom.residue.idx)
+                             O5_atom.residue.name, O5_atom.residue.idx)
                 gaplist.append(gaprecord)
                 ngaps += 1
 
@@ -397,9 +399,9 @@ class AmberPDBFixer(object):
                 fh.write(err)
             pdbh = StringIO(out)
             # not using load_file since it does not read StringIO
-            print '-'*80
-            print pdbh
-            print '-'*80
+            print('-'*80)
+            print(pdbh)
+            print('-'*80)
             self.parm = parmed.read_PDB(pdbh)
         finally:
             fileobj.close()

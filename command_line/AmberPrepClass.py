@@ -74,7 +74,7 @@ master_phil_string = """
         .type = bool
         .caption = Run reduce on the input pdb file to place hydrogens
         .help = Run reduce on the input pdb file to place hydrogens
-      use_glycam = True
+      use_glycam = False
         .type = bool
         .caption = Load GLYCAM carbohydrate force field
         .help = Load GLYCAM carbohydrate force field
@@ -319,8 +319,10 @@ class AmberPrepRunner:
     '''
 
     template_parm = parmed.read_PDB(self.pdb_filename)
+    print("ready for parmed.load_file\n")
     parm = parmed.load_file("%s_asu.prmtop" % self.base,
                          xyz="%s_asu.rst7" % self.base )
+    assert 0
 
     # following kludge is needed to get atom numbers; not needed if
     #   conversion to phenix order is done right after this
@@ -542,6 +544,8 @@ class AmberPrepRunner:
       f.write('source leaprc.protein.ff14SB\n')
       f.write('source leaprc.DNA.OL15\n')
       f.write('source leaprc.RNA.OL3\n')
+      f.write('loadOff all_modrna08.lib\n')
+      f.write('loadAmberParams all_modrna08.frcmod\n')
     if( use_glycam ):
        f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
@@ -1169,7 +1173,9 @@ def run(rargs=None):
   amber_prep_runner.update_rst7_box("asu")
 
   phenix_file = '4phenix_%s.pdb' % amber_prep_runner.base
+  print("ready for amber_prep_runner.asu_parm7_to_4phenix_pdb\n")
   amber_prep_runner.asu_parm7_to_4phenix_pdb(phenix_file)
+  print("back from amber_prep_runner.asu_parm7_to_4phenix_pdb\n")
 
   print_header("Preparing unit cell files: 4amber_%(base)s.prmtop and 4amber_%(base)s.rst7" % locals())
   amber_prep_runner.build_unitcell_prmtop_and_rst7_files(redq=actions.redq,

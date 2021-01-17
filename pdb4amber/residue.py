@@ -77,7 +77,7 @@ RESPROT = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
 
 RESNA = ('C', 'G', 'U', 'A', 'DC', 'DG', 'DT', 'DA', 'OHE', 'C5', 'G5', 'U5',
          'A5', 'C3', 'G3', 'U3', 'A3', 'DC5', 'DG5', 'DT5', 'DA5', 'DC3',
-         'DG3', 'DT3', 'DA3' )
+         'DG3', 'DT3', 'DA3', 'PSU', 'OMU', '1MA' )
 
 RESSOLV = ('WAT', 'HOH', 'AG', 'AL', 'Ag', 'BA', 'BR', 'Be', 'CA', 'CD', 'CE',
            'CL', 'CO', 'CR', 'CS', 'CU', 'CU1', 'Ce', 'Cl-', 'Cr', 'Dy', 'EU',
