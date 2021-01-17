@@ -42,6 +42,9 @@ master_phil_string = """
       elbow_input_file_name = None
         .type = path
         .short_caption = Chemical info for a single ligand to create Amber files
+      use_amber_library = True
+        .type = bool
+        .short_caption = switch for using ligands from the amber library
       ligand_id = LIG
         .type = str
         .short_caption = Three-letter for ligand
@@ -457,6 +460,7 @@ class AmberPrepRunner:
                       ns_names=[],
                       nproc=1,
                       prefer_input_method=None,
+                      use_amber_library=True,
                       debug=False):
     assert self.pdb_hierarchy
     if nproc > 1:
@@ -471,7 +475,7 @@ class AmberPrepRunner:
         print "%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
 
       # else check if this has already been entered in the amber library:
-      elif amber_library_server.is_in_components_lib(residue_name):
+      elif use_amber_library and amber_library_server.is_in_components_lib(residue_name):
         print """
   Residue "%s" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
@@ -1150,6 +1154,7 @@ def run(rargs=None):
       ns_names,
       # nproc=inputs.nproc,
       prefer_input_method=inputs.antechamber.prefer_input_method,
+      use_amber_library=inputs.use_amber_library,
   )
   #
   print_header("Preparing asu files and 4phenix_%s.pdb" % base)
