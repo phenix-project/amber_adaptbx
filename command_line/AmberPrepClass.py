@@ -542,8 +542,8 @@ class AmberPrepRunner:
       f.write('source leaprc.protein.ff14SB\n')
       f.write('source leaprc.DNA.OL15\n')
       f.write('source leaprc.RNA.OL3\n')
-      f.write('loadOff all_modrna08.lib\n')
-      f.write('loadAmberParams all_modrna08.frcmod\n')
+      f.write('loadOff modrna20.lib\n')
+      f.write('loadAmberParams modrna20.frcmod\n')
     if( use_glycam ):
        f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
@@ -769,7 +769,7 @@ class AmberPrepRunner:
       cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
              'bin','msander' )
       cmd += '%s -O -i %s -p %s -c %s -o %s.min.out \
-           -ref %s -r %s' % (
+           -ref %s -r %s 2> min.stderr' % (
           LEStype,
           input_file,
           self.final_prmtop_file,
