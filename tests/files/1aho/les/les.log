@@ -16,6 +16,8 @@ The following residues had alternate locations:
 CYS_12
 GLU_24
 CYS_61
+-----------Non-standard-resnames
+
 
 ---------- Gaps (Renumbered Residues!)
 gap of 6.778859 A between GLY 59 and ARG 60
@@ -61,6 +63,8 @@ f
 
 The following residues had alternate locations:
 None
+-----------Non-standard-resnames
+
 
 ---------- Gaps (Renumbered Residues!)
 gap of 6.778859 A between GLY 59 and ARG 60
@@ -78,19 +82,22 @@ Checking output filenames
   Building the LES prmtop and rst7 files
 ================================================================================
 
-| ~> /Users/nigel/phenix/conda/build/reduce/exe/reduce -BUILD -NUC -DB ./dummydb 1aho_uc.pdb > 1aho_uc_H.pdb 2>reduce_lesbuilder.log
+| ~> /home/case/phenix/build/reduce/exe/reduce -BUILD -NUC -DB ./dummydb 1aho_uc.pdb > 1aho_uc_H.pdb 2>reduce_lesbuilder.log
 
 
 ============================================================
  Building the prmtop and rst7 file with alternate conformers
 ============================================================
 
-| ~> /Users/nigel/phenix/conda/build/../conda_base/bin/addles <addles.in > addles.log
+| ~> /home/case/phenix/build/../conda_base/bin/addles <addles.in > addles.log
 
 4amber_1aho.prmtop
 ================================================================================
   Minimizing input coordinates.
 ================================================================================
+
+| ~> /home/case/phenix/build/../conda_base/bin/msander.LES -O -i 1aho_amber_all.in -p 4amber_1aho.prmtop -c 4amber_1aho.rst7 -o 1aho.min.out            -ref 4amber_1aho.rst7 -r 4amber_1aho.min.rst7 2> min.stderr
+
 checking special positions in 4phenix_1aho.pdb
 ================================================================================
   Done.  Four new files have been made:
