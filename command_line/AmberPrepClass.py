@@ -212,7 +212,7 @@ def setup_options_args(rargs):
   # master_phil.fetch_diff(source=master_phil.format(
   #    python_object=working_params)).show()
   # print "#phil __OFF__\n\n"
-  with open("%s.eff" % preamble, "wb") as f:
+  with open("%s.eff" % preamble, "w") as f:
     f.write(working_phil.format(python_object=working_params).as_str())
   return working_params
 
@@ -376,7 +376,7 @@ class AmberPrepRunner:
                               template_pdb, outpdb):
     '''
     Combine information in {parm7,rst7} with that in the template_pdb
-       file (usually 4phenix_xxxx.pdb) to create outpdb 
+       file (usually 4phenix_xxxx.pdb) to create outpdb
 
     Note:  the atom order in outpdb will be the "Amber" atom order; use phenix
     routines after this to convert to phenix atom order.
@@ -508,7 +508,7 @@ class AmberPrepRunner:
       errors = []
       warnings = []
       fatals = []
-      f = file(logfile, "rb")
+      f = file(logfile, "r")
       lines = f.read()
       f.close()
       warnings = {
@@ -545,7 +545,7 @@ class AmberPrepRunner:
             raise Sorry('tleap error : "%s"' % line)
 
     tleap_input_file = "tleap_%s.in" % output_base
-    f = file(tleap_input_file, "wb")
+    f = file(tleap_input_file, "w")
     f.write('logFile %s\n' % logfile)
 
     amber_dir = os.path.join( os.environ["LIBTBX_BUILD"] , ".." , "conda_base" )
@@ -673,7 +673,7 @@ class AmberPrepRunner:
     #-----------------------------------------------------------------
 
     uc_pdb_file = "%s_4UnitCell.pdb" % self.base
-    with open(uc_pdb_file, "wb") as fout:
+    with open(uc_pdb_file, "w") as fout:
       with open(self.pdb_filename) as fin:
         for line in fin:
           if "CRYST1" in line or "SMTRY" in line:
@@ -774,7 +774,7 @@ class AmberPrepRunner:
     if mintype in ["amber_h", "amber_all"]:
 
       input_file = '%s_%s.in' % (self.base, mintype)
-      f = open('%s_%s.in' % (self.base, mintype), 'wb')
+      f = open('%s_%s.in' % (self.base, mintype), 'w')
       f.write(inputs[mintype])
       f.close()
       cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
@@ -1301,7 +1301,7 @@ def run(rargs=None):
             append_end=True,
             crystal_symmetry=amber_prep_runner.pdb_inp.crystal_symmetry() )
   # expand the b4phenix_xxxx.pdb file to the full unit cell:
-  build_unitcell('b4phenix_%s.pdb' % base, '%s_uc.pdb' % base, 
+  build_unitcell('b4phenix_%s.pdb' % base, '%s_uc.pdb' % base,
                  use_amber_unitcell=actions.use_amber_unitcell)
 
   amber_prep_runner.check_special_positions()
