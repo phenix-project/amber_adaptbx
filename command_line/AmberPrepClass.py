@@ -4,7 +4,7 @@ import os
 import shutil
 import sys
 import iotbx.pdb
-import StringIO
+from six.moves import cStringIO as StringIO
 from libtbx import phil
 from libtbx.utils import Sorry
 import libtbx.load_env
@@ -917,7 +917,7 @@ def _run_antechamber_ccif(residue_name,
   for cmd in cmds:
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
-    stdo = StringIO.StringIO()
+    stdo = StringIO()
     ero.show_stdout(out=stdo)
     for line in stdo.getvalue().splitlines():
       if line.find('APS') > -1:
@@ -976,7 +976,7 @@ def _run_antechamber(mol,
   for cmd in cmds:
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
-    stdo = StringIO.StringIO()
+    stdo = StringIO()
     ero.show_stdout(out=stdo)
     for line in stdo.getvalue().splitlines():
       if line.find('APS') > -1:
