@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Romain M. Wolf, NIBR Basel, December 2013
 # with revisions by Pawel Janowski & Jason Swails, Rutgers U., Feb. 2014
 #    & Jan. 2015
@@ -257,8 +258,8 @@ import automatic_residue
 RESPROTE = tuple(list(RESPROTE)+automatic_residue.RESPROTE)
 
 def main():
-  print RESPROTE
-  print dir(automatic_residue)
+  print(RESPROTE)
+  print(dir(automatic_residue))
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import math
@@ -373,9 +374,9 @@ class AmberPDBFixer(object):
                 fh.write(err)
             pdbh = StringIO(out)
             # not using load_file since it does not read StringIO
-            print '-'*80
-            print pdbh
-            print '-'*80
+            print('-'*80)
+            print(pdbh)
+            print('-'*80)
             self.parm = parmed.read_PDB(pdbh)
         finally:
             fileobj.close()

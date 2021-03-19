@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import iotbx.pdb
 import parmed
@@ -83,9 +84,9 @@ class LESBuilder(object):
   def build_LES_parm(self):
     # create addles.in, then run addles with this input.
     #   creates xxxxab.prmtop and xxxxab.rst7
-    print "\n============================================================"
-    print " Building the prmtop and rst7 file with alternate conformers"
-    print "============================================================"
+    print("\n============================================================")
+    print(" Building the prmtop and rst7 file with alternate conformers")
+    print("============================================================")
     if not self.addles_input_file:
       commands = make_addles_input.addles_input(self.original_pdb_file,
                                                 self.prmtop,
@@ -100,7 +101,7 @@ class LESBuilder(object):
     command_addles = os.path.join( os.environ["LIBTBX_BUILD"],
            '..', 'conda_base', 'bin','addles' )
     command_addles += ' <{} > addles.log'.format(fn)
-    print "\n| ~> %s\n" % command_addles
+    print("\n| ~> %s\n" % command_addles)
     easy_run.fully_buffered(command_addles)
 
   def update_LES_coordinates_from_uc(self):
@@ -195,7 +196,7 @@ class LESBuilder(object):
               'exe','reduce' )
          cmd += ' -BUILD -NUC -DB ./dummydb {} > {} 2>reduce_lesbuilder.log'.format(
              self.unitcell_pdb_file, self.new_pdb_with_H)
-         print "\n| ~> %s\n" % cmd
+         print("\n| ~> %s\n" % cmd)
          easy_run.fully_buffered(cmd)
          os.unlink('./dummydb')
       else:

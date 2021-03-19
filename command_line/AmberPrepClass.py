@@ -1,3 +1,4 @@
+from __future__ import print_function
 # LIBTBX_SET_DISPATCHER_NAME phenix.AmberPrep
 
 import os
@@ -230,9 +231,9 @@ def check_required_output_filenames(filenames=None,
   # only tleap currently
   if filenames is None:
     return
-  print 'Checking output filenames'
+  print('Checking output filenames')
   for filename in filenames:
-    print '  file : %s' % filename
+    print('  file : %s' % filename)
     if not os.path.exists(filename):
       s = "  Output file not present : %s" % filename
       if error_display_file:
@@ -450,7 +451,7 @@ class AmberPrepRunner:
         include_non_linked=True,
     ):
       if not three.are_linked():
-        print three.show()
+        print(three.show())
         gaps.append(three)
     if gaps:
       return gaps
@@ -464,22 +465,22 @@ class AmberPrepRunner:
                       debug=False):
     assert self.pdb_hierarchy
     if nproc > 1:
-      print "\n\tParallel processes not implemented\n"
+      print("\n\tParallel processes not implemented\n")
 
     for residue_name in ns_names:
 
       #  use existing mol2 or lib files if present
       if os.path.isfile('%s.lib' % residue_name):
-        print "%s.lib is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
+        print("%s.lib is present. Skipping elbow/antechamber run for this residue.\n" % residue_name)
       elif os.path.isfile('%s.mol2' % residue_name):
-        print "%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" % residue_name
+        print("%s.mol2 is present. Skipping elbow/antechamber run for this residue.\n" % residue_name)
 
       # else check if this has already been entered in the amber library:
       elif use_amber_library and amber_library_server.is_in_components_lib(residue_name):
-        print """
+        print("""
   Residue "%s" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
-        """ % residue_name
+        """ % residue_name)
 
       #  else use chemical component dictionary if requested (should be rare):
       elif prefer_input_method == "chemical_component":
@@ -525,14 +526,14 @@ class AmberPrepRunner:
             if msg:
               errors.append(" > %s" % msg)
       if errors:
-        print "Errors and warnings in tleap"
+        print("Errors and warnings in tleap")
         # print "  check logfile %s for explaination\n" % logfile
         for line in errors:
-          print "  %s\n" % line
+          print("  %s\n" % line)
       if fatals:
-        print "Fatal errors in tleap"
+        print("Fatal errors in tleap")
         for line in fatals:
-          print line
+          print(line)
         raise Sorry("Fatal errors in tleap: %s" % os.path.abspath(logfile))
       return fatals
 
@@ -805,15 +806,15 @@ class AmberPrepRunner:
 
   def check_special_positions(self):
     pdb_file = '4phenix_%s.pdb' % self.base
-    print 'checking special positions in %s' % pdb_file
+    print('checking special positions in %s' % pdb_file)
     xrs = iotbx.pdb.input(file_name=pdb_file).xray_structure_simple()
     site_symmetry_table = xrs.site_symmetry_table()
     if site_symmetry_table.n_special_positions() > 0:
-      print "WARNING: The following atoms occupy special positions."
+      print("WARNING: The following atoms occupy special positions.")
       for i in site_symmetry_table.special_position_indices():
-        print "  Atom %d" % i
-      print "It may be a good idea to inspect manually and remove"
-      print "atoms from special positions or rerun minimization."
+        print("  Atom %d" % i)
+      print("It may be a good idea to inspect manually and remove")
+      print("atoms from special positions or rerun minimization.")
 
   def run_clean(self):
     files_to_clean = """
@@ -921,7 +922,7 @@ def _run_antechamber_ccif(residue_name,
     ero.show_stdout(out=stdo)
     for line in stdo.getvalue().splitlines():
       if line.find('APS') > -1:
-        print line
+        print(line)
       if line.find('Error') > -1:
         raise Sorry(line)
 
@@ -945,7 +946,7 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   mol.WriteTriposMol2('4antechamber_%s.mol2' % mol.residue_name)
   del mol.files_written[-1]
   mol.Multiplicitise()
-  if verbose: print mol.DisplayBrief()
+  if verbose: print(mol.DisplayBrief())
 
 def _run_antechamber(mol,
                      use_am1_and_maxcyc_zero=True,
@@ -980,7 +981,7 @@ def _run_antechamber(mol,
     ero.show_stdout(out=stdo)
     for line in stdo.getvalue().splitlines():
       if line.find('APS') > -1:
-        print line
+        print(line)
       if line.find('Error') > -1:
         raise Sorry(line)
 
@@ -1134,7 +1135,7 @@ def run(rargs=None):
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
 
   if working_params.amber_prep.inputs.elbow_input_file_name:
-    print working_params.amber_prep.inputs.elbow_input_file_name
+    print(working_params.amber_prep.inputs.elbow_input_file_name)
     create_amber_files_for_ligand(params)
 
   print_header("Running pdb4amber on %s" % inputs.pdb_file_name)
@@ -1219,7 +1220,7 @@ def run(rargs=None):
   sites_cart = hierarchy.atoms().extract_xyz()
   parm = parmed.load_file("4amber_%s.prmtop" % base,
                           xyz="4amber_%s.rst7" % base )
-  print parm
+  print(parm)
   asu_n_atoms = len(sites_cart)
   n_models = int(len(parm.coordinates) / asu_n_atoms)
   order_converter = get_indices_convert_dict_from_array(

@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import sys
 from scitbx.array_family import flex
 
@@ -101,7 +102,7 @@ class geometry_manager(object):
         if i: _outl(result.energy_components[i])
         else: _outl(result.residual_sum)
       if qmmask:
-         print >>log, """  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s SCF: %5s""" % (
+         print("""  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s SCF: %5s""" % (
           outl[0],
           result.energy_components[7],
           outl[1],
@@ -111,9 +112,9 @@ class geometry_manager(object):
           outl[3],
           outl[4],
           outl[5],
-          outl[6])
+          outl[6]), file=log)
       else:
-         print >>log, """  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s""" % (
+         print("""  Amber total: %8s bonds (n=%d): %8s angles (n=%d): %8s diheds (n=%d): %8s elec.: %8s vdW: %5s""" % (
           outl[0],
           result.energy_components[7],
           outl[1],
@@ -122,5 +123,5 @@ class geometry_manager(object):
           result.energy_components[9],
           outl[3],
           outl[4],
-          outl[5])
+          outl[5]), file=log)
     return result

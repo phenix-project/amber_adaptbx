@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 from cctbx import geometry_restraints
 import sys
 import amber_adaptbx.lbfgs
@@ -91,7 +92,7 @@ class run(object):
     self.show(amber_structs, log=log)
 
     for i_macro_cycle in xrange(number_of_macro_cycles):
-      print >> self.log, "  macro-cycle:", i_macro_cycle
+      print("  macro-cycle:", i_macro_cycle, file=self.log)
       if(alternate_nonbonded_off_on and i_macro_cycle<=number_of_macro_cycles/2):
         geometry_restraints_flags.nonbonded = bool(i_macro_cycle % 2)
       sites_cart = self.pdb_hierarchy.atoms().extract_xyz()

@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 from math import sqrt
 import scitbx.restraints
 from libtbx.utils import Sorry
@@ -32,15 +33,15 @@ class energies(scitbx.restraints.energies):
 
   def show(self):
     # assert 0 # not writing to log...
-    print "    Amber total energy: %0.2f" % (self.residual_sum)
-    print "      bonds (n=%d): %0.2f" % (self.energy_components[6],
-                                         self.energy_components[1])
-    print "      angles (n=%d): %0.2f" % (self.energy_components[7],
-                                          self.energy_components[2])
-    print "      dihedrals (n=%d): %0.2f" % (self.energy_components[8],
-                                             self.energy_components[3])
-    print "      electrostatics: %0.2f" % (self.energy_components[4])
-    print "      van der Waals: %0.2f" % (self.energy_components[5])
+    print("    Amber total energy: %0.2f" % (self.residual_sum))
+    print("      bonds (n=%d): %0.2f" % (self.energy_components[6],
+                                         self.energy_components[1]))
+    print("      angles (n=%d): %0.2f" % (self.energy_components[7],
+                                          self.energy_components[2]))
+    print("      dihedrals (n=%d): %0.2f" % (self.energy_components[8],
+                                             self.energy_components[3]))
+    print("      electrostatics: %0.2f" % (self.energy_components[4]))
+    print("      van der Waals: %0.2f" % (self.energy_components[5]))
     return 0
 
   def get_grms(self):

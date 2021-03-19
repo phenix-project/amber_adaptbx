@@ -1,5 +1,6 @@
 #!/usr/bin/env phenix.python
 
+from __future__ import print_function
 from iotbx import pdb
 import numpy as np
 from collections import OrderedDict

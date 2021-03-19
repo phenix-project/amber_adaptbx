@@ -1,6 +1,7 @@
 #!/usr/bin/env phenix.python
 '''Testing for both LES and non-LES
 '''
+from __future__ import print_function
 import os
 import subprocess
 import pytest
@@ -29,8 +30,8 @@ def test_geometry_minimization_command_line(pdb_file, LES, use_amber):
             'amber.coordinate_file_name={}'.format(rst7_file),
             'max_iterations=1'
         ]
-        print('geometry_minimization command: ',
-              ' '.join(command_minimization))
+        print(('geometry_minimization command: ',
+              ' '.join(command_minimization)))
         output = subprocess.check_output(command_minimization)
         assert 'Write PDB file' in output
         assert '_minimized.pdb' in output

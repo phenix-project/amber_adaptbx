@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, sys
 import time
 import copy
@@ -115,13 +116,13 @@ def generate_pdb_codes_01_pavel(d_min_max      = 3.549,
     #print "code:%s r_work:%f r_free:%f d_min:%f contents:%s" % (n, rw, rf, dm, rc)
     yield n
   
-  print "Rwork:"
+  print("Rwork:")
   show_histogram(data = r_work_pdb_, n_slots=5)
-  print "Rfree:"
+  print("Rfree:")
   show_histogram(data = r_free_pdb_, n_slots=5)
-  print "Rfree - Rwork:"
+  print("Rfree - Rwork:")
   show_histogram(data = diff_, n_slots=5)
-  print "d min:"
+  print("d min:")
   show_histogram(data = d_min_, n_slots=20)
 
 def generate_pdb_codes_amber(d_min_max      = 3.549,
@@ -143,7 +144,7 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
   database_dict = easy_pickle.load(file)
   if 0:
     for key in sorted(database_dict.keys()):
-      print key, list(database_dict[key][:9])
+      print(key, list(database_dict[key][:9]))
     assert 0
   count = 0
   for i, (sg, rc, na, resolution) in enumerate(
@@ -162,7 +163,7 @@ def generate_pdb_codes_amber(d_min_max      = 3.549,
       if rc.find(e)>-1: break
     else:
       if verbose:
-        print "  %5d %s %s %s" % (i+1,database_dict["pdb_code"][i],sg,rc)
+        print("  %5d %s %s %s" % (i+1,database_dict["pdb_code"][i],sg,rc))
       yield database_dict["pdb_code"][i]
       count+=1
     continue
@@ -187,7 +188,7 @@ def run(only_i=None,
         "other",
         "rna_dna",
         ])):
-    print '...',i, code
+    print('...',i, code)
     codes.append(code)
 
     if only_i is not None: break
@@ -201,16 +202,16 @@ def run(only_i=None,
     hi_lo = []
     for i, line in enumerate(lines):
       if not i: continue
-      print line
+      print(line)
       tmp = line.split(",")
-      print tmp
+      print(tmp)
       if tmp[0] in codes:
         hi_lo.append(tmp)
       if tmp[0] in codes and tmp[3] in codes:
         assert 0
-    print hi_lo
+    print(hi_lo)
     for h in hi_lo:
-      print h
+      print(h)
 
 
 if __name__=="__main__":

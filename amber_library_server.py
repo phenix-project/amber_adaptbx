@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import libtbx.load_env
 
@@ -27,11 +28,11 @@ def repo_dir(verbose=False):
   if os.path.exists(install_dir):
     return install_dir
   if verbose:
-    print """
+    print("""
     Couldn't find amberlibrary
       1. Set AMBER_LIBRARY_DIR in environment
       2. Add/link to $PHENIX/modules
-    """
+    """)
   return None
 
 
@@ -63,13 +64,13 @@ def path_in_components_lib(residue_name):
 
 
 def run():
-  print 'Repo directory', repo_dir()
+  print('Repo directory', repo_dir())
   for code in ["000",
                "HOH",
                "NWM",
                "NUC",
                ]:
-    print code, is_in_components_lib(code), path_in_components_lib(code)
+    print(code, is_in_components_lib(code), path_in_components_lib(code))
 
 if __name__ == "__main__":
   run()

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import numpy as np
@@ -75,7 +76,7 @@ class extreme(dict):
       del self[min(self.keys())]
 
 def print_cmd(cmd, verbose=False):
-  print "\n~> %s\n" % cmd
+  print("\n~> %s\n" % cmd)
 
 def expand_coord_to_unit_cell(sites_cart, crystal_symmetry):
   sites_cart_uc = flex.vec3_double()
@@ -96,7 +97,7 @@ def bond_rmsd(parm,
               get_extremes=False,
               verbose=False,
   ):
-  if verbose: print "starting bond_rmsd: %s" % time.strftime("%H:%M:%S")
+  if verbose: print("starting bond_rmsd: %s" % time.strftime("%H:%M:%S"))
   ignore_hd=True   # dac timing test
   if ignore_hd:
     bonds = parm.bonds_without_h
@@ -132,7 +133,7 @@ def bond_rmsd(parm,
   b_ave = sqrt(flex.mean_default(b_sq, 0))
   b_max = sqrt(flex.max_default(b_sq, 0))
   b_min = sqrt(flex.min_default(b_sq, 0))
-  if verbose: print "done with bond_rmsd: %s" % time.strftime("%H:%M:%S")
+  if verbose: print("done with bond_rmsd: %s" % time.strftime("%H:%M:%S"))
   if not get_deltas:
     return b_min, b_max, b_ave
   else:
@@ -178,7 +179,7 @@ def angle_rmsd(parm,
                get_extremes=False,
                verbose=False,
   ):
-  if verbose: print "starting angle_rmsd: %s" % time.strftime("%H:%M:%S")
+  if verbose: print("starting angle_rmsd: %s" % time.strftime("%H:%M:%S"))
   ignore_hd=True   # dac timing test
   if ignore_hd:
     angles = parm.angles_without_h
@@ -220,7 +221,7 @@ def angle_rmsd(parm,
   a_ave = sqrt(flex.mean_default(a_sq, 0))
   a_max = sqrt(flex.max_default(a_sq, 0))
   a_min = sqrt(flex.min_default(a_sq, 0))
-  if verbose: print "done with angle_rmsd: %s" % time.strftime("%H:%M:%S")
+  if verbose: print("done with angle_rmsd: %s" % time.strftime("%H:%M:%S"))
   if not get_deltas:
     return (a_min, a_max, a_ave)
   else:
@@ -398,7 +399,7 @@ def get_indices(ids_dict, big_arr):
       print('atom index = {}, coordinates in rst7 file = {}'.format(index, arr))
       attempted_key = ' '.join(str(round3(i)) for i in arr)
       print('argument to sites_cart_ids dict: {}'.format(attempted_key))
-      print ids_dict
+      print(ids_dict)
       raise KeyError(msg)
   return np.array(string_list)
 

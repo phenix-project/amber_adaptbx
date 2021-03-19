@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, sys
 
 from libtbx import easy_run
@@ -51,36 +52,36 @@ class Program(ProgramTemplate):
                                'cpptraj'
                                )
     preamble = self.data_manager.get_model_names()[0].split('.')[0]
-    print '''
+    print('''
     Running cpptraj executable
       %s
     on input
 """
 %s
 """
-    ''' % ( cpptraj_exe,  input_str % locals())
+    ''' % ( cpptraj_exe,  input_str % locals()))
     rc = easy_run.go(command=cpptraj_exe,
                      stdin_lines=input_str % locals(),
                      )
     rc.show_stdout()
 
-    print '  Writing H-bonds to %(preamble)s.hbond.dat' % locals()
+    print('  Writing H-bonds to %(preamble)s.hbond.dat' % locals())
 
     f=file('%(preamble)s.hbond.dat' % locals(), 'rb')
     lines = f.read()
     f.close()
 
     if self.params.output.list_h_bonds:
-      print
-      print lines
+      print()
+      print(lines)
 
     nr = get_number_of_residues(model.get_hierarchy())
 
     if self.params.output.show_number_of_h_bonds_per_1000:
       h_bonds = len(lines.splitlines())-1
       atoms = len(model.get_hierarchy().atoms())
-      print '_'*80
-      print '''
+      print('_'*80)
+      print('''
       Number of H-bonds found : %7d
       Number of atoms         : %7d
       H-bonds per 1000 atoms  : %10.2f
@@ -89,6 +90,6 @@ class Program(ProgramTemplate):
              atoms,
              h_bonds/atoms*1000,
              h_bonds/nr,
-             )
+             ))
 
 

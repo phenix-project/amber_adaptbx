@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import parmed as pmd
 import subprocess
@@ -41,7 +42,7 @@ def test_minimization_with_amber_h_LES(pdb_file, LES, minimization_type,
     minimized_rst7_file = get_minimized_rst7_filename(
         pdb_file, LES=LES, minimization_type=minimization_type)
     with tempfolder():
-        print('--> command_build: ', ' '.join(command_build))
+        print(('--> command_build: ', ' '.join(command_build)))
         # no minimization
         output = subprocess.check_output(command_build)
         parm0 = pmd.load_file(prmtop_file, original_rst7_file)

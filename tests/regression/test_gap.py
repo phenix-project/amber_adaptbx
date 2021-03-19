@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import subprocess
 import parmed
@@ -40,7 +41,7 @@ def test_gap(pdb_code):
     ]
 
     for line in lines:
-        print('command = ', line)
+        print(('command = ', line))
         outputs.append(subprocess.check_output(line, shell=True).decode())
         print(outputs[-1])
     assert 'possible FAILURE:' not in ''.join(outputs)
