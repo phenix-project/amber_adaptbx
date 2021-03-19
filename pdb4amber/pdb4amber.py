@@ -8,7 +8,7 @@ import argparse
 from libtbx.utils import Sorry
 try:
     import parmed
-except ImportError, e:
+except ImportError as e:
     raise Sorry('  cannot import parmed')
 try:
     from cStringIO import StringIO

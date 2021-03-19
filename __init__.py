@@ -3,7 +3,7 @@ from libtbx.utils import Sorry
 try:
   import sander
   import sanderles
-except ImportError, e:
+except ImportError as e:
   sander = None
   sanderles = None
 

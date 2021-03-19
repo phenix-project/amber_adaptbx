@@ -7,7 +7,7 @@ try:
   import sander
   import sanderles
   import parmed # require version in AmberTools >= 16
-except ImportError, e:
+except ImportError as e:
   sander = None
   sanderles = None
   parmed = None
