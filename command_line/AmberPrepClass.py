@@ -948,9 +948,26 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   mol.Multiplicitise()
   if verbose: print(mol.DisplayBrief())
 
+def _sqm_out_finished(filename):
+  f=file(filename, 'r')
+  lines=f.read()
+  del f
+  converged = False
+  finished = False
+  for line in lines.splitlines():
+    if line.find('... geometry converged !')>-1:
+      converged = True
+    if line.find('--------- Calculation Completed ----------')>-1:
+      finished = True
+  return converged and finished
+
+def _load_antechamber_output_pdb(mol, pdb_filename='sqm.pdb'):
+  mol.ReadPDB(pdb_filename)
+
 def _run_antechamber(mol,
                      use_am1_and_maxcyc_zero=True,
                      use_mol2=False,
+                     verbose=False,
                      ):
   cmds = []
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
@@ -964,7 +981,7 @@ def _run_antechamber(mol,
         -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
         % (mol.residue_name, mol.residue_name, mol.charge, mol.multiplicity)
   if use_am1_and_maxcyc_zero:
-    cmd += ' -ek "qm_theory=\'AM1\',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'
+    cmd += ''' -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'''
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
     cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
@@ -980,10 +997,13 @@ def _run_antechamber(mol,
     stdo = StringIO()
     ero.show_stdout(out=stdo)
     for line in stdo.getvalue().splitlines():
+      if verbose: print(line)
       if line.find('APS') > -1:
         print(line)
       if line.find('Error') > -1:
         raise Sorry(line)
+  if not use_am1_and_maxcyc_zero:
+    assert _sqm_out_finished('sqm.out'), 'Amber antechamber failed'
 
 def _run_parmchk2(mol):
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
@@ -1077,12 +1097,17 @@ def _run_elbow_antechamber(pdb_hierarchy,
     for atom1, atom2 in rc:
       atom1.name = atom2.name
 
-  _write_anterchamber_input_from_elbow_molecule(mol)
-  _run_antechamber(mol, use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero)
-  rc = _run_parmchk2(mol)
+  rc = run_antechamber(mol,
+                       use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero,
+                       use_mol2=use_mol2,
+                       tidy_up=tidy_up)
   return rc
 
-def run_antechamber(mol, use_am1_and_maxcyc_zero=True):
+def run_antechamber(mol,
+                    use_am1_and_maxcyc_zero=True,
+                    use_mol2=False,
+                    tidy_up=True,
+                    ):
   '''
   Created for use from eLBOW
 
@@ -1096,9 +1121,12 @@ def run_antechamber(mol, use_am1_and_maxcyc_zero=True):
   assert mol.residue_name
   _write_anterchamber_input_from_elbow_molecule(mol)
   _run_antechamber(mol,
-                   use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero)
+                   use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero,
+                   use_mol2=use_mol2,
+                   )
+  _load_antechamber_output_pdb(mol)
   rc = _run_parmchk2(mol)
-  _tidy_directory(mol)
+  if tidy_up: _tidy_directory(mol)
   return rc
 
 def _run_elbow(residue_name, args, kwds, debug=False):
