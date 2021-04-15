@@ -949,6 +949,7 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   if verbose: print(mol.DisplayBrief())
 
 def _sqm_out_finished(filename):
+  if not os.path.exists(filename): return False
   f=file(filename, 'r')
   lines=f.read()
   del f
@@ -969,6 +970,8 @@ def _run_antechamber(mol,
                      use_mol2=False,
                      verbose=False,
                      ):
+  if verbose:
+    print('use_am1_and_maxcyc_zero',use_am1_and_maxcyc_zero)
   cmds = []
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
           'bin','antechamber' )
@@ -992,7 +995,7 @@ def _run_antechamber(mol,
     cmds.append(cmd)
 
   for cmd in cmds:
-    print_cmd(cmd)
+    print_cmd(cmd, verbose=verbose)
     ero = easy_run.fully_buffered(cmd)
     stdo = StringIO()
     ero.show_stdout(out=stdo)
@@ -1107,6 +1110,7 @@ def run_antechamber(mol,
                     use_am1_and_maxcyc_zero=False,
                     use_mol2=False,
                     tidy_up=True,
+                    verbose=False,
                     ):
   '''
   Created for use from eLBOW
@@ -1123,9 +1127,10 @@ def run_antechamber(mol,
   _run_antechamber(mol,
                    use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero,
                    use_mol2=use_mol2,
+                   verbose=verbose,
                    )
   _load_antechamber_output_pdb(mol)
-  rc = _run_parmchk2(mol)
+  rc = _run_parmchk2(mol, verbose=verbose)
   if tidy_up: _tidy_directory(mol)
   return rc
 
