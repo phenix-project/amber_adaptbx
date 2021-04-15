@@ -1104,7 +1104,7 @@ def _run_elbow_antechamber(pdb_hierarchy,
   return rc
 
 def run_antechamber(mol,
-                    use_am1_and_maxcyc_zero=True,
+                    use_am1_and_maxcyc_zero=False,
                     use_mol2=False,
                     tidy_up=True,
                     ):
