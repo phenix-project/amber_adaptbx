@@ -1008,7 +1008,7 @@ def _run_antechamber(mol,
   if not use_am1_and_maxcyc_zero:
     assert _sqm_out_finished('sqm.out'), 'Amber antechamber failed'
 
-def _run_parmchk2(mol):
+def _run_parmchk2(mol, verbose=False):
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
         'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (mol.residue_name,
