@@ -163,8 +163,8 @@ class manager(standard_manager):
     # to usurp a test in statistics.py
     #
     result.bond_residual_sum=result.target
-    #if log is None:
-    #   log = sys.stdout
+    if log is None:
+       log = sys.stdout
     if self.print_amber_energies:
       import decimal
       outl = []
@@ -187,22 +187,21 @@ class manager(standard_manager):
                    '  vdW     ',
                    ]
         heading = ' '.join(headers)
-        numbers = '%s %10s %10s %10s ' % (' '*12,
+        numbers = '%s %10s %10s %10s ' % (' '*10,
                                           'n=%d' % result.energy_components[6],
                                           'n=%d' % result.energy_components[7],
                                           'n=%d' % result.energy_components[8],
                                           )
         self.last_time = time.time()
         delta_time = time.time()-self.last_time
-        print(heading, file=log)
-        print(numbers, file=log)
-      energies = '%10s %10s %10s %10s %10s %10s %5.1f' % (outl[0],
+        # print(heading, file=log)
+        # print(numbers, file=log)
+      energies = 'Amber: %10s %10s %10s %10s %10s %10s' % (outl[0],
                                                           outl[1],
                                                           outl[2],
                                                           outl[3],
                                                           outl[4],
                                                           outl[5],
-                                                          delta_time,
                                                           )
       print(energies, file=log)
     #print result.bond_deviations(sites_cart,
