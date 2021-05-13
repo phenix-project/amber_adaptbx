@@ -20,7 +20,7 @@ def get_amber_struct_object(params):
   amber_structs = amber_adaptbx.SanderStruct(
       parm_file_name=amber_params.topology_file_name,
       rst_file_name=amber_params.coordinate_file_name,
-      ridingH=ridingH,
+      ridingH=ridingH, igb=amber_params.igb, cut=amber_params.cut, 
   )
 
   if amber_params.bellymask:

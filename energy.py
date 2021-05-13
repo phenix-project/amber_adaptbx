@@ -93,7 +93,8 @@ class energies(scitbx.restraints.energies):
 
 class SanderStruct(object):
 
-  def __init__(self, parm_file_name, rst_file_name, ridingH=True):
+  def __init__(self, parm_file_name, rst_file_name, ridingH=True,
+        igb=0, cut=8.0 ):
     check_file("amber.topology_file_name", parm_file_name)
     check_file("amber.coordinate_file_name", rst_file_name)
     self.md_engine = 'sander'
@@ -105,5 +106,13 @@ class SanderStruct(object):
 
     self.order_converter = None
     self.order_map_file_name = None
-    self.inp = self.sander_engine.pme_input()
+    if igb == 0:
+       self.inp = self.sander_engine.pme_input()
+    else:
+       self.inp = self.sander_engine.gas_input(igb)
+       self.inp.ntb = 1
+       self.inp.cut = cut
+       self.inp.rgbmax = 15.0
+       print( "Amber: setting igb, cut, rgbmax: %d, %6.2f  15.00\n" % 
+            ( igb, cut ) )
     self.writer = None

@@ -19,7 +19,7 @@ from amber_adaptbx.utils import (
     check_file,
     print_sites_cart,
 )
-from amber_adaptbx.geometry import geometry_manager
+# from amber_adaptbx.geometry import geometry_manager
 from amber_adaptbx.energy import energies, SanderStruct
 
 master_phil_str = """
@@ -70,6 +70,14 @@ master_phil_str = """
   print_amber_energies = False
     .type = bool
     .help = Print details of Amber energies during refinement
+  igb = 0
+    .type = int
+    .style = hidden
+    .help = Set the Amber generalized Born parameter
+  cut = 8.0
+    .type = float
+    .style = hidden
+    .help = Amber cutoff, default to 8.0, increase if igb>0
 """
 obsoleted = '''
   automatic_wxc_scale = False

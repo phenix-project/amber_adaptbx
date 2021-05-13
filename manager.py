@@ -116,7 +116,7 @@ class manager(standard_manager):
                      extension_objects=[],
                      site_labels=None,
                      log=None):
-    delta_time_limit=10
+    delta_time_limit=600
     result = standard_manager.energies_sites(
       self,
       sites_cart,
@@ -156,23 +156,20 @@ class manager(standard_manager):
     nangl = ptrfunc('ntheth') + ptrfunc('ntheta')
     nmphi = ptrfunc('nphih') + ptrfunc('nphia')
     result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
-                                ene.elec + ene.elec_14, ene.vdw + ene.vdw_14,
+                                ene.elec + ene.elec_14 + ene.gb, ene.vdw + ene.vdw_14,
                                 nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
     #
     # to usurp a test in statistics.py
     #
     result.bond_residual_sum=result.target
-    if log is None:
-      log = sys.stdout
+    #if log is None:
+    #   log = sys.stdout
     if self.print_amber_energies:
       import decimal
       outl = []
       def _outl(f):
-        if f>1e4:
-          outl.append('%.1E' % decimal.Decimal(f))
-        else:
-          outl.append('%0.1f' % f)
+        outl.append('%0.1f' % f)
       for i in range(9):
         if i: _outl(result.energy_components[i])
         else: _outl(result.residual_sum)
@@ -182,15 +179,15 @@ class manager(standard_manager):
       else:
         delta_time = time.time()-self.last_time
       if delta_time>delta_time_limit or delta_time<1e-6:
-        headers = [' Amber total',
-                   '   bonds    ',
-                   '   angles   ',
-                   '  dihedrals ',
-                   '   elec.    ',
-                   '  v.d.Waals ',
+        headers = ['Amber tot.',
+                   '  bonds   ',
+                   '  angles  ',
+                   '  dihed.  ',
+                   '  elec.   ',
+                   '  vdW     ',
                    ]
         heading = ' '.join(headers)
-        numbers = '%s %12s %12s %12s ' % (' '*12,
+        numbers = '%s %10s %10s %10s ' % (' '*12,
                                           'n=%d' % result.energy_components[6],
                                           'n=%d' % result.energy_components[7],
                                           'n=%d' % result.energy_components[8],
@@ -199,7 +196,7 @@ class manager(standard_manager):
         delta_time = time.time()-self.last_time
         print(heading, file=log)
         print(numbers, file=log)
-      energies = '%12s %12s %12s %12s %12s %12s %5.1f' % (outl[0],
+      energies = '%10s %10s %10s %10s %10s %10s %5.1f' % (outl[0],
                                                           outl[1],
                                                           outl[2],
                                                           outl[3],
