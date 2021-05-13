@@ -113,6 +113,6 @@ class SanderStruct(object):
        self.inp.ntb = 1
        self.inp.cut = cut
        self.inp.rgbmax = 15.0
-       print( "Amber: setting igb, cut, rgbmax: %d, %6.2f  15.00\n" % 
+       print( "Setting Amber igb, cut, rgbmax: %d, %6.2f  15.00\n" % 
             ( igb, cut ) )
     self.writer = None
