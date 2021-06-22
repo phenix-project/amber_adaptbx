@@ -509,7 +509,7 @@ class AmberPrepRunner:
       errors = []
       warnings = []
       fatals = []
-      f = file(logfile, "r")
+      f = open(logfile, "r")
       lines = f.read()
       f.close()
       warnings = {
@@ -546,7 +546,7 @@ class AmberPrepRunner:
             raise Sorry('tleap error : "%s"' % line)
 
     tleap_input_file = "tleap_%s.in" % output_base
-    f = file(tleap_input_file, "w")
+    f = open(tleap_input_file, "w")
     f.write('logFile %s\n' % logfile)
 
     amber_dir = os.path.join( os.environ["LIBTBX_BUILD"] , ".." , "conda_base" )
@@ -950,7 +950,7 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
 
 def _sqm_out_finished(filename):
   if not os.path.exists(filename): return False
-  f=file(filename, 'r')
+  f=open(filename, 'r')
   lines=f.read()
   del f
   converged = False
@@ -1054,7 +1054,7 @@ def _run_elbow_antechamber(pdb_hierarchy,
     import pickle
     pf = "%s.pickle" % residue_name
     if os.path.exists(pf):
-      f = file(pf, "rb")
+      f = open(pf, "rb")
       mol = pickle.load(f)
       f.close()
     else:
@@ -1140,7 +1140,7 @@ def _run_elbow(residue_name, args, kwds, debug=False):
   if debug:
     pf = "%s.pickle" % residue_name
     if os.path.exists(pf):
-      f = file(pf, "rb")
+      f = open(pf, "rb")
       mol = pickle.load(f)
       f.close()
     else:
