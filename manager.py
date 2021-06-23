@@ -247,6 +247,8 @@ def digester(standard_geometry_restraints_manager,
              ):
   sgrm = standard_geometry_restraints_manager
   agrm = manager(params, log=log)
-  for attr, value in vars(sgrm).items(): setattr(agrm, attr, value)
+  for attr, value in list(vars(sgrm).items()):
+    if attr.startswith('__'): continue
+    setattr(agrm, attr, value)
   agrm.standard_geometry_restraints_manager = sgrm
   return agrm
