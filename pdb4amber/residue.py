@@ -254,12 +254,12 @@ RESPROTE = ('ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS',
            'LYH', 'ACE', 'NME', 'GL4', 'AS4', 'MSE')
 
 # Automatic creation and addition of amino acids
-import automatic_residue
-RESPROTE = tuple(list(RESPROTE)+automatic_residue.RESPROTE)
+# import automatic_residue
+# RESPROTE = tuple(list(RESPROTE)+automatic_residue.RESPROTE)
 
 def main():
   print(RESPROTE)
-  print(dir(automatic_residue))
+  # print(dir(automatic_residue))
 
 
 if __name__ == '__main__':

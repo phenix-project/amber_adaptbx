@@ -646,7 +646,7 @@ def run(
     logger.info("\n---------- Mising heavy atom(s)\n")
     if missing_atom_residues:
         for (residue, n_missing) in missing_atom_residues:
-            logger.warn('{}_{} misses {} heavy atom(s)'.format(
+            logger.warning('{}_{} misses {} heavy atom(s)'.format(
                 residue.name, residue.idx + 1, n_missing))
     else:
         logger.info('None')
