@@ -50,6 +50,8 @@ VAL_37
 SER_82
 CYS_92
 SER_112
+-----------Non-standard-resnames
+SPB, GOL
 
 ---------- Mising heavy atom(s)
 
@@ -59,13 +61,13 @@ Only the first occurrence for each atom was kept.
 ================================================================================
   Setting up library files for non-standard residues
 ================================================================================
+================================================================================
+  Running elbow/antechamber for SPB 
+================================================================================
 
   Residue "GOL" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
         
-================================================================================
-  Running elbow/antechamber for SPB 
-================================================================================
 ================================================================================
   Preparing asu files and 4phenix_3cfb.pdb
 ================================================================================
@@ -120,6 +122,8 @@ z
 
 The following residues had alternate locations:
 None
+-----------Non-standard-resnames
+SPB, GOL
 
 ---------- Mising heavy atom(s)
 
