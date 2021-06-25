@@ -52,6 +52,8 @@ LYS_215
 LYS_228
 ILE_231
 ASN_237
+-----------Non-standard-resnames
+ACT, IAS, IPA, SO4
 
 ---------- Gaps (Renumbered Residues!)
 gap of 4.373036 A between LYS 66 and GLY 68
@@ -67,17 +69,17 @@ Only the first occurrence for each atom was kept.
   Setting up library files for non-standard residues
 ================================================================================
 ================================================================================
+  Running elbow/antechamber for ACT 
+================================================================================
+IAS.lib is present. Skipping elbow/antechamber run for this residue.
+
+================================================================================
   Running elbow/antechamber for IPA 
 ================================================================================
 
   Residue "SO4" already in amber monomer library. Skipping elbow/antechamber
     run for this residue.
         
-IAS.lib is present. Skipping elbow/antechamber run for this residue.
-
-================================================================================
-  Running elbow/antechamber for ACT 
-================================================================================
 ================================================================================
   Preparing asu files and 4phenix_1dy5.pdb
 ================================================================================
@@ -110,6 +112,8 @@ f
 
 The following residues had alternate locations:
 None
+-----------Non-standard-resnames
+ACT, IAS, IPA, SO4
 
 ---------- Gaps (Renumbered Residues!)
 gap of 4.373036 A between LYS 66 and GLY 68
