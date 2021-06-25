@@ -509,7 +509,7 @@ class AmberPrepRunner:
       errors = []
       warnings = []
       fatals = []
-      f = file(logfile, "r")
+      f = open(logfile, "r")
       lines = f.read()
       f.close()
       warnings = {
@@ -546,7 +546,7 @@ class AmberPrepRunner:
             raise Sorry('tleap error : "%s"' % line)
 
     tleap_input_file = "tleap_%s.in" % output_base
-    f = file(tleap_input_file, "w")
+    f = open(tleap_input_file, "w")
     f.write('logFile %s\n' % logfile)
 
     amber_dir = os.path.join( os.environ["LIBTBX_BUILD"] , ".." , "conda_base" )
@@ -949,7 +949,8 @@ def _write_anterchamber_input_from_elbow_molecule(mol, verbose=False):
   if verbose: print(mol.DisplayBrief())
 
 def _sqm_out_finished(filename):
-  f=file(filename, 'r')
+  if not os.path.exists(filename): return False
+  f=open(filename, 'r')
   lines=f.read()
   del f
   converged = False
@@ -969,6 +970,8 @@ def _run_antechamber(mol,
                      use_mol2=False,
                      verbose=False,
                      ):
+  if verbose:
+    print('use_am1_and_maxcyc_zero',use_am1_and_maxcyc_zero)
   cmds = []
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
           'bin','antechamber' )
@@ -992,7 +995,7 @@ def _run_antechamber(mol,
     cmds.append(cmd)
 
   for cmd in cmds:
-    print_cmd(cmd)
+    print_cmd(cmd, verbose=verbose)
     ero = easy_run.fully_buffered(cmd)
     stdo = StringIO()
     ero.show_stdout(out=stdo)
@@ -1005,7 +1008,7 @@ def _run_antechamber(mol,
   if not use_am1_and_maxcyc_zero:
     assert _sqm_out_finished('sqm.out'), 'Amber antechamber failed'
 
-def _run_parmchk2(mol):
+def _run_parmchk2(mol, verbose=False):
   cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
         'bin','parmchk2' )
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (mol.residue_name,
@@ -1051,7 +1054,7 @@ def _run_elbow_antechamber(pdb_hierarchy,
     import pickle
     pf = "%s.pickle" % residue_name
     if os.path.exists(pf):
-      f = file(pf, "rb")
+      f = open(pf, "rb")
       mol = pickle.load(f)
       f.close()
     else:
@@ -1097,6 +1100,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
     for atom1, atom2 in rc:
       atom1.name = atom2.name
 
+  use_mol2 = False
+  tidy_up = False
   rc = run_antechamber(mol,
                        use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero,
                        use_mol2=use_mol2,
@@ -1107,6 +1112,7 @@ def run_antechamber(mol,
                     use_am1_and_maxcyc_zero=False,
                     use_mol2=False,
                     tidy_up=True,
+                    verbose=False,
                     ):
   '''
   Created for use from eLBOW
@@ -1123,9 +1129,10 @@ def run_antechamber(mol,
   _run_antechamber(mol,
                    use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero,
                    use_mol2=use_mol2,
+                   verbose=verbose,
                    )
   _load_antechamber_output_pdb(mol)
-  rc = _run_parmchk2(mol)
+  rc = _run_parmchk2(mol, verbose=verbose)
   if tidy_up: _tidy_directory(mol)
   return rc
 
@@ -1135,7 +1142,7 @@ def _run_elbow(residue_name, args, kwds, debug=False):
   if debug:
     pf = "%s.pickle" % residue_name
     if os.path.exists(pf):
-      f = file(pf, "rb")
+      f = open(pf, "rb")
       mol = pickle.load(f)
       f.close()
     else:

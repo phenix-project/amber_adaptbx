@@ -1,6 +1,5 @@
-from __future__ import absolute_import, division, print_function
-from StringIO import StringIO
-import sys, time
+from io import StringIO
+import sys
 
 from libtbx.utils import Sorry
 from scitbx.array_family import flex
@@ -74,8 +73,6 @@ class manager(standard_manager):
     if self.energy_components is None:
       self.energy_components = flex.double([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
-    self.last_time = None
-
   def __repr__(self):
     return 'Amber manager'
 
@@ -116,7 +113,6 @@ class manager(standard_manager):
                      extension_objects=[],
                      site_labels=None,
                      log=None):
-    delta_time_limit=600
     result = standard_manager.energies_sites(
       self,
       sites_cart,
@@ -137,6 +133,7 @@ class manager(standard_manager):
     sander_coords = reorder_coords_phenix_to_amber(sites_cart_uc,
                                                    self.order_converter['p2a'])
     self.amber_structs.sander_engine.set_positions(sander_coords)
+
     ene, frc = self.amber_structs.sander_engine.energy_forces()
     if self.amber_structs.writer is not None:
       self.amber_structs.writer.add_coordinates(sander_coords)
@@ -164,7 +161,7 @@ class manager(standard_manager):
     #
     result.bond_residual_sum=result.target
     if log is None:
-       log = sys.stdout
+      log = sys.stdout
     if self.print_amber_energies:
       import decimal
       outl = []
@@ -173,48 +170,22 @@ class manager(standard_manager):
       for i in range(9):
         if i: _outl(result.energy_components[i])
         else: _outl(result.residual_sum)
-      if not self.last_time:
-        self.last_time = time.time()
-        delta_time = 0
-      else:
-        delta_time = time.time()-self.last_time
-      if delta_time>delta_time_limit or delta_time<1e-6:
-        headers = ['Amber tot.',
-                   '  bonds   ',
-                   '  angles  ',
-                   '  dihed.  ',
-                   '  elec.   ',
-                   '  vdW     ',
-                   ]
-        heading = ' '.join(headers)
-        numbers = '%s %10s %10s %10s ' % (' '*10,
-                                          'n=%d' % result.energy_components[6],
-                                          'n=%d' % result.energy_components[7],
-                                          'n=%d' % result.energy_components[8],
-                                          )
-        self.last_time = time.time()
-        delta_time = time.time()-self.last_time
-        # print(heading, file=log)
-        # print(numbers, file=log)
       energies = 'Amber: %10s %10s %10s %10s %10s %10s' % (outl[0],
-                                                          outl[1],
-                                                          outl[2],
-                                                          outl[3],
-                                                          outl[4],
-                                                          outl[5],
-                                                          )
+                        outl[1], outl[2], outl[3], outl[4], outl[5],)
       print(energies, file=log)
-    #print result.bond_deviations(sites_cart,
-    #                             self.amber_structs.parm,
-    #                             ignore_hd=False,
-    #                             verbose=1,
-    #)
-    #print result.angle_deviations(sites_cart,
-    #                             self.amber_structs.parm,
-    #                             ignore_hd=False,
-    #                             verbose=1,
-    #)
-    # print(len(result.gradients),list(result.gradients)[:10])
+
+      #print result.bond_deviations(sites_cart,
+      #                             self.amber_structs.parm,
+      #                             ignore_hd=False,
+      #                             verbose=1,
+      #)
+      #print result.angle_deviations(sites_cart,
+      #                             self.amber_structs.parm,
+      #                             ignore_hd=False,
+      #                             verbose=1,
+      #)
+      # print(len(result.gradients),list(result.gradients)[:10])
+
     return result
 
   def select(self, selection=None, iselection=None):
@@ -244,6 +215,8 @@ def digester(standard_geometry_restraints_manager,
              ):
   sgrm = standard_geometry_restraints_manager
   agrm = manager(params, log=log)
-  for attr, value in vars(sgrm).items(): setattr(agrm, attr, value)
+  for attr, value in list(vars(sgrm).items()):
+    if attr.startswith('__'): continue
+    setattr(agrm, attr, value)
   agrm.standard_geometry_restraints_manager = sgrm
   return agrm

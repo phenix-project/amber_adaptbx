@@ -363,7 +363,7 @@ def build_unitcell(asu_pdb_file, output_file, use_amber_unitcell=False):
     tmp_file = output_file + 'xxx'
     ph_p1.write_pdb_file(tmp_file, crystal_symmetry=cs_p1)
     # make column 21 blank, since parmed is pretty strict about this:
-    fout = file(output_file,"wb")
+    fout = open(output_file,"w")
     with open(tmp_file) as fin:
        for line in fin:
           if line[0:4] == "ATOM" or line[0:6] == "HETATM" \
