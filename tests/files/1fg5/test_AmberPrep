@@ -16,4 +16,6 @@ status=$(($status + $?))
 ./dacdif non-les/non-les.log non-les.log
 status=$(($status + $?))
 
+/bin/rm -f 1fg5_uc.pdb tleap_uc.in
+
 exit $status
