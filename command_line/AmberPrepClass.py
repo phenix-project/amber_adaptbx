@@ -1100,6 +1100,8 @@ def _run_elbow_antechamber(pdb_hierarchy,
     for atom1, atom2 in rc:
       atom1.name = atom2.name
 
+  use_mol2 = False
+  tidy_up = False
   rc = run_antechamber(mol,
                        use_am1_and_maxcyc_zero=use_am1_and_maxcyc_zero,
                        use_mol2=use_mol2,
