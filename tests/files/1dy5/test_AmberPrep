@@ -10,9 +10,9 @@ unset AMBER_LIBRARY_DIR
 echo "Running non-LES test on 1dy5:"
 phenix.AmberPrep 1dy5.pdb minimise=amber_all > non-les.log 2>&1
 
-./dacdif non-les/4phenix_1dy5.pdb 4phenix_1dy5.pdb
-status=$?
-./dacdif non-les/4amber_1dy5.prmtop 4amber_1dy5.prmtop
+#./dacdif -r 1.e-3 non-les/4phenix_1dy5.pdb 4phenix_1dy5.pdb
+#status=$?
+./dacdif -r 1.e-3 non-les/4amber_1dy5.prmtop 4amber_1dy5.prmtop
 status=$(($status + $?))
 #./dacdif non-les/4amber_1dy5.rst7 4amber_1dy5.rst7
 #status=$(($status + $?))
@@ -22,6 +22,6 @@ status=$(($status + $?))
 #status=$(($status + $?))
 
 /bin/rm -f 1dy5.min.out ACT.* IPA.* SO4.*  1dy5_uc.pdb non-les.log \
-    4amber_1dy5.rst7 tleap_uc.in
+    4amber_1dy5.rst7 4amber_1dy5.pdb tleap_uc.in
 
 exit $status
