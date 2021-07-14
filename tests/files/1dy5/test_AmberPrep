@@ -22,6 +22,6 @@ status=$(($status + $?))
 #status=$(($status + $?))
 
 /bin/rm -f 1dy5.min.out ACT.* IPA.* SO4.*  1dy5_uc.pdb non-les.log \
-    4amber_1dy5.rst7 4amber_1dy5.pdb tleap_uc.in
+    4amber_1dy5.rst7 4amber_1dy5.pdb tleap_uc.in 4phenix_1dy5.pdb
 
 exit $status
