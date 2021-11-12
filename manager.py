@@ -26,33 +26,18 @@ class manager(standard_manager):
   n_sites_cart = None
 
   def __init__(self,
-               # pdb_hierarchy,
-               # standard_geometry_restraints_manager,
                params,
                energy_components=None,
-               # gradients=None,
-               # number_of_restraints=0,
                gradients_factory=flex.vec3_double,
-               # amber_structs=None,
                log=StringIO()):
     self.gradients_factory = gradients_factory
-    # self.number_of_restraints = number_of_restraints
-    # self.amber_structs = amber_structs
     adopt_init_args(self, locals(), exclude=["log"])
 
     self.initialisation(params, log)
 
     from amber_adaptbx import interface
     self.amber_structs, self.sander = interface.get_amber_struct_object(params)
-    # self.sander = sander # used for cleanup
-    # self.sites_cart = self.pdb_hierarchy.atoms().extract_xyz()
     compute_gradients=False
-    # amber_geometry_manager = amber_adaptbx.geometry_manager(
-    #   sites_cart=sites_cart,
-    #   gradients_factory=flex.vec3_double,
-    #   amber_structs=self.amber_structs)
-    # order_converter is a Python dict that map amber atom order to phenix order
-    # assign later
     if manager.COUNT == 0:
       # compute order_converter from original sites_cart or load from file
       initialize_order_converter(self)
