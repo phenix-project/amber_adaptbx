@@ -1,21 +1,22 @@
 Notes:
 
-The tests that phenix automatically runs are in 
-   /home/case/phenix/modules/phenix_regression/amber
+(1) One test harness for amber_adaptbx is this:
+     $PHENIX/modules/phenix/phenix/command_line/amber_run_tests.py
 
 These are "regression tests" that check that phenix.AmberPrep and
 phenix.refine with useAmber=True continue to give correct results.
-Run like this:
+The scripts will write PASSED or FAILED to stdout (along with other
+info), and will return 0 on success on 1 on failure.  But this is not
+run by default, and not all of these tests have been kept up to date.
 
-     phenix.python tst_amber_xx.py
+(2) The tests that are run "by default" are here:
 
-These should return "OK" on success, and also leave a folder with full
-results, in case one wants to dig further.  The data used for these tests
-in the "files" folder.
+     $PHENIX/modules/phenix_regression/amber
 
-----------------------------------------------------------------------------
+Each of the tst_amber_xx.py scripts are run.
 
-Other folders here have older tests, that are probably of little use any more,
-but I'm keeping some around just in case.
-
+(3) Inside the amber_adaptbx/tests folder, the local versions of the tests
+in item (2) above are in the "files" folder.  Other files/folders in the
+tests folder are older attempts at tests.  Most/all of these should probably
+be removed to reduce confusion  (dac, 9/21).
 
