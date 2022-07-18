@@ -154,8 +154,8 @@ class manager(standard_manager):
     nangl = ptrfunc('ntheth') + ptrfunc('ntheta')
     nmphi = ptrfunc('nphih') + ptrfunc('nphia')
     result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
-                                ene.elec + ene.elec_14 + ene.gb, ene.vdw + ene.vdw_14,
-                                nbond, nangl, nmphi]
+         ene.elec + ene.elec_14 + ene.gb + ene.rism, ene.vdw + ene.vdw_14,
+         nbond, nangl, nmphi]
     result.finalize_target_and_gradients()
     #
     # to usurp a test in statistics.py
