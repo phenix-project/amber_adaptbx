@@ -23,6 +23,6 @@ status=$(($status + $?))
 ./dacdif les/addles.in addles.in
 status=$(($status + $?))
 
-/bin/rm -f 1aho_4tleap_renum.txt 1aho_uc.pdb tleap_uc.in
+/bin/rm -f 1aho_4tleap_renum.txt 1aho_uc.pdb tleap_uc.in addles.log
 
 exit $status

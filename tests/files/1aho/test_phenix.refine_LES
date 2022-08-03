@@ -14,9 +14,10 @@ phenix.refine  \
    amber.order_file_name=les/4amber_1aho.order \
    print_amber_energies=True \
    prefix=amber serial=1 \
-   write_geo=False --overwrite cdl=True > amber1_LES.log 
+   write_geo=False cdl=True --overwrite > amber1_LES.log 
 
-tail -3 amber1_LES.log | head -2 > tail.log
+grep '^Start R-work' amber1_LES.log > tail.log
+grep '^Final R-work' amber1_LES.log >> tail.log
 ./dacdif -a 0.005 les/tail.log tail.log
 status=$?
 
@@ -24,6 +25,6 @@ if [ $status -ne 0 ]; then
    echo "(The expected full log file is in les/amber1_LES.log)"
 fi
 
-/bin/rm -f amber_data.mtz amber_001.* amber_002.def
+/bin/rm -f amber_data.mtz amber_001.* amber_002.def 4phenix_1aho_refine*
 
 exit $status
