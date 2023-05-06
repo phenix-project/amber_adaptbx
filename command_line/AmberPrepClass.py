@@ -537,6 +537,7 @@ class AmberPrepRunner:
                 redq=False,
                 use_glycam=False,
                 verbose=False,
+                use_amber_library=False,
                 ):
 
     def _parse_tleap_logfile(logfile):
@@ -612,7 +613,7 @@ class AmberPrepRunner:
       if os.path.isfile('%s.lib' % res):
         f.write('loadOff %s.lib\n' % res)
         f.write('loadAmberParams %s.frcmod\n' % res)
-      elif amber_library_server.is_in_components_lib(res):
+      elif use_amber_library and amber_library_server.is_in_components_lib(res):
         res_path = amber_library_server.path_in_components_lib(res)
         if res_path[1].find('.lib') > 0:
            f.write('loadOff %s\n' % res_path[1])
@@ -763,6 +764,7 @@ class AmberPrepRunner:
                    # logfile='tleap_uc.log',
                    redq=redq,
                    use_glycam=use_glycam,
+                   # use_amber_library=use_amber_library,
                    )
     self.update_rst7_box('uc')
 
@@ -1249,6 +1251,7 @@ def run(rargs=None):
                               # logfile='tleap_asu.log',
                               redq=actions.redq,
                               use_glycam=actions.use_glycam,
+                              # use_amber_library=use_amber_library,
                               )
   amber_prep_runner.update_rst7_box("asu")
 
