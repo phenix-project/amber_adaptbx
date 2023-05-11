@@ -60,11 +60,11 @@ def path_in_components_lib(residue_name):
       af = "%s.%s" % (preamble, ext)
       if os.path.exists(af):
         files.append(af)
-      af = os.path.join(os.path.dirname(af),
-                        'data_%s' % os.path.basename(af))
-      if os.path.exists(af):
-        files.append(af)
-    if len(files) == 2:
+    af = os.path.join(os.path.dirname(af),
+                      'data_%s' % os.path.basename(af))
+    if os.path.exists(af):
+      files.append(af)
+    if len(files) > 0:
       return files
   return False
 
