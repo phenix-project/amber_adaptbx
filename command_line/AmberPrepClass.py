@@ -537,7 +537,7 @@ class AmberPrepRunner:
                 redq=False,
                 use_glycam=False,
                 verbose=False,
-                use_amber_library=False,
+                use_amber_library=True,
                 ):
 
     def _parse_tleap_logfile(logfile):
@@ -613,10 +613,13 @@ class AmberPrepRunner:
       if os.path.isfile('%s.lib' % res):
         f.write('loadOff %s.lib\n' % res)
         f.write('loadAmberParams %s.frcmod\n' % res)
+      elif os.path.isfile('%s.mol2' % res):
+        f.write('%s loadMol2 %s.mol2\n' % (res, res))
+        f.write('loadAmberParams %s.frcmod\n' % res)
       elif use_amber_library and amber_library_server.is_in_components_lib(res):
         res_path = amber_library_server.path_in_components_lib(res)
-        if res_path[1].find('.lib') > 0:
-           f.write('loadOff %s\n' % res_path[1])
+        if len(res_path) > 2 and res_path[2].find('.lib') > 0:
+           f.write('loadOff %s\n' % res_path[2])
         else:
            f.write('%s = loadMol2 %s\n' % (res, res_path[1]))
         f.write('loadAmberParams %s\n' % (res_path[0]))
@@ -764,7 +767,7 @@ class AmberPrepRunner:
                    # logfile='tleap_uc.log',
                    redq=redq,
                    use_glycam=use_glycam,
-                   # use_amber_library=use_amber_library,
+                   use_amber_library=True,
                    )
     self.update_rst7_box('uc')
 
