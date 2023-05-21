@@ -614,7 +614,7 @@ class AmberPrepRunner:
         f.write('loadOff %s.lib\n' % res)
         f.write('loadAmberParams %s.frcmod\n' % res)
       elif os.path.isfile('%s.mol2' % res):
-        f.write('%s loadMol2 %s.mol2\n' % (res, res))
+        f.write('%s = loadMol2 %s.mol2\n' % (res, res))
         f.write('loadAmberParams %s.frcmod\n' % res)
       elif use_amber_library and amber_library_server.is_in_components_lib(res):
         res_path = amber_library_server.path_in_components_lib(res)
