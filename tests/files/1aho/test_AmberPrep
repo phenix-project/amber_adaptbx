@@ -6,7 +6,7 @@
 #  does not have:  non-standard residues, ligands
 
 echo "Running non-LES test on 1aho with a gap:"
-phenix.AmberPrep 1aho.pdb minimise=amber_all > non-les.log 2>&1
+phenix.AmberPrep 1aho.pdb minimise=amber_all use_reduce=False > non-les.log 2>&1
 
 ./dacdif non-les/4phenix_1aho.pdb 4phenix_1aho.pdb
 status=$?
