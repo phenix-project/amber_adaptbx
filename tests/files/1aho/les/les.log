@@ -15,7 +15,7 @@ A
 The following residues had alternate locations:
 CYS_12
 GLU_24
-CYS_61
+CYS_63
 -----------Non-standard-resnames
 
 
@@ -82,14 +82,11 @@ Checking output filenames
   Building the LES prmtop and rst7 files
 ================================================================================
 
-| ~> /home/case/phenix_dev/build/reduce/exe/reduce -BUILD -NUC -DB ./dummydb 1aho_uc.pdb > 1aho_uc_H.pdb 2>reduce_lesbuilder.log
-
-
 ============================================================
  Building the prmtop and rst7 file with alternate conformers
 ============================================================
 
-| ~> /home/case/phenix_dev/build/../conda_base/bin/addles <addles.in > addles.log
+| ~> /home/case/phenix-dev-5383/build/../conda_base/bin/addles <addles.in > addles.log
 
 4amber_1aho.prmtop
 ================================================================================
