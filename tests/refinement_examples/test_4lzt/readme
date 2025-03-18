@@ -1,8 +1,0 @@
-To refine:
-
-phenix.refine 4lzt.pdb prefix=vs_obs_amber 4lzt-sf-truncated.mtz amber.topology_file_name=4lzt.prmtop amber.coordinate_file_name=4lzt.rst7 use_amber=True refinement.input.xray_data.r_free_flags.file_name=md_avg_95_rfree.mtz --overwrite md_engine=sander wxc_scale=0.025 write_geo=False refinement.main.number_of_macro_cycles=1
-
-To minimize:
-
-phenix.geometry_minimization 4lzt.pdb macro_cycles=1 max_iter=2 amber.use=True amber.topology_file_name=4lzt.prmtop amber.coordinate_file_name=4lzt.rst7
-

@@ -29,7 +29,7 @@ else:
     string_types = basestring
 
 from .residue import (
-    RESPROT, RESPROTE, RESNA, 
+    RESPROT, RESPROTE, RESNA,
     AMBER_SUPPORTED_RESNAMES,
     HEAVY_ATOM_DICT, )
 
@@ -643,7 +643,7 @@ def run(
 
     # count heavy atoms:==================================================
     missing_atom_residues = pdbfixer.find_missing_heavy_atoms()
-    logger.info("\n---------- Mising heavy atom(s)\n")
+    logger.info("\n---------- Missing heavy atom(s)\n")
     if missing_atom_residues:
         for (residue, n_missing) in missing_atom_residues:
             logger.warning('{}_{} misses {} heavy atom(s)'.format(

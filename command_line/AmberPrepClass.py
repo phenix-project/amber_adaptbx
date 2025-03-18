@@ -115,19 +115,53 @@ def validate_params(params):
   from iotbx import pdb
   if not params.amber_prep.inputs.pdb_file_name:
     raise Sorry('Must supply a PDB model')
+  if not os.path.isfile(params.amber_prep.inputs.pdb_file_name):
+    raise Sorry('The model %s is missing' %(
+     params.amber_prep.inputs.pdb_file_name))
+  need_to_write = False
+  # Read the file and make sure it has CRYST1 record
+  if not params.amber_prep.inputs.pdb_file_name.endswith(".pdb"):
+    need_to_write = True
+
+  # need to convert to PDB file first
+  from iotbx.data_manager import DataManager
+  dm = DataManager()
+  dm.set_overwrite(True)
+  m = dm.get_model(params.amber_prep.inputs.pdb_file_name)
+  if not m:
+      raise Sorry("Unable to read model file %s" %(
+        params.amber_prep.inputs.pdb_file_name))
+  if m.crystal_symmetry() and m.crystal_symmetry().unit_cell() and \
+        m.crystal_symmetry().space_group():  # have cs
+    pass
+  else:
+    m.add_crystal_symmetry_if_necessary()
+    need_to_write = True
+  # Can add other PDB manipulations here if desired ..
+
+  if need_to_write:
+    fn, _ = os.path.splitext(params.amber_prep.inputs.pdb_file_name)
+    local_fn = os.path.split(fn)[-1]
+    params.amber_prep.inputs.pdb_file_name = "%s.pdb" %(local_fn)
+    dm.write_model_file(
+       m, params.amber_prep.inputs.pdb_file_name, format = 'pdb')
+    print('Converted to PDB format with CRYST1 record and writing to: %s' %(
+     os.path.join(os.getcwd(), params.amber_prep.inputs.pdb_file_name)))
+
   if not params.amber_prep.actions.override_special_positions_stop:
     pdb_inp = pdb.input(params.amber_prep.inputs.pdb_file_name)
-    rc = pdb_inp.extract_remark_iii_records(375)
-    if rc:
-      outl = '\n'.join(rc)
-      outl += '''
+    if hasattr(pdb_inp, 'extract_remark_iii_records'):
+      rc = pdb_inp.extract_remark_iii_records(375)
+      if rc:
+        outl = '\n'.join(rc)
+        outl += '''
 
   Atoms in special positions can cause problems for Phenix-Amber
 
   Remove offending atoms or set override_special_positions_stop=True to ignore
   '''
-      raise Sorry(outl)
-  return True
+        raise Sorry(outl)
+  return params
 
 def setup_parser():
   """Command line parser setup
@@ -835,6 +869,7 @@ class AmberPrepRunner:
       tleap_asu.log
       tleap_asu.in
       tleap_uc.log
+      tleap_uc.in
       sqm.pdb
       sqm.out
       sqm.in
@@ -867,6 +902,7 @@ class AmberPrepRunner:
               '4amber_%s.LES.pdb',
               'b4phenix_%s.pdb',
               '%s_4tleap_uc.pdb',
+              '%s_uc.pdb',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
@@ -1165,7 +1201,7 @@ def run(rargs=None):
   inputs = working_params.amber_prep.inputs
   actions = working_params.amber_prep.actions
   base = get_output_preamble(working_params)
-  validate_params(working_params)
+  working_params = validate_params(working_params)
   amber_prep_runner = AmberPrepRunner(base, LES=actions.LES)
   amber_prep_runner.initialize_pdb(inputs.pdb_file_name)
 
