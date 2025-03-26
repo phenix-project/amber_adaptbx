@@ -590,12 +590,9 @@ class AmberPrepRunner:
       f.write('source leaprc.phenix\n')
     else:
       f.write('addAtomTypes { { "SE" "Se" "sp3" } }\n')
-    if( redq ):
-      f.write('source leaprc.ff14SB.redq\n')
-    else:
-      f.write('source leaprc.protein.ff14SB\n')
-      f.write('source leaprc.DNA.OL15\n')
-      f.write('source leaprc.RNA.OL3\n')
+    f.write('source leaprc.protein.ff19SB\n')
+    f.write('source leaprc.DNA.OL15\n')
+    f.write('source leaprc.RNA.OL3\n')
     if( use_glycam ):
        f.write('source leaprc.GLYCAM_06j-1\n')
     f.write('source leaprc.water.tip3p\n')
@@ -824,7 +821,7 @@ class AmberPrepRunner:
           self.final_rst7_file,
           output_rst7_file
       )
-      print_cmd(cmd)
+      print_cmd(cmd,verbose=True)
       test_files_exist([input_file,
                         self.final_prmtop_file,
                         self.final_rst7_file,
