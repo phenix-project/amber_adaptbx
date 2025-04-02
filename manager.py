@@ -138,9 +138,9 @@ class manager(standard_manager):
     nbond = ptrfunc('nbonh') + ptrfunc('nbona')
     nangl = ptrfunc('ntheth') + ptrfunc('ntheta')
     nmphi = ptrfunc('nphih') + ptrfunc('nphia')
-    result.energy_components = [ene.tot, ene.bond, ene.angle, ene.dihedral,
-                                ene.elec + ene.elec_14 + ene.gb, ene.vdw + ene.vdw_14,
-                                nbond, nangl, nmphi]
+    result.energy_components = [ene.tot, ene.bond, ene.angle, 
+              ene.dihedral + ene.cmap,
+              ene.elec + ene.elec_14 + ene.gb, ene.vdw + ene.vdw_14, ene.scf]
     result.finalize_target_and_gradients()
     #
     # to usurp a test in statistics.py
@@ -153,11 +153,11 @@ class manager(standard_manager):
       outl = []
       def _outl(f):
         outl.append('%0.1f' % f)
-      for i in range(9):
+      for i in range(7):
         if i: _outl(result.energy_components[i])
         else: _outl(result.residual_sum)
-      energies = 'Amber: %10s %10s %10s %10s %10s %10s' % (outl[0],
-                        outl[1], outl[2], outl[3], outl[4], outl[5],)
+      energies = 'Amber: %10s %8s %8s %8s %10s %10s %8s' % (outl[0],
+         outl[1], outl[2], outl[3], outl[4], outl[5], outl[6] )
       print(energies, file=log)
 
       #print result.bond_deviations(sites_cart,
