@@ -1,0 +1,133 @@
+================================================================================
+  Running pdb4amber on 1of1A.pdb
+================================================================================
+
+==================================================
+Summary of pdb4amber for: 1of1A.pdb
+===================================================
+
+----------Chains
+The following (original) chains have been found:
+A
+
+---------- Alternate Locations (Original Residues!))
+
+The following residues had alternate locations:
+None
+-----------Non-standard-resnames
+SCT, SO4
+
+---------- Gaps (Renumbered Residues!)
+gap of 9.514181 A between ALA 26 and ASP 27
+gap of 8.455566 A between ALA 98 and PRO 99
+gap of 18.948359 A between THR 211 and GLY 212
+
+---------- Missing heavy atom(s)
+
+ALA_308 misses 4 heavy atom(s)
+================================================================================
+  Setting up library files for non-standard residues
+================================================================================
+
+  Residue "SCT" already in amber monomer library. Skipping elbow/antechamber
+    run for this residue.
+        
+
+  Residue "SO4" already in amber monomer library. Skipping elbow/antechamber
+    run for this residue.
+        
+================================================================================
+  Preparing asu files and 4phenix_1of1A.pdb
+================================================================================
+Checking output filenames
+  file : 1of1A_asu.prmtop
+  file : 1of1A_asu.rst7
+================================================================================
+  Preparing unit cell files: 4amber_1of1A.prmtop and 4amber_1of1A.rst7
+================================================================================
+================================================================================
+  Running pdb4amber on 1of1A_4tleap_uc1.pdb
+================================================================================
+
+==================================================
+Summary of pdb4amber for: 1of1A_4tleap_uc1.pdb
+===================================================
+
+----------Chains
+The following (original) chains have been found:
+A
+a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+
+---------- Alternate Locations (Original Residues!))
+
+The following residues had alternate locations:
+None
+-----------Non-standard-resnames
+SCT, SO4
+
+---------- Gaps (Renumbered Residues!)
+gap of 9.514181 A between ALA 26 and ASP 27
+gap of 8.455566 A between ALA 98 and PRO 99
+gap of 18.948359 A between THR 211 and GLY 212
+gap of 9.514181 A between ALA 500 and ASP 501
+gap of 8.455566 A between ALA 572 and PRO 573
+gap of 18.948359 A between THR 685 and GLY 686
+gap of 9.514181 A between ALA 974 and ASP 975
+gap of 8.455566 A between ALA 1046 and PRO 1047
+gap of 18.948359 A between THR 1159 and GLY 1160
+gap of 9.514181 A between ALA 1448 and ASP 1449
+gap of 8.455566 A between ALA 1520 and PRO 1521
+gap of 18.948359 A between THR 1633 and GLY 1634
+gap of 9.514181 A between ALA 1922 and ASP 1923
+gap of 8.455566 A between ALA 1994 and PRO 1995
+gap of 18.948359 A between THR 2107 and GLY 2108
+gap of 9.514181 A between ALA 2396 and ASP 2397
+gap of 8.455566 A between ALA 2468 and PRO 2469
+gap of 18.948359 A between THR 2581 and GLY 2582
+gap of 9.514181 A between ALA 2870 and ASP 2871
+gap of 8.455566 A between ALA 2942 and PRO 2943
+gap of 18.948359 A between THR 3055 and GLY 3056
+gap of 9.514181 A between ALA 3344 and ASP 3345
+gap of 8.455566 A between ALA 3416 and PRO 3417
+gap of 18.948359 A between THR 3529 and GLY 3530
+
+---------- Missing heavy atom(s)
+
+None
+Checking output filenames
+  file : 1of1A_uc.prmtop
+  file : 1of1A_uc.rst7
+4amber_1of1A.prmtop
+checking special positions in 4phenix_1of1A.pdb
+================================================================================
+  Done.  Four new files have been made:
+      4phenix_1of1A.pdb
+      4amber_1of1A.rst7
+      4amber_1of1A.prmtop
+      4amber_1of1A.order
+
+================================================================================
+
+Example
+
+  phenix.refine 4phenix_1of1A.pdb use_amber=True \
+    amber.topology_file_name=4amber_1of1A.prmtop \
+    amber.coordinate_file_name=4amber_1of1A.rst7 \
+    amber.order_file_name=4amber_1of1A.order \
+    ....(other refinement keywords here).....
+
+
+
