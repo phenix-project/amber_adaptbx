@@ -14,7 +14,7 @@ phenix.refine  \
    amber.order_file_name=non-les/4amber_1of1A.order \
    print_amber_energies=True \
    prefix=amber serial=1 \
-   amber.qmmask=':1'  amber.qmcharge=1 \
+   amber.qmmask=':309,783,1257,1731,2205,2679,3133,3627'  amber.qmcharge=0 \
    write_geo=False output.overwrite=True cdl=True > amber1_qmmm.log 
 
 tail -2 amber1_qmmm.log > tail_qmmm.log
