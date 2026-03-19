@@ -23,15 +23,13 @@ def repo_dir(verbose=False):
   if env_dir is not None:
     return env_dir
   install_dirs = []
-  install_dir = os.path.join(parent_dir, "amber_library")
-  if os.path.exists(install_dir): install_dirs.append(install_dir)
   install_dir = os.path.join(parent_dir, 'chem_data', 'geostd')
   if os.path.exists(install_dir): install_dirs.append(install_dir)
   if install_dirs:
     return install_dirs
   if verbose:
     print("""
-    Couldn't find amber_library
+    Couldn't find geostd library
       1. Set AMBER_LIBRARY_DIR in environment
       2. Add/link to $PHENIX/modules
     """)
@@ -70,14 +68,13 @@ def path_in_components_lib(residue_name):
 
 def run(only_code=None):
   print('Repo directory', repo_dir())
-  answers = ['geostd','geostd','geostd', False, 'geostd','amber_library']
+  answers = ['geostd','geostd','geostd', False, 'geostd']
   for i, code in enumerate([
     "000",
     "HOH",
     "NWM",
     "NUC",
     'AUX',
-    'CIT',
     ]):
     if only_code: code=only_code
     iic = is_in_components_lib(code)
