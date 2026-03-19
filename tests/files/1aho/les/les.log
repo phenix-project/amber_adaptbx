@@ -15,14 +15,14 @@ A
 The following residues had alternate locations:
 CYS_12
 GLU_24
-CYS_61
+CYS_63
 -----------Non-standard-resnames
 
 
 ---------- Gaps (Renumbered Residues!)
 gap of 6.778859 A between GLY 59 and ARG 60
 
----------- Mising heavy atom(s)
+---------- Missing heavy atom(s)
 
 ASP_9 misses 1 heavy atom(s)
 LYS_30 misses 3 heavy atom(s)
@@ -72,7 +72,7 @@ gap of 6.778859 A between GLY 250 and ARG 251
 gap of 6.778859 A between GLY 441 and ARG 442
 gap of 6.778859 A between GLY 632 and ARG 633
 
----------- Mising heavy atom(s)
+---------- Missing heavy atom(s)
 
 None
 Checking output filenames
@@ -82,14 +82,11 @@ Checking output filenames
   Building the LES prmtop and rst7 files
 ================================================================================
 
-| ~> /home/case/phenix37/build/reduce/exe/reduce -BUILD -NUC -DB ./dummydb 1aho_uc.pdb > 1aho_uc_H.pdb 2>reduce_lesbuilder.log
-
-
 ============================================================
  Building the prmtop and rst7 file with alternate conformers
 ============================================================
 
-| ~> /home/case/phenix37/build/../conda_base/bin/addles <addles.in > addles.log
+| ~> /home/case/phenix-dev-5383/build/../conda_base/bin/addles <addles.in > addles.log
 
 4amber_1aho.prmtop
 ================================================================================

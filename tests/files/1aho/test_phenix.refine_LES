@@ -5,7 +5,7 @@ echo "running 1 cycle of LES coordinate refinement on 1aho:"
 phenix.refine  \
    les/4phenix_1aho.pdb 1aho.mtz \
    c_beta_restraints=False discard_psi_phi=False \
-   refinement.input.xray_data.r_free_flags.generate=True \
+   xray_data.r_free_flags.generate=True \
    strategy=individual_sites \
    refinement.main.number_of_macro_cycles=1 \
    use_amber=True \
@@ -14,7 +14,7 @@ phenix.refine  \
    amber.order_file_name=les/4amber_1aho.order \
    print_amber_energies=True \
    prefix=amber serial=1 \
-   write_geo=False cdl=True --overwrite > amber1_LES.log 
+   write_geo=False cdl=True output.overwrite=True > amber1_LES.log 
 
 grep '^Start R-work' amber1_LES.log > tail.log
 grep '^Final R-work' amber1_LES.log >> tail.log

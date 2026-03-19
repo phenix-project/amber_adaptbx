@@ -874,6 +874,7 @@ class AmberPrepRunner:
       tleap_asu.log
       tleap_asu.in
       tleap_uc.log
+      tleap_uc.in
       sqm.pdb
       sqm.out
       sqm.in
@@ -906,6 +907,7 @@ class AmberPrepRunner:
               '4amber_%s.LES.pdb',
               'b4phenix_%s.pdb',
               '%s_4tleap_uc.pdb',
+              '%s_uc.pdb',
               ]:
       if os.path.isfile(s % self.base):
         # print '  removing' , s % self.base
