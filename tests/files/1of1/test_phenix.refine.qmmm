@@ -1,20 +1,20 @@
 #!/bin/sh
 
-echo "running 1 cycle of coordinate refinement on 1of1A using qm/mm:"
+echo "running 1 cycle of coordinate refinement on 1of1 using qm/mm:"
 
 phenix.refine  \
-   non-les/4phenix_1of1A.pdb 1of1A.mtz \
+   non-les/4phenix_1of1.pdb 1of1.mtz \
    c_beta_restraints=False discard_psi_phi=False \
    fmodel.xray_data.r_free_flags.generate=True \
    strategy=individual_sites \
    refinement.main.number_of_macro_cycles=1 \
    use_amber=True \
-   amber.topology_file_name=non-les/4amber_1of1A.prmtop \
-   amber.coordinate_file_name=non-les/4amber_1of1A.rst7 \
-   amber.order_file_name=non-les/4amber_1of1A.order \
+   amber.topology_file_name=non-les/4amber_1of1.prmtop \
+   amber.coordinate_file_name=non-les/4amber_1of1.rst7 \
+   amber.order_file_name=non-les/4amber_1of1.order \
    print_amber_energies=True \
    prefix=amber serial=1 \
-   amber.qmmask=':309,783,1257,1731,2205,2679,3133,3627'  amber.qmcharge=0 \
+   amber.qmmask=':623,1589,2555,3521,4487,5453,6419,7887'  amber.qmcharge=0 \
    write_geo=False output.overwrite=True cdl=True > amber1_qmmm.log 
 
 tail -2 amber1_qmmm.log > tail_qmmm.log
