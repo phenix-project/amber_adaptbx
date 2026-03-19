@@ -1,0 +1,27 @@
+#!/bin/sh
+
+#  simple test case: has alternate conformers, ss bonds, gaps, multiple
+#    chains per unit cell
+
+#  does not have:  non-standard residues, ligands
+
+echo "Running non-LES test on 1of1"
+phenix.AmberPrep 1of1.pdb minimise=none use_reduce=False > non-les.log 2>&1
+
+./dacdif non-les/4phenix_1of1.pdb 4phenix_1of1.pdb
+status=$?
+./dacdif non-les/4amber_1of1.prmtop 4amber_1of1.prmtop
+status=$(($status + $?))
+./dacdif non-les/4amber_1of1.rst7 4amber_1of1.rst7
+status=$(($status + $?))
+./dacdif non-les/4amber_1of1.order 4amber_1of1.order
+status=$(($status + $?))
+awk 'NF!=6' 1of1.min.out > 1of1.min.out6
+./dacdif non-les/1of1.min.out6 1of1.min.out6
+status=$(($status + $?))
+./dacdif non-les/non-les.log non-les.log
+status=$(($status + $?))
+
+/bin/rm -f 1of1_4tleap_renum.txt 1of1_uc.pdb 1of1.min.out tleap_uc.in
+
+exit $status
