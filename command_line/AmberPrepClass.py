@@ -999,6 +999,8 @@ def _sqm_out_finished(filename):
   return converged and finished
 
 def _load_antechamber_output_pdb(mol, pdb_filename='sqm.pdb'):
+  if not os.path.exists(pdb_filename):
+    assert 0
   mol.ReadPDB(pdb_filename)
 
 def _run_antechamber(mol,
