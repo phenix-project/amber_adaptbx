@@ -190,6 +190,10 @@ def setup_parser():
                     )
   return parser
 
+def get_exe(program):
+  bin_dir = libtbx.env.under_base('bin')
+  return os.path.join(bin_dir, program)
+
 def get_output_preamble(params):
   preamble = params.amber_prep.inputs.pdb_file_name
   if params.amber_prep.output.file_name:
@@ -583,7 +587,8 @@ class AmberPrepRunner:
     f = open(tleap_input_file, "w")
     f.write('logFile %s\n' % logfile)
 
-    amber_dir = os.path.join( os.environ["LIBTBX_BUILD"] , ".." , "conda_base" )
+    # amber_dir = os.path.join( os.environ["LIBTBX_BUILD"] , ".." , "conda_base" )
+    amber_dir = os.path.join(libtbx.env.under_base('bin'), '..')
 
     if(os.path.isfile(os.path.join(amber_dir, 'dat', 'leap', 'cmd',
                                    'leaprc.phenix',))):
@@ -661,8 +666,7 @@ class AmberPrepRunner:
     #
     if os.path.exists(logfile):
       os.remove(logfile)
-    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..',
-             'conda_base', 'bin', 'tleap' )
+    cmd = get_exe('tleap')
     cmd += ' -f %s' % tleap_input_file
     print_cmd(cmd)
     ero = easy_run.fully_buffered(cmd)
@@ -686,8 +690,7 @@ class AmberPrepRunner:
     assert self.cryst1
     uc = self.cryst1.unit_cell().parameters()
     # note: dangerous to use same file for input and output here?
-    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-            'bin','ChBox' )
+    cmd = get_exe('ChBox')
     cmd += " -c %s_%s.rst7 -o %s_%s.rst7" % (self.base,
                                                  output_base,
                                                  self.base,
@@ -812,8 +815,7 @@ class AmberPrepRunner:
       f = open('%s_%s.in' % (self.base, mintype), 'w')
       f.write(inputs[mintype])
       f.close()
-      cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-             'bin','msander' )
+      cmd = get_exe('msander')
       cmd += '%s -O -i %s -p %s -c %s -o %s.min.out \
            -ref %s -r %s' % (
           LEStype,
@@ -943,8 +945,7 @@ def _run_antechamber_ccif(residue_name,
 
   ccif = get_chemical_components_file_name(residue_name)
   cmds = []
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-          'bin','antechamber' )
+  cmd = get_exe('antechamber')
   cmd += ' -i %s -fi ccif -bk %s -o %s.mol2 -fo mol2 \
       -s 2 -pf y -c bcc -at gaff2' % (ccif, residue_name, residue_name)
   if use_am1_and_maxcyc_zero:
@@ -962,8 +963,7 @@ def _run_antechamber_ccif(residue_name,
       if line.find('Error') > -1:
         raise Sorry(line)
 
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-        'bin','parmchk2' )
+  cmd = get_exe('parmchk2')
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (residue_name,
                                                            residue_name)
   print_cmd(cmd, verbose=debug)
@@ -1009,10 +1009,9 @@ def _run_antechamber(mol,
                      verbose=False,
                      ):
   if verbose:
-    print('use_am1_and_maxcyc_zero',use_am1_and_maxcyc_zero)
+    print('use_am1_and_maxcyc_zero', use_am1_and_maxcyc_zero)
   cmds = []
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-          'bin','antechamber' )
+  cmd = get_exe('antechamber')
   if use_mol2:
     cmd += ' -i 4antechamber_%s.mol2 -fi mol2 -o %s.mol2 -fo mol2 \
         -nc %d -m %d -s 2 -pf y -c bcc -at gaff2' \
@@ -1025,8 +1024,7 @@ def _run_antechamber(mol,
     cmd += ''' -ek "qm_theory='AM1',grms_tol=0.0005,scfconv=1.d-10,maxcyc=0,ndiis_attempts=700,"'''
   cmds.append(cmd)
   if not use_am1_and_maxcyc_zero:
-    cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-          'bin','antechamber' )
+    cmd = get_exe('antechamber' )
     cmd += ' -i sqm.pdb -fi pdb -o %s.mol2 -fo mol2 \
       -nc %s -m %d -s 2 -pf y -c bcc -at gaff2' \
       % (mol.residue_name, mol.charge, mol.multiplicity)
@@ -1047,8 +1045,7 @@ def _run_antechamber(mol,
     assert _sqm_out_finished('sqm.out'), 'Amber antechamber failed'
 
 def _run_parmchk2(mol, verbose=False):
-  cmd = os.path.join( os.environ["LIBTBX_BUILD"], '..', 'conda_base',
-        'bin','parmchk2' )
+  cmd = get_exe('parmchk2')
   cmd += ' -s 2 -i %s.mol2 -f mol2 -o %s.frcmod' % (mol.residue_name,
                                                     mol.residue_name)
   print_cmd(cmd)
